@@ -1,1 +1,5 @@
-/* filled in phase 5 */
+/* Roost chrome inside a real report. Layout only, no colours (PLAN §10 Q6):
+   hub.css places .rh-pill absolutely inside the artboard's .rh-viewport; a real report scrolls the body, so pin it to the viewport. */
+body > .rh-pill { position: fixed; }
+/* .rh-panel and .rh-chip set display, which would beat the hidden attribute. */
+.rh-pill [hidden] { display: none !important; }

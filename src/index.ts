@@ -7,6 +7,8 @@ import { triagePage, triagePreview } from './pages/triage';
 import * as viewer from './viewer';
 import { ID_RE, REPORT_ID_RE, filesProject, manifestKey, versionKey, type Manifest } from './model';
 import { ApiError } from './store';
+import { injectChrome } from './chrome';
+import { viewer as loadViewer } from './pages/data';
 
 export interface Env extends AuthEnv {
   NTFY_TOPIC?: string;
@@ -66,7 +68,7 @@ async function serveDs(_req: Request, env: Env, m: RegExpMatchArray): Promise<Re
   });
 }
 
-async function serveReport(req: Request, env: Env, m: RegExpMatchArray): Promise<Response> {
+async function serveReport(req: Request, env: Env, m: RegExpMatchArray, _who: Identity, ctx: ExecutionContext): Promise<Response> {
   const [, project, id, slash, vn, rest] = m;
   if (!ID_RE.test(project) || !REPORT_ID_RE.test(id)) return notFound();
   if (!slash) return Response.redirect(new URL(`/p/${project}/r/${id}/`, req.url).toString(), 301);
@@ -86,9 +88,22 @@ async function serveReport(req: Request, env: Env, m: RegExpMatchArray): Promise
   const file = path || 'index.html';
   const obj = await env.REPORTS.get(versionKey(filesProject(manifest!, entry), id, version.n, file));
   if (!obj) return notFound();
-  const type = obj.httpMetadata?.contentType ?? typeOf(file);
-  const cache = type.startsWith('text/html') ? NO_STORE : vn ? IMMUTABLE : 'private, no-cache';
-  return new Response(obj.body, { headers: { 'content-type': type, 'cache-control': cache } });
+  // .html is always served as HTML (and gets chrome), whatever type the uploader sent.
+  const type = /\.html?$/i.test(file) ? TYPES.html : obj.httpMetadata?.contentType ?? typeOf(file);
+  if (!type.startsWith('text/html')) {
+    return new Response(obj.body, { headers: { 'content-type': type, 'cache-control': vn ? IMMUTABLE : 'private, no-cache' } });
+  }
+  const [v, reg] = await Promise.all([loadViewer(env), api.readRegistry(env)]);
+  const p = reg.doc.projects.find((x) => x.id === project) ?? { id: project, title: project, description: '', match: { remotes: [], paths: [], keywords: [] }, status: 'active' as const };
+  if (file === 'index.html') ctx.waitUntil(markSeen(env, `${project}/${id}`, v.seen));
+  const res = new Response(obj.body, { headers: { 'content-type': type, 'cache-control': NO_STORE } });
+  return injectChrome(res, { m: manifest!, p, e: entry, n: version.n, v });
+}
+
+/** SPEC 6.4: serving a report through the Worker marks it seen. */
+async function markSeen(env: Env, ref: string, seen: { last_visit: string; opened: string[] }) {
+  if (seen.opened.includes(ref)) return;
+  await env.STATE.put('seen', JSON.stringify({ ...seen, opened: [...seen.opened, ref] }));
 }
 
 function whoami(_req: Request, _env: Env, _m: RegExpMatchArray, who: Identity): Response {

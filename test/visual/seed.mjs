@@ -109,4 +109,6 @@ const pins = JSON.stringify([...ages.keys()].filter((k) => /how-lynx-should-reme
 execFileSync('npx', ['wrangler', 'kv', 'key', 'put', 'pins', pins, '--binding', 'STATE', '--local'], { stdio: 'ignore' });
 const lastVisit = JSON.stringify({ last_visit: iso(10 * H_), opened: [] });
 execFileSync('npx', ['wrangler', 'kv', 'key', 'put', 'seen', lastVisit, '--binding', 'STATE', '--local'], { stdio: 'ignore' });
+const archived = [...ages.keys()].find((k) => k.endsWith('onboarding-flow-walkthrough'));
+await fetch(`${BASE}/api/archive`, { method: 'POST', body: JSON.stringify({ ref: archived }), headers: { 'content-type': 'application/json', origin: BASE } });
 console.log(`seeded ${ages.size} reports into ${BASE}`);

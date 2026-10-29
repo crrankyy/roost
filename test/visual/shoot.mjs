@@ -18,6 +18,10 @@ const PAGES = [
   ['archived', '/?archived=1'],
   ['filter-sheet', '/', async (p) => { await p.getByRole('button', { name: 'Open filters' }).first().click(); await p.waitForTimeout(600); }, 'phone'],
   ['kind-menu', '/', async (p) => { await p.getByRole('button', { name: /^Kind|All kinds/ }).first().click(); await p.waitForTimeout(400); }, 'desk'],
+  ['report', '/', async (p) => { await gotoReport(p, 'how-lynx-should-remember'); }],
+  ['report-expanded', '/', async (p) => { await gotoReport(p, 'how-lynx-should-remember'); await p.locator('.rh-chip').click(); await p.waitForTimeout(300); }],
+  ['report-old', '/', async (p) => { await gotoReport(p, 'how-lynx-should-remember', 'v1/'); }],
+  ['report-archived', '/', async (p) => { await gotoReport(p, 'onboarding-flow-walkthrough', '', '/kind/explainer/?archived=1'); }],
   ['triage', '/triage'],
   ['triage-reclassify', '/triage', async (p) => { await p.getByRole('button', { name: 'Reclassify' }).first().click(); await p.waitForTimeout(400); }],
   ['triage-quarantine', '/triage', async (p) => {
@@ -25,6 +29,11 @@ const PAGES = [
     await p.goto(new URL(href, p.url()).href, { waitUntil: 'networkidle' });
   }],
 ];
+async function gotoReport(p, slug, suffix = '', from = '/') {
+  if (from !== '/') await p.goto(new URL(from, p.url()).href, { waitUntil: 'networkidle' });
+  const href = await p.locator(`a[href*="${slug}"]`).first().getAttribute('href');
+  await p.goto(new URL(href + suffix, p.url()).href, { waitUntil: 'networkidle' });
+}
 const SIZES = [['phone', 380, 844], ['desk', 1240, 900]];
 const THEMES = ['light', 'dark'];
 const PALETTES = ['catppuccin', 'tokyo-night', 'rose-pine', 'nord', 'dracula', 'kanagawa', 'graphite', 'ash', 'solarized', 'gruvbox', 'everforest', 'github', 'ayu', 'flexoki'];
