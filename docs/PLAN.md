@@ -508,3 +508,35 @@ The PROMPT.md acceptance list is the final check, run in phase 6 on your phone. 
 - lint-clean skill output.
 
 The visual items go through the contact sheet.
+
+---
+
+## Status (30 Oct 2026)
+
+All six phases are built, committed on `main` and deployed to https://roost.crrankyy.workers.dev, with Access in front (AUD `8b492c11…`, team `green-disk-aaef`, service token `56ce728e….access`).
+
+Verified on the live Worker:
+- Every unauthenticated path tried (`/`, `/_ds/…`, `/api/whoami`, `/api/publish`) redirects to Access login.
+- `roost doctor`: all checks pass.
+- `scripts/upload-ds.mjs`: 186 files, all unchanged (idempotent).
+- Three concurrent publishes to one report land as v1, v2, v3, and the manifest agrees.
+- A fake AWS key: attended exits 4 (masked `••••MPLE`); `--unattended` quarantines into triage.
+- `roost export roost` recreates every version plus the manifest.
+- A report written by a headless Claude Code session with the skill is published.
+
+Verified locally (44 Worker tests, 13 CLI tests, Playwright contact sheet at 380/1240 px, light/dark, 14 palettes): chrome banners and pill, archive everywhere, triage flows, ntfy payload, pages against the artboards.
+
+Pending, owner on a phone: the logged-in walkthrough of the acceptance list, and comparing the pages with the Claude Design canvas.
+
+Decisions taken on the §10 open questions:
+- Q1: ntfy is sent by the Worker only.
+- Q4: version gaps are accepted.
+- Q6: one layout rule in `chrome.css`.
+- Q9: a cross-project move keeps the files in place and the old URL redirects.
+- Q14: emails are allowlisted with `ROOST_ALLOW_EMAILS`.
+- Q15: the CLI falls back to `~/.config/roost/env`.
+
+Upstream DS issues:
+- `.rh-pill` is absolute.
+- `bundle.css` carries preflight and the Google Fonts import.
+- `ThemeToggle` emits a `title` attribute.
