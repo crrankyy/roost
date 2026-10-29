@@ -44,14 +44,14 @@ Browser (phone or laptop) ─────────email login─────�
 | R2 bucket `roost` | Report versions, project manifests, project registry, settings, design-system assets | Nothing is ever deleted |
 | KV namespace `ROOST_STATE` | Pins, last-visit time, opened report ids, theme and palette | Single user, a few small keys |
 | Cloudflare Access | Email login for the browser; service token for the publisher | One-click Access on the workers.dev route |
-| ntfy.sh | Push notifications on publish and triage | Random topic name, metadata only |
+| ntfy.sh | Push notifications on publish and triage, sent by the Worker | Random topic name in the Worker secret `NTFY_TOPIC`, metadata only |
 | Publisher CLI `roost` | Validates, classifies, uploads, notifies | Single Node script, no dependencies beyond Node 20+ |
 
 **Access and authentication**
 
 - Enable Access on the Worker's workers.dev route (Worker → Settings → Domains & Routes → Enable Cloudflare Access). Policy: allow only the owner's email.
 - The Worker still validates the `Cf-Access-Jwt-Assertion` header on every request (issuer = the team domain, audience = `POLICY_AUD`, keys from `<team>.cloudflareaccess.com/cdn-cgi/access/certs`). Requests without a valid token get 403.
-- The publisher authenticates with an Access service token (`CF_ACCESS_CLIENT_ID` / `CF_ACCESS_CLIENT_SECRET` in the environment of each machine). The Access policy includes a Service Auth rule for that token.
+- The publisher authenticates with an Access service token (`CF_ACCESS_CLIENT_ID` / `CF_ACCESS_CLIENT_SECRET` in the environment of each machine, or in `~/.config/roost/env`). The Access application has a separate Service Auth policy for that token. The Worker tells the identities apart by the JWT: `common_name` equal to the var `SERVICE_TOKEN_ID` (the token's Client ID) is the publisher; an `email` claim is the browser.
 - Write endpoints for publishing (`/api/publish`, registry and stream commands) accept only the service-token identity. Browser sessions can call only the viewer actions: pin, mark seen, set theme/palette, triage confirm/reclassify/publish/reject, archive/unarchive.
 
 ## 3. Data model
@@ -141,7 +141,7 @@ Each version stores a `report.json` written by the publish API, never by the rep
 
 ### 3.5 Project manifest
 
-`p/<project>/manifest.json` is the index the Worker renders from: the project's streams plus one entry per report (current classification, latest version, the version list with dates and change notes, flags, triage state). Only the publish API and viewer actions write it. Writes are read-modify-write with an R2 ETag precondition (`onlyIf`), retried on conflict. A small global index (`index/recent.json`: the latest ~100 reports across projects, plus open triage items) is maintained alongside so the home page needs one read.
+`p/<project>/manifest.json` is the index the Worker renders from: the project's streams plus one entry per report (current classification, latest version, the version list with dates and change notes, flags, triage state). Only the publish API and viewer actions write it. Writes are read-modify-write with an R2 ETag precondition (`onlyIf`; `etagDoesNotMatch: '*'` to create), retried up to six times with jittered backoff. A publish claims its version number in the manifest (as `pending`) before writing any file, so concurrent publishes never share a version; a pending version is never served or listed. A small global index (`index/recent.json`: the latest ~100 reports across projects, plus open triage items) is maintained alongside so the home page needs one read.
 
 ## 4. URLs and storage layout
 
@@ -167,7 +167,7 @@ Query parameters on any index: `?archived=1` includes archived items; `?from=YYY
 
 ```
 registry/projects.json
-config/settings.json                      # ntfy topic, kind config, design-system version
+config/settings.json                      # kind config, design-system version (the ntfy topic is only in the Worker secret)
 index/recent.json
 p/<project>/manifest.json
 p/<project>/r/<id>/v<N>/index.html
@@ -190,15 +190,15 @@ The publisher is the only way content enters the system: Claude classifies, the 
 ```
 roost publish <dir> [--project P] [--kind K] [--stream S | --new-stream S] \
               [--slug X] [--title T] [--summary S] [--tags a,b] [--status draft|final] \
-              [--typed '{json}'] [--change-note "…"] [--supersedes ID] \
-              [--unattended] [--allow-secrets] [--dry-run] [--json]
+              [--typed '{json}'] [--change-note "…"] [--supersedes ID] [--why "…"] \
+              [--confirmed] [--unattended] [--allow-secrets] [--dry-run] [--json]
 roost project add|edit|archive|list
-roost stream rename|merge|done|archive <project> <stream>
+roost stream create|rename|merge|done|archive|unarchive <project> <stream> [--to S]
 roost export <project> <out-dir>
 roost doctor                      # checks env, Access token, connectivity
 ```
 
-A single Node script (Node 20+, no dependencies), shipped with the Claude Code skill. Configuration from the environment: `ROOST_URL`, `CF_ACCESS_CLIENT_ID`, `CF_ACCESS_CLIENT_SECRET`, optional `ROOST_NTFY_TOPIC` override.
+A single Node script (Node 20+, no dependencies), shipped with the Claude Code skill. Configuration from the environment, falling back to `~/.config/roost/env` (mode 600): `ROOST_URL`, `CF_ACCESS_CLIENT_ID`, `CF_ACCESS_CLIENT_SECRET`, optional `ROOST_ALLOW_EMAILS` (addresses the secret scan ignores). `--confirmed` records that the user answered the combined question; `--why` is Claude's reason for the classification. Exit codes: 0 published, 1 network/server/auth, 2 usage or lint errors, 3 needs confirmation, 4 secret findings (attended). `--json` prints one object on stdout.
 
 ### 5.2 Steps
 
@@ -207,8 +207,8 @@ A single Node script (Node 20+, no dependencies), shipped with the Claude Code s
 3. **Lint** the folder against the authoring contract (section 7): errors stop the publish, warnings print.
 4. **Scan for secrets**; findings are warnings (see 5.5).
 5. **Confirm** with the user when any confidence rule says ask, as one combined question.
-6. **Upload** to `POST /api/publish` (multipart); the Worker assigns the version number, writes `report.json`, and updates the manifest and global index atomically.
-7. **Notify** via ntfy and print the report URL.
+6. **Upload** in three steps, so no request parses a large body (the free plan allows 10 ms of CPU): `POST /api/publish` validates and claims version N in the manifest; each file is `PUT` and streamed into R2 with its sha256 checked, never overwriting; `POST …/commit` writes `report.json`, makes the version live (or quarantined) in the manifest, then recomputes that project's slice of the global index. The manifest is the source of truth; the index is rebuilt from manifests if a write to it fails.
+7. **Notify**: the Worker sends the ntfy push after commit; the CLI prints the report URL.
 
 ### 5.3 Classification confidence
 
@@ -232,7 +232,7 @@ When no one can answer (`--unattended`, scheduled runs, or a question left unans
 
 ### 5.6 Notifications
 
-- ntfy.sh topic = a long random string in `config/settings.json` and the Worker secret `NTFY_TOPIC`.
+- ntfy.sh topic = a long random string, held only in the Worker secret `NTFY_TOPIC`. The Worker sends every notification.
 - Payload: title, project, kind and the report URL only; no summary or content.
 - Two tags: `published` on every publish, `needs-you` on triage and quarantine, so either can be muted.
 - Self-hosted ntfy later needs only a server URL change.
@@ -354,7 +354,7 @@ Everything runs on Cloudflare's free tier for a single user; the only secrets ar
 
 **Operations**
 
-- Deploy with `wrangler deploy` from the `roost` repo; bindings: R2 `REPORTS` (bucket `roost`), KV `STATE` (`ROOST_STATE`), vars `POLICY_AUD`, `TEAM_DOMAIN`, secret `NTFY_TOPIC`.
+- Deploy with `wrangler deploy` from the `roost` repo; bindings: R2 `REPORTS` (bucket `roost`), KV `STATE` (`ROOST_STATE`), vars `POLICY_AUD`, `TEAM_DOMAIN`, `SERVICE_TOKEN_ID`, secret `NTFY_TOPIC`. Preview URLs are off, so only the Access-protected workers.dev route exists.
 - Design-system files are uploaded to `ds/lynx-reports/v1/` by a deploy script from `docs/design-system/` (or a vendored copy in the repo).
 - Backup: `roost export <project> <dir>` pulls every version and the manifest; R2 itself is the system of record.
 - Custom domain later: add it to the Worker; Access covers every hostname on it; redirect the workers.dev URL.
