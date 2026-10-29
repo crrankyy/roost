@@ -9,7 +9,7 @@
   "r2_buckets": [{ "binding": "REPORTS", "bucket_name": "roost" }],
   "kv_namespaces": [{ "binding": "STATE", "id": "0ac5b7ae1d514f36b8ded8f137c8d8e1" }],
   // Empty values fail closed: every request gets 403 until Access is configured.
-  "vars": { "POLICY_AUD": "", "TEAM_DOMAIN": "", "SERVICE_TOKEN_ID": "" },
+  "vars": { "POLICY_AUD": "3c5b86503c2e0d91f24736db5a0e4059f2510d1f52a2ec4a791725dfff893372", "TEAM_DOMAIN": "green-disk-aaef.cloudflareaccess.com", "SERVICE_TOKEN_ID": "" },
   // Roost's browser files are bundled as text and served by the Worker (src/assets.ts).
   "rules": [{ "type": "Text", "globs": ["**/_roost/*.js", "**/_roost/*.css"], "fallthrough": false }],
   "observability": { "enabled": true }
