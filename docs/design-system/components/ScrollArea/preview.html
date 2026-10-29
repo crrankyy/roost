@@ -1,0 +1,23 @@
+<!-- @dsCard group="Layout" height=260 subtitle="run log with an always-visible thumb" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>ScrollArea — preview</title>
+<style>html,body{margin:0}body{background:var(--background);color:var(--foreground);font-family:var(--font-sans);padding:24px}</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+  var K = window.Lynx, h = React.createElement, I = K.Icons;
+  var steps = ['Opened inbox', 'Fetched 48 new messages', 'Classified newsletters', 'Drafted 3 replies', 'Flagged invoice from Acme', 'Archived 24 messages',
+    'Checked calendar conflicts', 'Proposed meeting time', 'Summarised thread with Dana', 'Waiting for approval', 'Sent digest', 'Run finished'];
+  ReactDOM.createRoot(document.getElementById('root')).render(
+    h(K.ScrollArea, { type: 'always', style: { height: 200, width: 340, border: '1px solid color-mix(in srgb, var(--border) 50%, transparent)', borderRadius: 'var(--radius-xl)' } },
+      h('div', { style: { padding: '12px 16px' } },
+        h('div', { style: { fontSize: 12, fontWeight: 500, color: 'var(--muted-foreground)', marginBottom: 8 } }, 'Inbox agent · run log'),
+        steps.map(function (s, i) {
+          return h('div', { key: i, style: { display: 'flex', gap: 8, alignItems: 'center', fontSize: 13, padding: '6px 0', borderTop: i ? '1px solid color-mix(in srgb, var(--border) 50%, transparent)' : 'none' } },
+            h('span', { style: { fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted-foreground)' } }, '10:' + (40 + i)), s);
+        }))));
+</script>
+</body>
+</html>

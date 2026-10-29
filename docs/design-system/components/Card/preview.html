@@ -1,0 +1,28 @@
+<!-- @dsCard group="Layout" height=250 subtitle="agent run card · compact stat card" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Card — preview</title>
+<style>html,body{margin:0}body{background:var(--background);color:var(--foreground);font-family:var(--font-sans);padding:24px}</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+  var K = window.Lynx, h = React.createElement, I = K.Icons;
+  ReactDOM.createRoot(document.getElementById('root')).render(h('div', { style: { display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: 16, alignItems: 'start' } },
+    h(K.Card, null,
+      h(K.CardHeader, null,
+        h(K.CardTitle, null, 'Research agent'),
+        h(K.CardDescription, null, 'Last run 4 minutes ago · 12 sources reviewed')),
+      h(K.CardContent, { style: { fontSize: 14, lineHeight: '24px', color: 'var(--muted-foreground)' } },
+        'Summarised three papers on retrieval latency and drafted notes in your workspace.'),
+      h(K.CardFooter, null,
+        h(K.Button, { size: 'sm' }, 'Open run'),
+        h(K.Button, { size: 'sm', variant: 'outline' }, h(I.Pause), 'Pause'))),
+    h(K.Card, null,
+      h(K.CardHeader, null,
+        h(K.CardDescription, null, 'Runs this week'),
+        h(K.CardTitle, { style: { fontSize: 24 } }, '128')),
+      h(K.CardContent, { style: { fontSize: 12, color: 'var(--muted-foreground)' } }, '4 agents · 2 paused'))));
+</script>
+</body>
+</html>

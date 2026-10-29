@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Report Hub · Filter sheet</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/lynx/tokens.css">
+<link rel="stylesheet" href="ds/lynx/components/bundle.css">
+<link rel="stylesheet" href="ds/lynx/components/reports.css">
+<script src="ds/lynx/components/bundle.js"></script>
+<link rel="stylesheet" href="hub.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div data-theme="light" style="position: relative; width: 380px; height: 844px; overflow: hidden; background: var(--background); font-family: var(--font-sans); color: var(--foreground)">
+<div aria-hidden="true" style="position: absolute; inset: 0; overflow: hidden; pointer-events: none">
+<dc-import name="Main" theme="light" hint-size="380px,2760px"></dc-import>
+</div>
+
+<x-import component-from-global-scope="Lynx.Drawer" open="{{yes}}" should-scale-background="{{no}}">
+<x-import component-from-global-scope="Lynx.DrawerContent">
+<div class="hub" style="background: none; max-width: 420px; width: 100%; margin: 0 auto; display: flex; flex-direction: column; min-height: 0">
+<x-import component-from-global-scope="Lynx.DrawerHeader">
+<x-import component-from-global-scope="Lynx.DrawerTitle">Filter recent reports</x-import>
+<x-import component-from-global-scope="Lynx.DrawerDescription">3 filters on · 3 of 15 reports match</x-import>
+</x-import>
+
+<div style="padding: 0 16px; display: flex; flex-direction: column; gap: 20px">
+<div class="hub-field">
+<label class="hub-label" for="f-project">Project</label>
+<x-import component-from-global-scope="Lynx.Select" default-value="all">
+<x-import component-from-global-scope="Lynx.SelectTrigger" id="f-project" style="width: 100%">
+<x-import component-from-global-scope="Lynx.SelectValue" placeholder="All projects"></x-import>
+</x-import>
+<x-import component-from-global-scope="Lynx.SelectContent">
+<x-import component-from-global-scope="Lynx.SelectItem" value="all">All projects</x-import>
+<x-import component-from-global-scope="Lynx.SelectItem" value="payments-api">Payments API</x-import>
+<x-import component-from-global-scope="Lynx.SelectItem" value="report-hub">Report Hub</x-import>
+<x-import component-from-global-scope="Lynx.SelectItem" value="lynx">Lynx</x-import>
+</x-import>
+</x-import>
+</div>
+
+<sc-if value="{{showKinds}}" hint-placeholder-val="{{true}}">
+<div class="hub-field" role="group" aria-labelledby="f-kind-l">
+<div style="display: flex; align-items: baseline; justify-content: space-between">
+<span class="hub-label" id="f-kind-l">Kind</span>
+<span class="hub-caption">3 of 13</span>
+</div>
+<div class="hub-kinds">
+<sc-for list="{{kinds}}" as="k" hint-placeholder-count="13">
+<label class="hub-choice" for="{{k.fid}}">
+<x-import component-from-global-scope="Lynx.Checkbox" id="{{k.fid}}" default-checked="{{k.on}}"></x-import>
+<span class="lr-badge" data-kind="{{k.id}}">{{k.label}}</span>
+</label>
+</sc-for>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{hideKinds}}" hint-placeholder-val="{{false}}">
+<div class="hub-setting">
+<div style="display: flex; flex-direction: column; gap: 6px; min-width: 0">
+<span class="hub-label">Kind</span>
+<span class="lr-tags" style="display: flex; flex-wrap: wrap; gap: 6px"><span class="lr-badge" data-kind="investigation">Investigation</span><span class="lr-badge" data-kind="incident">Incident</span><span class="lr-badge" data-kind="review">Review</span></span>
+</div>
+<x-import component-from-global-scope="Lynx.Button" variant="ghost" size="sm">Change</x-import>
+</div>
+</sc-if>
+
+<div class="hub-field">
+<span class="hub-label" id="f-range-l">Date range</span>
+<x-import component-from-global-scope="Lynx.ToggleGroup" type="single" variant="outline" size="sm" default-value="{{range}}" aria-labelledby="f-range-l">
+<x-import component-from-global-scope="Lynx.ToggleGroupItem" value="7">7 days</x-import>
+<x-import component-from-global-scope="Lynx.ToggleGroupItem" value="30">30 days</x-import>
+<x-import component-from-global-scope="Lynx.ToggleGroupItem" value="90">90 days</x-import>
+<x-import component-from-global-scope="Lynx.ToggleGroupItem" value="custom">Custom</x-import>
+</x-import>
+<sc-if value="{{custom}}" hint-placeholder-val="{{false}}">
+<div class="lr-inset" style="padding: 8px; display: flex; flex-direction: column; align-items: center; gap: 4px">
+<x-import component-from-global-scope="Lynx.Calendar" mode="range" selected="{{selectedRange}}" default-month="{{month}}" today="{{today}}"></x-import>
+<span class="hub-caption" style="padding-bottom: 4px">5 Oct – 18 Oct 2026 · 14 days</span>
+</div>
+</sc-if>
+</div>
+
+<div class="hub-setting">
+<label for="f-archived" style="display: flex; flex-direction: column; gap: 2px">
+<span class="hub-label">Include archived</span>
+<span class="hub-caption">Archived reports show with an Archived badge.</span>
+</label>
+<x-import component-from-global-scope="Lynx.Switch" id="f-archived" default-checked="{{no}}"></x-import>
+</div>
+</div>
+
+<x-import component-from-global-scope="Lynx.DrawerFooter">
+<x-import component-from-global-scope="Lynx.Button">{{applyLabel}}</x-import>
+<x-import component-from-global-scope="Lynx.Button" variant="ghost">Reset filters</x-import>
+</x-import>
+</div>
+</x-import>
+</x-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"range":{"editor":"enum","options":["7","30","90","custom"],"default":"30"},"$preview":{"width":380,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var range = this.props.range || '30';
+    var custom = range === 'custom';
+    var on = { investigation: true, incident: true, review: true };
+    var cap = function (s) { return s.charAt(0).toUpperCase() + s.slice(1); };
+    return {
+      yes: true, no: false,
+      range: range,
+      custom: custom,
+      showKinds: !custom,
+      hideKinds: custom,
+      applyLabel: custom ? 'Show 2 reports' : 'Show 3 reports',
+      selectedRange: { from: new Date(2026, 9, 5), to: new Date(2026, 9, 18) },
+      month: new Date(2026, 9, 1),
+      today: new Date(2026, 9, 29),
+      kinds: ['investigation', 'incident', 'review', 'audit', 'architecture', 'plan', 'analysis', 'benchmark', 'experiment', 'research', 'explainer', 'runbook', 'summary'].map(function (k) {
+        return { id: k, fid: 'f-kind-' + k, label: cap(k), on: !!on[k] };
+      })
+    };
+  }
+}
+</script>
+</body>
+</html>

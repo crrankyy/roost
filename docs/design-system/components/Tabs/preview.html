@@ -1,0 +1,25 @@
+<!-- @dsCard group="Navigation" height=170 subtitle="Active tab with agent glow, hover, disabled tab" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Tabs — preview</title>
+<style>html,body{margin:0}body{background:var(--background);color:var(--foreground);font-family:var(--font-sans);padding:24px}</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+  var K = window.Lynx, h = React.createElement, I = K.Icons;
+  ReactDOM.createRoot(document.getElementById('root')).render(
+    h(K.Tabs, { defaultValue: 'activity', style: { maxWidth: 520 } },
+      h(K.TabsList, null,
+        h(K.TabsTrigger, { value: 'activity' }, h(I.Zap), 'Activity'),
+        h(K.TabsTrigger, { value: 'runs' }, 'Runs'),
+        h(K.TabsTrigger, { value: 'permissions' }, 'Permissions'),
+        h(K.TabsTrigger, { value: 'billing', disabled: true }, 'Billing')),
+      h(K.TabsContent, { value: 'activity' },
+        h('div', { style: { fontSize: 14, lineHeight: 1.6 } }, 'The research agent finished its source review and the coding agent opened a draft pull request.'),
+        h('div', { style: { fontSize: 12, color: 'var(--muted-foreground)', marginTop: 6 } }, 'Updated 2 min ago')),
+      h(K.TabsContent, { value: 'runs' }, h('div', { style: { fontSize: 14 } }, '3 runs in progress, 41 finished today.')),
+      h(K.TabsContent, { value: 'permissions' }, h('div', { style: { fontSize: 14 } }, 'Calendar, inbox and GitHub are connected.'))));
+</script>
+</body>
+</html>

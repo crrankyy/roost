@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Report Hub · Filters inline · desktop</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/lynx/tokens.css">
+<link rel="stylesheet" href="ds/lynx/components/bundle.css">
+<link rel="stylesheet" href="ds/lynx/components/reports.css">
+<script src="ds/lynx/components/bundle.js"></script>
+<link rel="stylesheet" href="hub.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="hub" data-theme="light" style="width: 1240px; min-height: 860px; font-family: var(--font-sans); color: var(--foreground)">
+<div class="hub-page">
+
+<header class="lr-panel hub-bar">
+<a class="hub-brand" href="Main.dc.html">
+<x-import component-from-global-scope="Lynx.LiveAvatar" size="{{n28}}" hue="mauve" label="Report Hub"></x-import>
+<span>Report Hub</span>
+</a>
+<x-import component-from-global-scope="Lynx.Button" variant="outline" size="icon" aria-label="Choose palette"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"></path></svg></x-import>
+<x-import component-from-global-scope="Lynx.ThemeToggle"></x-import>
+</header>
+
+<section class="hub-sec" aria-labelledby="fr-h" style="max-width: 820px">
+<div class="hub-sec-head">
+<h2 id="fr-h" class="hub-sec-title">Recent <span class="hub-count">4 of 15 match</span></h2>
+</div>
+<div class="hub-filters" role="group" aria-label="Filter recent reports">
+<x-import component-from-global-scope="Lynx.Select" default-value="all">
+<x-import component-from-global-scope="Lynx.SelectTrigger" aria-label="Project" style="width: 168px">
+<x-import component-from-global-scope="Lynx.SelectValue" placeholder="All projects"></x-import>
+</x-import>
+<x-import component-from-global-scope="Lynx.SelectContent">
+<x-import component-from-global-scope="Lynx.SelectItem" value="all">All projects</x-import>
+<x-import component-from-global-scope="Lynx.SelectItem" value="payments-api">Payments API</x-import>
+<x-import component-from-global-scope="Lynx.SelectItem" value="report-hub">Report Hub</x-import>
+<x-import component-from-global-scope="Lynx.SelectItem" value="lynx">Lynx</x-import>
+</x-import>
+</x-import>
+<x-import component-from-global-scope="Lynx.DropdownMenu" open="{{yes}}" modal="{{no}}">
+<x-import component-from-global-scope="Lynx.DropdownMenuTrigger" class="{{outlineBtn}}" aria-label="Kind, 3 selected">Kind<span class="hub-filter-count">3</span><x-import component-from-global-scope="Lynx.Icons.ChevronDown" size="16" aria-hidden="true"></x-import></x-import>
+<x-import component-from-global-scope="Lynx.DropdownMenuContent" align="start" style="width: 220px">
+<x-import component-from-global-scope="Lynx.DropdownMenuLabel">Kind</x-import>
+<sc-for list="{{kinds}}" as="k" hint-placeholder-count="13">
+<x-import component-from-global-scope="Lynx.DropdownMenuCheckboxItem" checked="{{k.on}}"><span class="lr-badge" data-kind="{{k.id}}">{{k.label}}</span></x-import>
+</sc-for>
+<x-import component-from-global-scope="Lynx.DropdownMenuSeparator"></x-import>
+<x-import component-from-global-scope="Lynx.DropdownMenuItem">Clear kinds</x-import>
+</x-import>
+</x-import>
+<x-import component-from-global-scope="Lynx.Select" default-value="30">
+<x-import component-from-global-scope="Lynx.SelectTrigger" aria-label="Date range" style="width: 156px">
+<x-import component-from-global-scope="Lynx.SelectValue" placeholder="Any time"></x-import>
+</x-import>
+<x-import component-from-global-scope="Lynx.SelectContent">
+<x-import component-from-global-scope="Lynx.SelectItem" value="any">Any time</x-import>
+<x-import component-from-global-scope="Lynx.SelectItem" value="7">Last 7 days</x-import>
+<x-import component-from-global-scope="Lynx.SelectItem" value="30">Last 30 days</x-import>
+<x-import component-from-global-scope="Lynx.SelectItem" value="90">Last 90 days</x-import>
+<x-import component-from-global-scope="Lynx.SelectSeparator"></x-import>
+<x-import component-from-global-scope="Lynx.SelectItem" value="custom">Custom range…</x-import>
+</x-import>
+</x-import>
+<label class="hub-choice" for="fd-archived" style="margin-left: 8px; gap: 8px">
+<x-import component-from-global-scope="Lynx.Switch" id="fd-archived" default-checked="{{yes}}"></x-import>
+Include archived
+</label>
+<span style="flex: 1"></span>
+<x-import component-from-global-scope="Lynx.Button" variant="ghost" size="sm"><x-import component-from-global-scope="Lynx.Icons.RotateCcw" size="16" aria-hidden="true"></x-import>Reset</x-import>
+</div>
+
+<div class="lr-panel hub-list">
+<sc-for list="{{results}}" as="r" hint-placeholder-count="4">
+<a class="hub-row" href="Report.dc.html">
+<span class="hub-row-top">
+<span class="hub-dot" data-on="{{r.isNew}}" role="img" aria-label="{{r.dotLabel}}"></span>
+<span class="hub-row-title">{{r.title}}</span>
+<span class="hub-time">{{r.when}}</span>
+</span>
+<span class="hub-meta">
+<span class="lr-badge" data-kind="{{r.kind}}">{{r.kindLabel}}</span>
+<span class="hub-path">{{r.project}} › <b>{{r.stream}}</b></span>
+<sc-if value="{{r.archived}}" hint-placeholder-val="{{false}}"><span class="lr-badge lr-badge-plain">Archived 21 Oct</span></sc-if>
+</span>
+<span class="hub-sum">{{r.summary}}</span>
+</a>
+</sc-for>
+</div>
+</section>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1240,"height":860}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var cap = function (s) { return s.charAt(0).toUpperCase() + s.slice(1); };
+    var on = { investigation: true, incident: true, review: true };
+    var L = window.Lynx || {};
+    return {
+      n28: 28, yes: true, no: false,
+      outlineBtn: L.buttonVariants ? L.buttonVariants({ variant: 'outline' }) : '',
+      kinds: ['investigation', 'incident', 'review', 'audit', 'architecture', 'plan', 'analysis', 'benchmark', 'experiment', 'research', 'explainer', 'runbook', 'summary'].map(function (k) {
+        return { id: k, label: cap(k), on: !!on[k] };
+      }),
+      results: [
+        { title: 'Why refresh tokens expire early', project: 'Payments API', stream: 'auth-migration', kind: 'investigation', when: '2h ago', isNew: 'true', dotLabel: 'Unread', archived: false, opacity: '1', summary: 'They inherit the access token’s 15-minute TTL after the Redis key rename; the fix is one line in token-store.ts.' },
+        { title: 'Review: ETag retries for manifest writes', project: 'Report Hub', stream: 'worker', kind: 'review', when: '5h ago', isNew: 'true', dotLabel: 'Unread', archived: false, opacity: '1', summary: 'Approve with two changes: cap retries at three and re-read the manifest before each retry.' },
+        { title: 'Publish 403s on 14 Oct', project: 'Report Hub', stream: 'worker', kind: 'incident', when: '2 weeks ago', isNew: 'false', dotLabel: '', archived: false, opacity: '1', summary: 'An Access policy change blocked the publish token for 47 minutes; six queued reports went out after the fix.' },
+        { title: 'Worker cold starts after deploys', project: 'Report Hub', stream: 'worker', kind: 'investigation', when: '3 weeks ago', isNew: 'false', dotLabel: '', archived: true, opacity: '0.72', summary: 'Superseded by the ETag review; cold starts were the manifest read, not the Worker itself.' }
+      ].map(function (r) { r.kindLabel = cap(r.kind); return r; })
+    };
+  }
+}
+</script>
+</body>
+</html>

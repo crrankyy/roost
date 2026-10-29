@@ -1,0 +1,30 @@
+<!-- @dsCard group="Layout" height=250 subtitle="open activity panel · closed panel" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Collapsible — preview</title>
+<style>html,body{margin:0}body{background:var(--background);color:var(--foreground);font-family:var(--font-sans);padding:24px}</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+  var K = window.Lynx, h = React.createElement, I = K.Icons;
+  var shell = { border: '1px solid var(--agent-border)', background: 'var(--agent-soft)', borderRadius: 'var(--radius-xl)', padding: 4, maxWidth: 460 };
+  var step = { display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--muted-foreground)', padding: '4px 12px' };
+  function Panel(props) {
+    var s = React.useState(props.open), open = s[0], set = s[1];
+    return h(K.Collapsible, { open: open, onOpenChange: set, style: Object.assign({}, shell, { marginBottom: 12 }) },
+      h(K.CollapsibleTrigger, { asChild: true },
+        h(K.Button, { variant: 'ghost', size: 'sm', style: { width: '100%', justifyContent: 'space-between' } },
+          h('span', { style: { display: 'flex', alignItems: 'center', gap: 8, color: 'var(--foreground)' } }, h(I.Wrench), props.title),
+          h(I.ChevronDown, { style: { transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .2s' } }))),
+      h(K.CollapsibleContent, null,
+        h('div', { style: { padding: '4px 0 6px' } }, props.steps.map(function (t, i) {
+          return h('div', { key: i, style: step }, h(I.CircleDot, { size: 12, color: 'var(--agent)' }), t);
+        }))));
+  }
+  ReactDOM.createRoot(document.getElementById('root')).render(h('div', null,
+    h(Panel, { open: true, title: '3 tool calls', steps: ['Searched the web for retrieval benchmarks', 'Read 12 sources', 'Wrote summary to notes'] }),
+    h(Panel, { open: false, title: 'Permissions used', steps: ['Read inbox', 'Write calendar'] })));
+</script>
+</body>
+</html>

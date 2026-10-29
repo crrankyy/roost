@@ -1,0 +1,24 @@
+<!-- @dsCard group="Forms" height=294 subtitle="filled · placeholder · invalid · disabled · file" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Input — preview</title>
+<style>html,body{margin:0}body{background:var(--background);color:var(--foreground);font-family:var(--font-sans);padding:24px}
+.row{display:flex;flex-wrap:wrap;align-items:center;gap:12px}.col{display:flex;flex-direction:column;gap:8px}.g2{display:grid;grid-template-columns:1fr 1fr;gap:20px 24px}.cap{font-size:12px;color:var(--muted-foreground)}.shell{border:1px solid color-mix(in srgb,var(--border) 50%,transparent);border-radius:var(--radius-2xl);background:color-mix(in srgb,var(--card) 75%,transparent);box-shadow:var(--shadow-lg)}</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+  var K = window.Lynx, h = React.createElement, I = K.Icons;
+  function F(id, label, el, hint) { return h('div', { className: 'col' }, h(K.Label, { htmlFor: id }, label), el, hint ? h('span', { className: 'cap', style: hint.style }, hint.text) : null) }
+
+  ReactDOM.createRoot(document.getElementById('root')).render(h('div', { className: 'g2' },
+    F('i1', 'Agent name', h(K.Input, { id: 'i1', defaultValue: 'Inbox agent' })),
+    F('i2', 'Search runs', h(K.Input, { id: 'i2', type: 'search', placeholder: 'Search by tool, source or date' })),
+    h('div', { className: 'col' }, h(K.Label, { htmlFor: 'i3' }, 'Webhook URL'),
+      h(K.Input, { id: 'i3', defaultValue: 'lynx.ai/hooks', 'aria-invalid': true, 'aria-describedby': 'i3e' }),
+      h(K.FieldError, { id: 'i3e', style: { fontSize: 12 } }, 'Enter a full URL starting with https://')),
+    F('i4', 'Workspace ID', h(K.Input, { id: 'i4', defaultValue: 'ws_7f3a91', disabled: true })),
+    F('i5', 'Knowledge file', h(K.Input, { id: 'i5', type: 'file' }))));
+</script>
+</body>
+</html>

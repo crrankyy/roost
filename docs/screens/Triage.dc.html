@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Report Hub · Triage</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/lynx/tokens.css">
+<link rel="stylesheet" href="ds/lynx/components/bundle.css">
+<link rel="stylesheet" href="ds/lynx/components/reports.css">
+<script src="ds/lynx/components/bundle.js"></script>
+<link rel="stylesheet" href="hub.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="hub" data-theme="light" style="width: 100%; min-height: 100vh; font-family: var(--font-sans); color: var(--foreground)">
+<div class="hub-page">
+
+<header class="lr-panel hub-bar">
+<a class="hub-brand" href="Main.dc.html">
+<x-import component-from-global-scope="Lynx.LiveAvatar" size="{{n28}}" hue="mauve" label="Report Hub"></x-import>
+<span>Report Hub</span>
+</a>
+<x-import component-from-global-scope="Lynx.Button" variant="outline" size="icon" aria-label="Choose palette"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"></path></svg></x-import>
+<x-import component-from-global-scope="Lynx.ThemeToggle"></x-import>
+</header>
+
+<nav class="hub-onlynarrow" aria-label="Triage" style="align-items: center; gap: 8px; padding: 0 4px">
+<a href="Main.dc.html" style="display: inline-flex; align-items: center; gap: 6px; font-size: 14px; line-height: 20px; padding: 8px 4px; color: var(--muted-foreground)"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"></path><path d="M19 12H5"></path></svg>Home</a>
+<span class="hub-caption" style="flex: 1; text-align: center">Triage · {{position}} of 3</span>
+<x-import component-from-global-scope="Lynx.Button" variant="outline" size="icon" aria-label="Previous report" on-click="{{prev}}"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></x-import>
+<x-import component-from-global-scope="Lynx.Button" variant="outline" size="icon" aria-label="Next report" on-click="{{next}}"><x-import component-from-global-scope="Lynx.Icons.ChevronRight" size="16" aria-hidden="true"></x-import></x-import>
+</nav>
+
+<div class="hub-wide" style="flex-direction: column; gap: 12px; padding: 0 4px">
+<x-import component-from-global-scope="Lynx.Breadcrumb">
+<x-import component-from-global-scope="Lynx.BreadcrumbList">
+<x-import component-from-global-scope="Lynx.BreadcrumbItem"><x-import component-from-global-scope="Lynx.BreadcrumbLink" href="Main.dc.html">Home</x-import></x-import>
+<x-import component-from-global-scope="Lynx.BreadcrumbSeparator"></x-import>
+<x-import component-from-global-scope="Lynx.BreadcrumbItem"><x-import component-from-global-scope="Lynx.BreadcrumbPage">Triage</x-import></x-import>
+</x-import>
+</x-import>
+<h1 class="hub-h1">3 reports need confirming</h1>
+</div>
+
+<div class="hub-split">
+<div class="hub-wide lr-panel hub-list" style="flex-direction: column">
+<sc-for list="{{items}}" as="t" hint-placeholder-count="3">
+<button type="button" class="hub-row hub-inbox-item" data-selected="{{t.selected}}" aria-pressed="{{t.selected}}" onClick="{{t.pick}}">
+<span class="hub-row-top"><span class="hub-row-title">{{t.title}}</span><span class="hub-time">{{t.ago}}</span></span>
+<span class="hub-proposal"><span>{{t.where}}</span><span>as</span><span class="lr-badge" data-kind="{{t.kind}}">{{t.kindLabel}}</span></span>
+<sc-if value="{{t.quarantined}}" hint-placeholder-val="{{false}}"><span><span class="lr-badge" data-tone="red">2 secret findings · not published</span></span></sc-if>
+</button>
+</sc-for>
+</div>
+
+<article class="lr-panel hub-detail" aria-labelledby="tri-title">
+<sc-if value="{{cur.quarantined}}" hint-placeholder-val="{{false}}">
+<x-import component-from-global-scope="Lynx.Alert" variant="destructive">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg>
+<x-import component-from-global-scope="Lynx.AlertTitle">Not published: 2 likely secrets found</x-import>
+<x-import component-from-global-scope="Lynx.AlertDescription">The secret scan held this report back, so no link serves it yet. Publish it as it is, or reject it.</x-import>
+</x-import>
+</sc-if>
+
+<header class="lr-header" style="gap: 12px">
+<div class="lr-eyebrow">
+<span class="lr-badge" data-tone="{{cur.tone}}">{{cur.status}}</span>
+<span>{{cur.published}}</span>
+</div>
+<h2 id="tri-title" class="lr-title">{{cur.title}}</h2>
+<p class="lr-lead">{{cur.lead}}</p>
+<div>
+<x-import component-from-global-scope="Lynx.Button" variant="outline" size="sm">{{cur.openLabel}}<x-import component-from-global-scope="Lynx.Icons.ArrowRight" size="16" aria-hidden="true"></x-import></x-import>
+</div>
+</header>
+
+<section class="lr-inset hub-proposed" aria-label="Proposed classification">
+<span class="lr-label" style="margin: 0">Claude’s proposed classification</span>
+<div class="hub-proposed-line">
+<span style="display: inline-flex; align-items: center; gap: 6px"><span style="display: flex; color: var(--muted-foreground)"><x-import component-from-global-scope="Lynx.Icons.Folder" size="16" aria-hidden="true"></x-import></span>{{cur.project}}</span>
+<span class="sep">›</span>
+<span style="display: inline-flex; align-items: center; gap: 6px"><svg class="i" style="color: var(--muted-foreground)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="6" x2="6" y1="3" y2="15"></line><circle cx="18" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><path d="M18 9a9 9 0 0 1-9 9"></path></svg>{{cur.stream}}</span>
+<span class="sep">as</span>
+<span class="lr-badge" data-kind="{{cur.kind}}">{{cur.kindLabel}}</span>
+</div>
+<p class="hub-caption">{{cur.why}}</p>
+</section>
+
+<sc-if value="{{cur.quarantined}}" hint-placeholder-val="{{false}}">
+<section style="display: flex; flex-direction: column" aria-labelledby="secrets-h">
+<span id="secrets-h" class="lr-label">Secret scan findings</span>
+<div class="hub-secret">
+<span class="lr-num">1</span>
+<div style="display: flex; flex-direction: column; gap: 4px; min-width: 0">
+<span class="hub-label">index.html, line 214</span>
+<span class="hub-caption">Cloudflare API token</span>
+<code aria-label="Value masked, ends in 7Qk2">cf_••••••••••••••••••7Qk2</code>
+</div>
+</div>
+<div class="hub-secret">
+<span class="lr-num">2</span>
+<div style="display: flex; flex-direction: column; gap: 4px; min-width: 0">
+<span class="hub-label">assets/lockfile-diff.txt, line 88</span>
+<span class="hub-caption">GitHub personal access token</span>
+<code aria-label="Value masked, ends in a91F">ghp_••••••••••••••••••a91F</code>
+</div>
+</div>
+</section>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<div class="hub-actions">
+<x-import component-from-global-scope="Lynx.Button">Reject</x-import>
+<x-import component-from-global-scope="Lynx.Button" variant="destructive">Publish anyway</x-import>
+</div>
+<p class="hub-caption">Rejected reports stay in the archive, unpublished. Publishing serves the values exactly as found.</p>
+</div>
+</sc-if>
+
+<sc-if value="{{showConfirm}}" hint-placeholder-val="{{true}}">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<div class="hub-actions">
+<x-import component-from-global-scope="Lynx.Button" on-click="{{confirm}}"><x-import component-from-global-scope="Lynx.Icons.Check" size="16" aria-hidden="true"></x-import>Confirm</x-import>
+<x-import component-from-global-scope="Lynx.Button" variant="outline" on-click="{{openReclassify}}">Reclassify</x-import>
+</div>
+<p class="hub-caption">Classification is metadata, so the report’s link stays the same either way.</p>
+</div>
+</sc-if>
+
+<sc-if value="{{showDone}}" hint-placeholder-val="{{false}}">
+<div class="lr-callout" data-tone="success"><svg class="lr-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg><p style="margin: 0">Filed under {{cur.project}} › {{cur.stream}} as {{cur.kindLabel}}. Next: {{nextTitle}}.</p></div>
+</sc-if>
+
+<sc-if value="{{showForm}}" hint-placeholder-val="{{false}}">
+<section class="lr-inset" style="display: flex; flex-direction: column; gap: 20px" aria-labelledby="rc-h">
+<h3 id="rc-h" class="hub-label" style="margin: 0">Reclassify</h3>
+<div class="hub-field">
+<label class="hub-label" for="rc-project" style="font-weight: 400; color: var(--muted-foreground)">Project</label>
+<x-import component-from-global-scope="Lynx.Select" default-value="payments-api">
+<x-import component-from-global-scope="Lynx.SelectTrigger" id="rc-project" style="width: 100%; max-width: 320px">
+<x-import component-from-global-scope="Lynx.SelectValue" placeholder="Choose a project"></x-import>
+</x-import>
+<x-import component-from-global-scope="Lynx.SelectContent">
+<x-import component-from-global-scope="Lynx.SelectItem" value="payments-api">Payments API</x-import>
+<x-import component-from-global-scope="Lynx.SelectItem" value="report-hub">Report Hub</x-import>
+<x-import component-from-global-scope="Lynx.SelectItem" value="lynx">Lynx</x-import>
+</x-import>
+</x-import>
+</div>
+<div class="hub-field" role="group" aria-labelledby="rc-stream-l">
+<span id="rc-stream-l" class="hub-label" style="font-weight: 400; color: var(--muted-foreground)">Stream</span>
+<x-import component-from-global-scope="Lynx.RadioGroup" default-value="new" aria-labelledby="rc-stream-l">
+<sc-for list="{{streamChoices}}" as="c" hint-placeholder-count="5">
+<label class="hub-choice" for="{{c.id}}">
+<x-import component-from-global-scope="Lynx.RadioGroupItem" value="{{c.value}}" id="{{c.id}}"></x-import>
+<span>{{c.label}}</span>
+<span class="hub-caption">{{c.hint}}</span>
+</label>
+</sc-for>
+</x-import>
+<div style="display: flex; flex-direction: column; gap: 6px; padding-left: 26px; max-width: 346px">
+<label class="hub-caption" for="rc-new">New stream name</label>
+<x-import component-from-global-scope="Lynx.Input" id="rc-new" default-value="oct-batch-mismatch"></x-import>
+<span class="hub-caption">Created when you save. Lowercase words joined by hyphens.</span>
+</div>
+</div>
+<div class="hub-field">
+<label class="hub-label" for="rc-kind" style="font-weight: 400; color: var(--muted-foreground)">Kind</label>
+<x-import component-from-global-scope="Lynx.Select" default-value="investigation">
+<x-import component-from-global-scope="Lynx.SelectTrigger" id="rc-kind" style="width: 100%; max-width: 320px">
+<x-import component-from-global-scope="Lynx.SelectValue" placeholder="Choose a kind"></x-import>
+</x-import>
+<x-import component-from-global-scope="Lynx.SelectContent">
+<sc-for list="{{kinds}}" as="k" hint-placeholder-count="13">
+<x-import component-from-global-scope="Lynx.SelectItem" value="{{k.id}}"><span class="lr-badge" data-kind="{{k.id}}">{{k.label}}</span></x-import>
+</sc-for>
+</x-import>
+</x-import>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<div class="hub-actions">
+<x-import component-from-global-scope="Lynx.Button" on-click="{{confirm}}">Save and confirm</x-import>
+<x-import component-from-global-scope="Lynx.Button" variant="ghost" on-click="{{closeReclassify}}">Cancel</x-import>
+</div>
+<p class="hub-caption">The link stays the same: project, stream and kind are metadata.</p>
+</div>
+</section>
+</sc-if>
+</article>
+</div>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"item":{"editor":"enum","options":["settlement","eval","audit"],"default":"settlement"},"reclassify":{"editor":"boolean","default":true},"$preview":{"width":1240,"height":1300}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var self = this;
+    var st = this.state || {};
+    var cap = function (s) { return s.charAt(0).toUpperCase() + s.slice(1); };
+    var data = {
+      settlement: { title: 'Settlement mismatch, Oct batch', ago: '40 min ago', where: 'Payments API › settlement-recon', project: 'Payments API', stream: 'settlement-recon', kind: 'analysis',
+        status: 'Needs confirming', tone: 'peach', published: 'Published unattended · 40 min ago · scheduled run nightly-recon', openLabel: 'Open report',
+        lead: '412 of 18,240 October settlements don’t match the acquirer file. 398 are one-day timezone shifts; 14 are real shortfalls totalling $3,140.',
+        why: 'Why: the run worked in payments-api/recon, and the title matches two earlier settlement-recon reports.', quarantined: false },
+      eval: { title: 'Nightly eval: memory recall', ago: '3h ago', where: 'Lynx › memory', project: 'Lynx', stream: 'memory', kind: 'benchmark',
+        status: 'Needs confirming', tone: 'peach', published: 'Published unattended · 3h ago · scheduled run nightly-eval', openLabel: 'Open report',
+        lead: 'Recall of planted facts is 19 of 20 after seven simulated days, up from 17. The one miss is a fact that changed on day six.',
+        why: 'Why: every earlier nightly eval is filed under Lynx › memory as a benchmark.', quarantined: false },
+      audit: { title: 'Dependency audit', ago: '6h ago', where: 'Report Hub, no stream', project: 'Report Hub', stream: 'no stream', kind: 'audit',
+        status: 'Quarantined', tone: 'red', published: 'Written by an unattended run · 6h ago · not served', openLabel: 'Preview report',
+        lead: '38 direct dependencies checked: 4 have known advisories and 9 are a major version behind. Two credentials were pasted into the evidence.',
+        why: 'Why: the run worked at the root of the report-hub repo and no stream matched.', quarantined: true }
+    };
+    var ids = ['settlement', 'eval', 'audit'];
+    var item = st.item || this.props.item || 'settlement';
+    if (!data[item]) item = 'settlement';
+    var reclassify = st.reclassify != null ? st.reclassify : (this.props.reclassify != null ? !!this.props.reclassify : true);
+    var confirmed = !!st.confirmed;
+    var cur = Object.assign({ kindLabel: cap(data[item].kind) }, data[item]);
+    var idx = ids.indexOf(item);
+    var go = function (id) { self.setState({ item: id, reclassify: false, confirmed: false }); };
+    return {
+      n28: 28, yes: true, no: false,
+      cur: cur,
+      position: idx + 1,
+      nextTitle: data[ids[(idx + 1) % 3]].title,
+      prev: function () { go(ids[(idx + 2) % 3]); },
+      next: function () { go(ids[(idx + 1) % 3]); },
+      showConfirm: !cur.quarantined && !reclassify && !confirmed,
+      showForm: !cur.quarantined && reclassify && !confirmed,
+      showDone: confirmed,
+      confirm: function () { self.setState({ confirmed: true, reclassify: false }); },
+      openReclassify: function () { self.setState({ reclassify: true }); },
+      closeReclassify: function () { self.setState({ reclassify: false }); },
+      items: ids.map(function (id) {
+        var d = data[id];
+        return { title: d.title, ago: d.ago, where: d.where, kind: d.kind, kindLabel: cap(d.kind), quarantined: d.quarantined,
+          selected: id === item ? 'true' : 'false', pick: function () { go(id); } };
+      }),
+      streamChoices: [
+        { value: 'settlement-recon', id: 'rc-s1', label: 'settlement-recon', hint: 'proposed' },
+        { value: 'auth-migration', id: 'rc-s2', label: 'auth-migration', hint: '' },
+        { value: 'refunds-v2', id: 'rc-s3', label: 'refunds-v2', hint: '' },
+        { value: 'general', id: 'rc-s4', label: 'No stream', hint: 'files under General' },
+        { value: 'new', id: 'rc-s5', label: 'Propose a new stream', hint: '' }
+      ],
+      kinds: ['investigation', 'incident', 'review', 'audit', 'architecture', 'plan', 'analysis', 'benchmark', 'experiment', 'research', 'explainer', 'runbook', 'summary'].map(function (k) { return { id: k, label: cap(k) }; })
+    };
+  }
+}
+</script>
+</body>
+</html>

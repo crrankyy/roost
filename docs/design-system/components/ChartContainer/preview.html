@@ -1,0 +1,29 @@
+<!-- @dsCard group="Data display" height=300 subtitle="runs per day; tooltip content shown standalone" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>ChartContainer — preview</title>
+<style>html,body{margin:0}body{background:var(--background);color:var(--foreground);font-family:var(--font-sans);padding:24px}</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+  var K = window.Lynx, h = React.createElement, I = K.Icons;
+  var config = { runs: { label: 'Runs', color: 'var(--agent)' } };
+  var data = [['Mon', 18], ['Tue', 26], ['Wed', 22], ['Thu', 42], ['Fri', 31], ['Sat', 9], ['Sun', 12]];
+  var max = 42;
+  ReactDOM.createRoot(document.getElementById('root')).render(h('div', null,
+    h('div', { style: { fontSize: 14, fontWeight: 500 } }, 'Agent runs this week'),
+    h('div', { style: { fontSize: 12, color: 'var(--muted-foreground)', marginBottom: 12 } }, 'Static stand-in bars; real charts pass recharts children'),
+    h(K.ChartContainer, { config: config, style: { height: 200, aspectRatio: 'auto' } },
+      h('div', { style: { position: 'relative', display: 'flex', gap: 12, height: '100%', width: '100%' } },
+        h('div', { style: { position: 'absolute', left: 0, right: 0, bottom: 22, borderTop: '1px solid color-mix(in srgb, var(--border) 50%, transparent)' } }),
+        data.map(function (d, i) {
+          return h('div', { key: i, style: { flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', gap: 6 } },
+            h('div', { style: { width: 28, height: (d[1] / max * 150) + 'px', background: 'var(--color-runs)', borderRadius: '4px 4px 0 0' } }),
+            h('span', { style: { color: 'var(--muted-foreground)', lineHeight: '16px' } }, d[0]));
+        }),
+        h('div', { style: { position: 'absolute', left: 'calc(50% + 50px)', top: 0 } },
+          h(K.ChartTooltipContent, { active: true, label: 'Thursday', payload: [{ dataKey: 'runs', name: 'runs', value: 42, color: 'var(--color-runs)', payload: {} }] }))))));
+</script>
+</body>
+</html>

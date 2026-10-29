@@ -1,0 +1,14 @@
+<!-- @dsCard group="Report · Content" height=300 subtitle="approve · request changes · reject" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Verdict — preview</title>
+<link rel="stylesheet" href="../reports.css"><style>body.lr-report{padding:24px;min-height:0}</style>
+</head>
+<body class="lr-report">
+<div style="display:flex;flex-direction:column;gap:12px">
+  <div class="lr-verdict" data-verdict="approve"><span class="lr-verdict-mark"><svg class="lr-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></span><div><div class="lr-verdict-word">Approve</div><p>Ready to merge. Two nits are optional.</p></div></div>
+  <div class="lr-verdict" data-verdict="changes"><span class="lr-verdict-mark"><svg class="lr-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg></span><div><div class="lr-verdict-word">Request changes</div><p>Findings 1 and 3 must be fixed before merging.</p></div></div>
+  <div class="lr-verdict" data-verdict="reject"><span class="lr-verdict-mark"><svg class="lr-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></span><div><div class="lr-verdict-word">Reject</div><p>The approach can’t meet the latency budget; see finding 2.</p></div></div>
+</div>
+</body>
+</html>

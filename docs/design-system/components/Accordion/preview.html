@@ -1,0 +1,24 @@
+<!-- @dsCard group="Layout" height=270 subtitle="single, collapsible; first item open" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Accordion — preview</title>
+<style>html,body{margin:0}body{background:var(--background);color:var(--foreground);font-family:var(--font-sans);padding:24px}</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+  var K = window.Lynx, h = React.createElement, I = K.Icons;
+  ReactDOM.createRoot(document.getElementById('root')).render(
+    h(K.Accordion, { type: 'single', collapsible: true, defaultValue: 'access', style: { maxWidth: 520 } },
+      h(K.AccordionItem, { value: 'access' },
+        h(K.AccordionTrigger, null, 'What can the research agent access?'),
+        h(K.AccordionContent, null, 'Only the sources you connect: the web, your notes and any folders you share. It never reads your inbox unless you grant that permission.')),
+      h(K.AccordionItem, { value: 'pause' },
+        h(K.AccordionTrigger, null, 'Can I pause an agent mid-run?'),
+        h(K.AccordionContent, null, 'Yes. Paused runs keep their context and resume from the last completed step.')),
+      h(K.AccordionItem, { value: 'models' },
+        h(K.AccordionTrigger, null, 'Which models do agents use?'),
+        h(K.AccordionContent, null, 'Each agent picks a default model; you can override it per run.'))));
+</script>
+</body>
+</html>

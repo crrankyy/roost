@@ -1,0 +1,22 @@
+<!-- @dsCard group="Feedback" height=260 subtitle="action toast and success toast, expanded" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>SonnerToaster — preview</title>
+<style>html,body{margin:0}body{background:var(--background);color:var(--foreground);font-family:var(--font-sans);padding:24px}</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+  var K = window.Lynx, h = React.createElement, I = K.Icons;
+  function Demo() {
+    React.useEffect(function () {
+      K.sonnerToast.success('Calendar agent booked 30 minutes', { description: 'Thursday 10:30 with Dana', duration: 1e9 });
+      K.sonnerToast('Inbox agent archived 24 emails', { description: 'Newsletters older than 30 days', duration: 1e9,
+        action: { label: 'Undo', onClick: function () {} } });
+    }, []);
+    return h(K.SonnerToaster, { expand: true, position: 'bottom-right' });
+  }
+  ReactDOM.createRoot(document.getElementById('root')).render(h(Demo));
+</script>
+</body>
+</html>

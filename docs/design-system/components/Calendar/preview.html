@@ -1,0 +1,20 @@
+<!-- @dsCard group="Forms" height=394 subtitle="single date with today · date range" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Calendar — preview</title>
+<style>html,body{margin:0}body{background:var(--background);color:var(--foreground);font-family:var(--font-sans);padding:24px}
+.row{display:flex;flex-wrap:wrap;align-items:center;gap:12px}.col{display:flex;flex-direction:column;gap:8px}.g2{display:grid;grid-template-columns:1fr 1fr;gap:20px 24px}.cap{font-size:12px;color:var(--muted-foreground)}.shell{border:1px solid color-mix(in srgb,var(--border) 50%,transparent);border-radius:var(--radius-2xl);background:color-mix(in srgb,var(--card) 75%,transparent);box-shadow:var(--shadow-lg)}</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+  var K = window.Lynx, h = React.createElement, I = K.Icons;
+  var today = new Date(2026, 9, 25);
+  function Single() { var st = React.useState(new Date(2026, 9, 28)); return h(K.Calendar, { mode: 'single', selected: st[0], onSelect: st[1], today: today, defaultMonth: today }) }
+  function Range() { var st = React.useState({ from: new Date(2026, 9, 12), to: new Date(2026, 9, 16) }); return h(K.Calendar, { mode: 'range', selected: st[0], onSelect: st[1], today: today, defaultMonth: today }) }
+  ReactDOM.createRoot(document.getElementById('root')).render(h('div', { className: 'row', style: { alignItems: 'flex-start', gap: 24 } },
+    h('div', { className: 'col' }, h('span', { className: 'cap' }, 'Run the calendar agent on'), h('div', { className: 'shell' }, h(Single))),
+    h('div', { className: 'col' }, h('span', { className: 'cap' }, 'Summarize meetings from'), h('div', { className: 'shell' }, h(Range)))));
+</script>
+</body>
+</html>

@@ -1,0 +1,1069 @@
+/* Lynx palettes. Set data-palette on <html> next to data-theme ("light" | "dark").
+   Each palette fills Catppuccin’s 26 slot names, so every role token in tokens.css follows it.
+   No data-palette (or "catppuccin") = the Catppuccin values in tokens.css. */
+
+/* Tokyo Night · Day / Night */
+
+[data-palette="tokyo-night"][data-theme="light"], [data-palette="tokyo-night"]:not([data-theme]) {
+  --rosewater: #b15c00;
+  --flamingo: #d20065;
+  --pink: #d20065;
+  --mauve: #7344b5;
+  --red: #a63838;
+  --maroon: #f52a65;
+  --peach: #b15c00;
+  --yellow: #8c6c3e;
+  --green: #587539;
+  --teal: #118c74;
+  --sky: #007197;
+  --sapphire: #006a83;
+  --blue: #2c78e0;
+  --lavender: #2e7de9;
+  --text: #3358b0;
+  --subtext1: #4c5a94;
+  --subtext0: #5a6491;
+  --overlay2: #6172b0;
+  --overlay1: #848cb5;
+  --overlay0: #9699a3;
+  --surface2: #a8aecb;
+  --surface1: #b6bbd1;
+  --surface0: #c4c8da;
+  --base: #e1e2e7;
+  --mantle: #d6d8df;
+  --crust: #c8cad3;
+  --agent-soft: color-mix(in srgb, var(--mauve) 8%, transparent);
+  --agent-border: color-mix(in srgb, var(--mauve) 30%, transparent);
+  --shadow-sm: 0 1px 2px 0 color-mix(in srgb, var(--text) 5%, transparent);
+  --shadow-lg: 0 10px 15px -3px color-mix(in srgb, var(--text) 10%, transparent), 0 4px 6px -4px color-mix(in srgb, var(--text) 10%, transparent);
+  --shadow-2xl: 0 25px 50px -12px color-mix(in srgb, var(--text) 25%, transparent);
+  --shadow-popover: 0 8px 24px color-mix(in srgb, var(--text) 20%, transparent);
+  --glow-agent: 0 0 24px color-mix(in srgb, var(--mauve) 18%, transparent);
+  --glow-thinking: 0 0 28px color-mix(in srgb, var(--mauve) 12%, transparent);
+  --glow-assistant: 0 0 28px color-mix(in srgb, var(--mauve) 25%, transparent);
+  --glow-user: 0 0 28px color-mix(in srgb, var(--blue) 24%, transparent);
+  --glow-online: 0 0 10px color-mix(in srgb, var(--green) 80%, transparent);
+}
+
+[data-palette="tokyo-night"][data-theme="dark"] {
+  --rosewater: #b4f9f8;
+  --flamingo: #f7768e;
+  --pink: #ff007c;
+  --mauve: #bb9af7;
+  --red: #f7768e;
+  --maroon: #db4b4b;
+  --peach: #ff9e64;
+  --yellow: #e0af68;
+  --green: #9ece6a;
+  --teal: #73daca;
+  --sky: #7dcfff;
+  --sapphire: #2ac3de;
+  --blue: #7aa2f7;
+  --lavender: #89ddff;
+  --text: #c0caf5;
+  --subtext1: #a9b1d6;
+  --subtext0: #9aa5ce;
+  --overlay2: #737aa2;
+  --overlay1: #565f89;
+  --overlay0: #545c7e;
+  --surface2: #414868;
+  --surface1: #3b4261;
+  --surface0: #292e42;
+  --base: #1a1b26;
+  --mantle: #16161e;
+  --crust: #101014;
+  --agent-soft: color-mix(in srgb, var(--mauve) 15%, transparent);
+  --agent-border: color-mix(in srgb, var(--mauve) 35%, transparent);
+  --shadow-sm: 0 1px 2px 0 color-mix(in srgb, var(--crust) 30%, transparent);
+  --shadow-lg: 0 10px 15px -3px color-mix(in srgb, var(--crust) 50%, transparent), 0 4px 6px -4px color-mix(in srgb, var(--crust) 50%, transparent);
+  --shadow-2xl: 0 25px 50px -12px color-mix(in srgb, var(--crust) 70%, transparent);
+  --shadow-popover: 0 8px 24px color-mix(in srgb, var(--crust) 60%, transparent);
+  --glow-agent: 0 0 24px color-mix(in srgb, var(--mauve) 18%, transparent);
+  --glow-thinking: 0 0 28px color-mix(in srgb, var(--mauve) 12%, transparent);
+  --glow-assistant: 0 0 28px color-mix(in srgb, var(--mauve) 25%, transparent);
+  --glow-user: 0 0 28px color-mix(in srgb, var(--blue) 24%, transparent);
+  --glow-online: 0 0 10px color-mix(in srgb, var(--green) 80%, transparent);
+}
+
+/* Rosé Pine · Dawn / Main */
+
+[data-palette="rose-pine"][data-theme="light"], [data-palette="rose-pine"]:not([data-theme]) {
+  --rosewater: #d7827e;
+  --flamingo: #d7827e;
+  --pink: #b4637a;
+  --mauve: #736287;
+  --red: #975366;
+  --maroon: #b4637a;
+  --peach: #b27728;
+  --yellow: #ea9d34;
+  --green: #538e99;
+  --teal: #56949f;
+  --sky: #56949f;
+  --sapphire: #286983;
+  --blue: #286983;
+  --lavender: #286983;
+  --text: #575279;
+  --subtext1: #625e80;
+  --subtext0: #797593;
+  --overlay2: #797593;
+  --overlay1: #9893a5;
+  --overlay0: #9893a5;
+  --surface2: #cecacd;
+  --surface1: #dfdad9;
+  --surface0: #f2e9e1;
+  --base: #faf4ed;
+  --mantle: #f2e9e1;
+  --crust: #e8dfd6;
+  --agent-soft: color-mix(in srgb, var(--mauve) 8%, transparent);
+  --agent-border: color-mix(in srgb, var(--mauve) 30%, transparent);
+  --shadow-sm: 0 1px 2px 0 color-mix(in srgb, var(--text) 5%, transparent);
+  --shadow-lg: 0 10px 15px -3px color-mix(in srgb, var(--text) 10%, transparent), 0 4px 6px -4px color-mix(in srgb, var(--text) 10%, transparent);
+  --shadow-2xl: 0 25px 50px -12px color-mix(in srgb, var(--text) 25%, transparent);
+  --shadow-popover: 0 8px 24px color-mix(in srgb, var(--text) 20%, transparent);
+  --glow-agent: 0 0 24px color-mix(in srgb, var(--mauve) 18%, transparent);
+  --glow-thinking: 0 0 28px color-mix(in srgb, var(--mauve) 12%, transparent);
+  --glow-assistant: 0 0 28px color-mix(in srgb, var(--mauve) 25%, transparent);
+  --glow-user: 0 0 28px color-mix(in srgb, var(--blue) 24%, transparent);
+  --glow-online: 0 0 10px color-mix(in srgb, var(--green) 80%, transparent);
+}
+
+[data-palette="rose-pine"][data-theme="dark"] {
+  --rosewater: #ebbcba;
+  --flamingo: #ebbcba;
+  --pink: #eb6f92;
+  --mauve: #c4a7e7;
+  --red: #eb6f92;
+  --maroon: #eb6f92;
+  --peach: #f6c177;
+  --yellow: #f6c177;
+  --green: #9ccfd8;
+  --teal: #9ccfd8;
+  --sky: #9ccfd8;
+  --sapphire: #3e8fb0;
+  --blue: #3e8fb0;
+  --lavender: #9ccfd8;
+  --text: #e0def4;
+  --subtext1: #c5c2dc;
+  --subtext0: #908caa;
+  --overlay2: #908caa;
+  --overlay1: #6e6a86;
+  --overlay0: #6e6a86;
+  --surface2: #524f67;
+  --surface1: #403d52;
+  --surface0: #26233a;
+  --base: #1f1d2e;
+  --mantle: #191724;
+  --crust: #13111c;
+  --agent-soft: color-mix(in srgb, var(--mauve) 15%, transparent);
+  --agent-border: color-mix(in srgb, var(--mauve) 35%, transparent);
+  --shadow-sm: 0 1px 2px 0 color-mix(in srgb, var(--crust) 30%, transparent);
+  --shadow-lg: 0 10px 15px -3px color-mix(in srgb, var(--crust) 50%, transparent), 0 4px 6px -4px color-mix(in srgb, var(--crust) 50%, transparent);
+  --shadow-2xl: 0 25px 50px -12px color-mix(in srgb, var(--crust) 70%, transparent);
+  --shadow-popover: 0 8px 24px color-mix(in srgb, var(--crust) 60%, transparent);
+  --glow-agent: 0 0 24px color-mix(in srgb, var(--mauve) 18%, transparent);
+  --glow-thinking: 0 0 28px color-mix(in srgb, var(--mauve) 12%, transparent);
+  --glow-assistant: 0 0 28px color-mix(in srgb, var(--mauve) 25%, transparent);
+  --glow-user: 0 0 28px color-mix(in srgb, var(--blue) 24%, transparent);
+  --glow-online: 0 0 10px color-mix(in srgb, var(--green) 80%, transparent);
+}
+
+/* Nord · Snow Storm / Polar Night */
+
+[data-palette="nord"][data-theme="light"], [data-palette="nord"]:not([data-theme]) {
+  --rosewater: #d08770;
+  --flamingo: #d08770;
+  --pink: #b48ead;
+  --mauve: #7a6176;
+  --red: #a05159;
+  --maroon: #bf616a;
+  --peach: #af715e;
+  --yellow: #ebcb8b;
+  --green: #758965;
+  --teal: #8fbcbb;
+  --sky: #88c0d0;
+  --sapphire: #81a1c1;
+  --blue: #5e81ac;
+  --lavender: #5e81ac;
+  --text: #2e3440;
+  --subtext1: #3b4252;
+  --subtext0: #4c566a;
+  --overlay2: #616e88;
+  --overlay1: #7b88a1;
+  --overlay0: #9aa3b5;
+  --surface2: #aeb7c7;
+  --surface1: #c2cad8;
+  --surface0: #d8dee9;
+  --base: #eceff4;
+  --mantle: #e5e9f0;
+  --crust: #d8dee9;
+  --agent-soft: color-mix(in srgb, var(--mauve) 8%, transparent);
+  --agent-border: color-mix(in srgb, var(--mauve) 30%, transparent);
+  --shadow-sm: 0 1px 2px 0 color-mix(in srgb, var(--text) 5%, transparent);
+  --shadow-lg: 0 10px 15px -3px color-mix(in srgb, var(--text) 10%, transparent), 0 4px 6px -4px color-mix(in srgb, var(--text) 10%, transparent);
+  --shadow-2xl: 0 25px 50px -12px color-mix(in srgb, var(--text) 25%, transparent);
+  --shadow-popover: 0 8px 24px color-mix(in srgb, var(--text) 20%, transparent);
+  --glow-agent: 0 0 24px color-mix(in srgb, var(--mauve) 18%, transparent);
+  --glow-thinking: 0 0 28px color-mix(in srgb, var(--mauve) 12%, transparent);
+  --glow-assistant: 0 0 28px color-mix(in srgb, var(--mauve) 25%, transparent);
+  --glow-user: 0 0 28px color-mix(in srgb, var(--blue) 24%, transparent);
+  --glow-online: 0 0 10px color-mix(in srgb, var(--green) 80%, transparent);
+}
+
+[data-palette="nord"][data-theme="dark"] {
+  --rosewater: #ebcb8b;
+  --flamingo: #d08770;
+  --pink: #b48ead;
+  --mauve: #c3a5bd;
+  --red: #d9a0a6;
+  --maroon: #bf616a;
+  --peach: #d08770;
+  --yellow: #ebcb8b;
+  --green: #a3be8c;
+  --teal: #8fbcbb;
+  --sky: #88c0d0;
+  --sapphire: #81a1c1;
+  --blue: #81a1c1;
+  --lavender: #88c0d0;
+  --text: #eceff4;
+  --subtext1: #d8dee9;
+  --subtext0: #c0c8d6;
+  --overlay2: #a0aabd;
+  --overlay1: #7b88a1;
+  --overlay0: #616e88;
+  --surface2: #4c566a;
+  --surface1: #434c5e;
+  --surface0: #3b4252;
+  --base: #3b4252;
+  --mantle: #2e3440;
+  --crust: #272c36;
+  --agent-soft: color-mix(in srgb, var(--mauve) 15%, transparent);
+  --agent-border: color-mix(in srgb, var(--mauve) 35%, transparent);
+  --shadow-sm: 0 1px 2px 0 color-mix(in srgb, var(--crust) 30%, transparent);
+  --shadow-lg: 0 10px 15px -3px color-mix(in srgb, var(--crust) 50%, transparent), 0 4px 6px -4px color-mix(in srgb, var(--crust) 50%, transparent);
+  --shadow-2xl: 0 25px 50px -12px color-mix(in srgb, var(--crust) 70%, transparent);
+  --shadow-popover: 0 8px 24px color-mix(in srgb, var(--crust) 60%, transparent);
+  --glow-agent: 0 0 24px color-mix(in srgb, var(--mauve) 18%, transparent);
+  --glow-thinking: 0 0 28px color-mix(in srgb, var(--mauve) 12%, transparent);
+  --glow-assistant: 0 0 28px color-mix(in srgb, var(--mauve) 25%, transparent);
+  --glow-user: 0 0 28px color-mix(in srgb, var(--blue) 24%, transparent);
+  --glow-online: 0 0 10px color-mix(in srgb, var(--green) 80%, transparent);
+}
+
+/* Dracula · Alucard / Dracula */
+
+[data-palette="dracula"][data-theme="light"], [data-palette="dracula"]:not([data-theme]) {
+  --rosewater: #a34d14;
+  --flamingo: #a3144d;
+  --pink: #a3144d;
+  --mauve: #644ac9;
+  --red: #c33828;
+  --maroon: #cb3a2a;
+  --peach: #a34d14;
+  --yellow: #846e15;
+  --green: #14710a;
+  --teal: #036a96;
+  --sky: #036a96;
+  --sapphire: #036a96;
+  --blue: #036a96;
+  --lavender: #644ac9;
+  --text: #1f1f1f;
+  --subtext1: #4b4733;
+  --subtext0: #6c664b;
+  --overlay2: #7d775c;
+  --overlay1: #948f78;
+  --overlay0: #aba690;
+  --surface2: #c4bfa8;
+  --surface1: #d9d4be;
+  --surface0: #e8e3cd;
+  --base: #fffbeb;
+  --mantle: #f5f0dc;
+  --crust: #ece6cf;
+  --agent-soft: color-mix(in srgb, var(--mauve) 8%, transparent);
+  --agent-border: color-mix(in srgb, var(--mauve) 30%, transparent);
+  --shadow-sm: 0 1px 2px 0 color-mix(in srgb, var(--text) 5%, transparent);
+  --shadow-lg: 0 10px 15px -3px color-mix(in srgb, var(--text) 10%, transparent), 0 4px 6px -4px color-mix(in srgb, var(--text) 10%, transparent);
+  --shadow-2xl: 0 25px 50px -12px color-mix(in srgb, var(--text) 25%, transparent);
+  --shadow-popover: 0 8px 24px color-mix(in srgb, var(--text) 20%, transparent);
+  --glow-agent: 0 0 24px color-mix(in srgb, var(--mauve) 18%, transparent);
+  --glow-thinking: 0 0 28px color-mix(in srgb, var(--mauve) 12%, transparent);
+  --glow-assistant: 0 0 28px color-mix(in srgb, var(--mauve) 25%, transparent);
+  --glow-user: 0 0 28px color-mix(in srgb, var(--blue) 24%, transparent);
+  --glow-online: 0 0 10px color-mix(in srgb, var(--green) 80%, transparent);
+}
+
+[data-palette="dracula"][data-theme="dark"] {
+  --rosewater: #ffb86c;
+  --flamingo: #ff79c6;
+  --pink: #ff79c6;
+  --mauve: #bd93f9;
+  --red: #ff5555;
+  --maroon: #ff6e6e;
+  --peach: #ffb86c;
+  --yellow: #f1fa8c;
+  --green: #50fa7b;
+  --teal: #8be9fd;
+  --sky: #8be9fd;
+  --sapphire: #8be9fd;
+  --blue: #8be9fd;
+  --lavender: #a4ffff;
+  --text: #f8f8f2;
+  --subtext1: #d6d8e4;
+  --subtext0: #b6bad0;
+  --overlay2: #9aa3c8;
+  --overlay1: #7280b0;
+  --overlay0: #6272a4;
+  --surface2: #565970;
+  --surface1: #44475a;
+  --surface0: #343746;
+  --base: #282a36;
+  --mantle: #21222c;
+  --crust: #191a21;
+  --agent-soft: color-mix(in srgb, var(--mauve) 15%, transparent);
+  --agent-border: color-mix(in srgb, var(--mauve) 35%, transparent);
+  --shadow-sm: 0 1px 2px 0 color-mix(in srgb, var(--crust) 30%, transparent);
+  --shadow-lg: 0 10px 15px -3px color-mix(in srgb, var(--crust) 50%, transparent), 0 4px 6px -4px color-mix(in srgb, var(--crust) 50%, transparent);
+  --shadow-2xl: 0 25px 50px -12px color-mix(in srgb, var(--crust) 70%, transparent);
+  --shadow-popover: 0 8px 24px color-mix(in srgb, var(--crust) 60%, transparent);
+  --glow-agent: 0 0 24px color-mix(in srgb, var(--mauve) 18%, transparent);
+  --glow-thinking: 0 0 28px color-mix(in srgb, var(--mauve) 12%, transparent);
+  --glow-assistant: 0 0 28px color-mix(in srgb, var(--mauve) 25%, transparent);
+  --glow-user: 0 0 28px color-mix(in srgb, var(--blue) 24%, transparent);
+  --glow-online: 0 0 10px color-mix(in srgb, var(--green) 80%, transparent);
+}
+
+/* Kanagawa · Lotus / Wave */
+
+[data-palette="kanagawa"][data-theme="light"], [data-palette="kanagawa"]:not([data-theme]) {
+  --rosewater: #cc6d00;
+  --flamingo: #b35b79;
+  --pink: #b35b79;
+  --mauve: #624c83;
+  --red: #b03849;
+  --maroon: #d7474b;
+  --peach: #bc6400;
+  --yellow: #77713f;
+  --green: #6b844b;
+  --teal: #597b75;
+  --sky: #4e8ca2;
+  --sapphire: #6693bf;
+  --blue: #4d699b;
+  --lavender: #5d57a3;
+  --text: #545464;
+  --subtext1: #43436c;
+  --subtext0: #716e61;
+  --overlay2: #716e61;
+  --overlay1: #8a8980;
+  --overlay0: #a09cac;
+  --surface2: #c9cbd1;
+  --surface1: #dcd5ac;
+  --surface0: #e5ddb0;
+  --base: #f2ecbc;
+  --mantle: #e8e2b8;
+  --crust: #dcd5ac;
+  --agent-soft: color-mix(in srgb, var(--mauve) 8%, transparent);
+  --agent-border: color-mix(in srgb, var(--mauve) 30%, transparent);
+  --shadow-sm: 0 1px 2px 0 color-mix(in srgb, var(--text) 5%, transparent);
+  --shadow-lg: 0 10px 15px -3px color-mix(in srgb, var(--text) 10%, transparent), 0 4px 6px -4px color-mix(in srgb, var(--text) 10%, transparent);
+  --shadow-2xl: 0 25px 50px -12px color-mix(in srgb, var(--text) 25%, transparent);
+  --shadow-popover: 0 8px 24px color-mix(in srgb, var(--text) 20%, transparent);
+  --glow-agent: 0 0 24px color-mix(in srgb, var(--mauve) 18%, transparent);
+  --glow-thinking: 0 0 28px color-mix(in srgb, var(--mauve) 12%, transparent);
+  --glow-assistant: 0 0 28px color-mix(in srgb, var(--mauve) 25%, transparent);
+  --glow-user: 0 0 28px color-mix(in srgb, var(--blue) 24%, transparent);
+  --glow-online: 0 0 10px color-mix(in srgb, var(--green) 80%, transparent);
+}
+
+[data-palette="kanagawa"][data-theme="dark"] {
+  --rosewater: #e6c384;
+  --flamingo: #d27e99;
+  --pink: #d27e99;
+  --mauve: #957fb8;
+  --red: #e46876;
+  --maroon: #ff5d62;
+  --peach: #ffa066;
+  --yellow: #e6c384;
+  --green: #98bb6c;
+  --teal: #7aa89f;
+  --sky: #7fb4ca;
+  --sapphire: #a3d4d5;
+  --blue: #7e9cd8;
+  --lavender: #9cabca;
+  --text: #dcd7ba;
+  --subtext1: #c8c093;
+  --subtext0: #a6a69c;
+  --overlay2: #938aa9;
+  --overlay1: #727169;
+  --overlay0: #54546d;
+  --surface2: #54546d;
+  --surface1: #363646;
+  --surface0: #2a2a37;
+  --base: #1f1f28;
+  --mantle: #1a1a22;
+  --crust: #16161d;
+  --agent-soft: color-mix(in srgb, var(--mauve) 15%, transparent);
+  --agent-border: color-mix(in srgb, var(--mauve) 35%, transparent);
+  --shadow-sm: 0 1px 2px 0 color-mix(in srgb, var(--crust) 30%, transparent);
+  --shadow-lg: 0 10px 15px -3px color-mix(in srgb, var(--crust) 50%, transparent), 0 4px 6px -4px color-mix(in srgb, var(--crust) 50%, transparent);
+  --shadow-2xl: 0 25px 50px -12px color-mix(in srgb, var(--crust) 70%, transparent);
+  --shadow-popover: 0 8px 24px color-mix(in srgb, var(--crust) 60%, transparent);
+  --glow-agent: 0 0 24px color-mix(in srgb, var(--mauve) 18%, transparent);
+  --glow-thinking: 0 0 28px color-mix(in srgb, var(--mauve) 12%, transparent);
+  --glow-assistant: 0 0 28px color-mix(in srgb, var(--mauve) 25%, transparent);
+  --glow-user: 0 0 28px color-mix(in srgb, var(--blue) 24%, transparent);
+  --glow-online: 0 0 10px color-mix(in srgb, var(--green) 80%, transparent);
+}
+
+/* Graphite · Light / Dark */
+
+[data-palette="graphite"][data-theme="light"], [data-palette="graphite"]:not([data-theme]) {
+  --rosewater: #a2786c;
+  --flamingo: #b4655c;
+  --pink: #a85d88;
+  --mauve: #4f46e5;
+  --red: #c2312f;
+  --maroon: #b8454a;
+  --peach: #b45f1f;
+  --yellow: #8f7417;
+  --green: #2f7d4f;
+  --teal: #2b7a78;
+  --sky: #2f76a6;
+  --sapphire: #356b9e;
+  --blue: #3a63c8;
+  --lavender: #5b67c7;
+  --text: #1d1d22;
+  --subtext1: #4a4a52;
+  --subtext0: #5d5d66;
+  --overlay2: #73737c;
+  --overlay1: #8b8b94;
+  --overlay0: #a3a3ab;
+  --surface2: #bdbdc4;
+  --surface1: #d2d2d8;
+  --surface0: #e2e2e7;
+  --base: #f7f7f9;
+  --mantle: #efeff2;
+  --crust: #e6e6ea;
+  --agent-soft: color-mix(in srgb, var(--mauve) 8%, transparent);
+  --agent-border: color-mix(in srgb, var(--mauve) 30%, transparent);
+  --shadow-sm: 0 1px 2px 0 color-mix(in srgb, var(--text) 5%, transparent);
+  --shadow-lg: 0 10px 15px -3px color-mix(in srgb, var(--text) 10%, transparent), 0 4px 6px -4px color-mix(in srgb, var(--text) 10%, transparent);
+  --shadow-2xl: 0 25px 50px -12px color-mix(in srgb, var(--text) 25%, transparent);
+  --shadow-popover: 0 8px 24px color-mix(in srgb, var(--text) 20%, transparent);
+  --glow-agent: 0 0 24px color-mix(in srgb, var(--mauve) 18%, transparent);
+  --glow-thinking: 0 0 28px color-mix(in srgb, var(--mauve) 12%, transparent);
+  --glow-assistant: 0 0 28px color-mix(in srgb, var(--mauve) 25%, transparent);
+  --glow-user: 0 0 28px color-mix(in srgb, var(--blue) 24%, transparent);
+  --glow-online: 0 0 10px color-mix(in srgb, var(--green) 80%, transparent);
+}
+
+[data-palette="graphite"][data-theme="dark"] {
+  --rosewater: #d9c2bb;
+  --flamingo: #e3aaa0;
+  --pink: #d9a7c5;
+  --mauve: #a5a1ff;
+  --red: #f28b82;
+  --maroon: #e8a0a4;
+  --peach: #f0b07a;
+  --yellow: #e6d38a;
+  --green: #8fd1a6;
+  --teal: #8ad0cc;
+  --sky: #8cc6ec;
+  --sapphire: #8fb4e6;
+  --blue: #94b0ff;
+  --lavender: #b8bdf5;
+  --text: #ececf0;
+  --subtext1: #c9c9d0;
+  --subtext0: #a9a9b2;
+  --overlay2: #8d8d96;
+  --overlay1: #74747d;
+  --overlay0: #5d5d65;
+  --surface2: #48484f;
+  --surface1: #38383e;
+  --surface0: #2a2a2f;
+  --base: #1f1f23;
+  --mantle: #18181b;
+  --crust: #121214;
+  --agent-soft: color-mix(in srgb, var(--mauve) 15%, transparent);
+  --agent-border: color-mix(in srgb, var(--mauve) 35%, transparent);
+  --shadow-sm: 0 1px 2px 0 color-mix(in srgb, var(--crust) 30%, transparent);
+  --shadow-lg: 0 10px 15px -3px color-mix(in srgb, var(--crust) 50%, transparent), 0 4px 6px -4px color-mix(in srgb, var(--crust) 50%, transparent);
+  --shadow-2xl: 0 25px 50px -12px color-mix(in srgb, var(--crust) 70%, transparent);
+  --shadow-popover: 0 8px 24px color-mix(in srgb, var(--crust) 60%, transparent);
+  --glow-agent: 0 0 24px color-mix(in srgb, var(--mauve) 18%, transparent);
+  --glow-thinking: 0 0 28px color-mix(in srgb, var(--mauve) 12%, transparent);
+  --glow-assistant: 0 0 28px color-mix(in srgb, var(--mauve) 25%, transparent);
+  --glow-user: 0 0 28px color-mix(in srgb, var(--blue) 24%, transparent);
+  --glow-online: 0 0 10px color-mix(in srgb, var(--green) 80%, transparent);
+}
+
+/* Ash · Light / Dark */
+
+[data-palette="ash"][data-theme="light"], [data-palette="ash"]:not([data-theme]) {
+  --rosewater: #9a7466;
+  --flamingo: #a86a5c;
+  --pink: #9a6680;
+  --mauve: #5c5a8a;
+  --red: #b0413b;
+  --maroon: #a8524d;
+  --peach: #a8612e;
+  --yellow: #86702c;
+  --green: #4f7a52;
+  --teal: #467671;
+  --sky: #4a7290;
+  --sapphire: #4c6a8a;
+  --blue: #4a62a0;
+  --lavender: #66689c;
+  --text: #262421;
+  --subtext1: #4f4b45;
+  --subtext0: #625e57;
+  --overlay2: #78736b;
+  --overlay1: #8f8a82;
+  --overlay0: #a7a29a;
+  --surface2: #c2bdb5;
+  --surface1: #d6d2cb;
+  --surface0: #e5e2dc;
+  --base: #f8f7f4;
+  --mantle: #f0eeea;
+  --crust: #e7e4df;
+  --agent-soft: color-mix(in srgb, var(--mauve) 8%, transparent);
+  --agent-border: color-mix(in srgb, var(--mauve) 30%, transparent);
+  --shadow-sm: 0 1px 2px 0 color-mix(in srgb, var(--text) 5%, transparent);
+  --shadow-lg: 0 10px 15px -3px color-mix(in srgb, var(--text) 10%, transparent), 0 4px 6px -4px color-mix(in srgb, var(--text) 10%, transparent);
+  --shadow-2xl: 0 25px 50px -12px color-mix(in srgb, var(--text) 25%, transparent);
+  --shadow-popover: 0 8px 24px color-mix(in srgb, var(--text) 20%, transparent);
+  --glow-agent: 0 0 24px color-mix(in srgb, var(--mauve) 18%, transparent);
+  --glow-thinking: 0 0 28px color-mix(in srgb, var(--mauve) 12%, transparent);
+  --glow-assistant: 0 0 28px color-mix(in srgb, var(--mauve) 25%, transparent);
+  --glow-user: 0 0 28px color-mix(in srgb, var(--blue) 24%, transparent);
+  --glow-online: 0 0 10px color-mix(in srgb, var(--green) 80%, transparent);
+}
+
+[data-palette="ash"][data-theme="dark"] {
+  --rosewater: #d6c4ba;
+  --flamingo: #d9b0a3;
+  --pink: #cfadbd;
+  --mauve: #b4b1db;
+  --red: #e09891;
+  --maroon: #d9a5a0;
+  --peach: #ddb08c;
+  --yellow: #d9cb98;
+  --green: #a8c9a6;
+  --teal: #a3c6c0;
+  --sky: #a6c2d6;
+  --sapphire: #a5b6cc;
+  --blue: #a8b8e0;
+  --lavender: #c0bfdf;
+  --text: #ebe8e3;
+  --subtext1: #cbc6be;
+  --subtext0: #ada8a0;
+  --overlay2: #918c85;
+  --overlay1: #78746e;
+  --overlay0: #615d58;
+  --surface2: #4b4844;
+  --surface1: #3b3936;
+  --surface0: #2d2b29;
+  --base: #221f1d;
+  --mantle: #1a1817;
+  --crust: #141312;
+  --agent-soft: color-mix(in srgb, var(--mauve) 15%, transparent);
+  --agent-border: color-mix(in srgb, var(--mauve) 35%, transparent);
+  --shadow-sm: 0 1px 2px 0 color-mix(in srgb, var(--crust) 30%, transparent);
+  --shadow-lg: 0 10px 15px -3px color-mix(in srgb, var(--crust) 50%, transparent), 0 4px 6px -4px color-mix(in srgb, var(--crust) 50%, transparent);
+  --shadow-2xl: 0 25px 50px -12px color-mix(in srgb, var(--crust) 70%, transparent);
+  --shadow-popover: 0 8px 24px color-mix(in srgb, var(--crust) 60%, transparent);
+  --glow-agent: 0 0 24px color-mix(in srgb, var(--mauve) 18%, transparent);
+  --glow-thinking: 0 0 28px color-mix(in srgb, var(--mauve) 12%, transparent);
+  --glow-assistant: 0 0 28px color-mix(in srgb, var(--mauve) 25%, transparent);
+  --glow-user: 0 0 28px color-mix(in srgb, var(--blue) 24%, transparent);
+  --glow-online: 0 0 10px color-mix(in srgb, var(--green) 80%, transparent);
+}
+
+/* Solarized · Light / Dark */
+
+[data-palette="solarized"][data-theme="light"], [data-palette="solarized"]:not([data-theme]) {
+  --rosewater: #cb4b16;
+  --flamingo: #d33682;
+  --pink: #d33682;
+  --mauve: #5b5fa5;
+  --red: #c22c29;
+  --maroon: #dc322f;
+  --peach: #cb4b16;
+  --yellow: #b58900;
+  --green: #7a8d00;
+  --teal: #2aa198;
+  --sky: #2aa198;
+  --sapphire: #268bd2;
+  --blue: #268bd2;
+  --lavender: #6c71c4;
+  --text: #073642;
+  --subtext1: #546a70;
+  --subtext0: #657b83;
+  --overlay2: #657b83;
+  --overlay1: #839496;
+  --overlay0: #93a1a1;
+  --surface2: #c9c2ad;
+  --surface1: #ddd6c1;
+  --surface0: #e8e1cb;
+  --base: #fdf6e3;
+  --mantle: #eee8d5;
+  --crust: #e4ddc8;
+  --agent-soft: color-mix(in srgb, var(--mauve) 8%, transparent);
+  --agent-border: color-mix(in srgb, var(--mauve) 30%, transparent);
+  --shadow-sm: 0 1px 2px 0 color-mix(in srgb, var(--text) 5%, transparent);
+  --shadow-lg: 0 10px 15px -3px color-mix(in srgb, var(--text) 10%, transparent), 0 4px 6px -4px color-mix(in srgb, var(--text) 10%, transparent);
+  --shadow-2xl: 0 25px 50px -12px color-mix(in srgb, var(--text) 25%, transparent);
+  --shadow-popover: 0 8px 24px color-mix(in srgb, var(--text) 20%, transparent);
+  --glow-agent: 0 0 24px color-mix(in srgb, var(--mauve) 18%, transparent);
+  --glow-thinking: 0 0 28px color-mix(in srgb, var(--mauve) 12%, transparent);
+  --glow-assistant: 0 0 28px color-mix(in srgb, var(--mauve) 25%, transparent);
+  --glow-user: 0 0 28px color-mix(in srgb, var(--blue) 24%, transparent);
+  --glow-online: 0 0 10px color-mix(in srgb, var(--green) 80%, transparent);
+}
+
+[data-palette="solarized"][data-theme="dark"] {
+  --rosewater: #cb4b16;
+  --flamingo: #d33682;
+  --pink: #d33682;
+  --mauve: #8f93d2;
+  --red: #e97c7a;
+  --maroon: #dc322f;
+  --peach: #cf5929;
+  --yellow: #b58900;
+  --green: #859900;
+  --teal: #2aa198;
+  --sky: #2aa198;
+  --sapphire: #268bd2;
+  --blue: #268bd2;
+  --lavender: #7277c6;
+  --text: #eee8d5;
+  --subtext1: #93a1a1;
+  --subtext0: #8d9d9e;
+  --overlay2: #839496;
+  --overlay1: #657b83;
+  --overlay0: #586e75;
+  --surface2: #3e5f67;
+  --surface1: #2a4f58;
+  --surface0: #0b3e4a;
+  --base: #073642;
+  --mantle: #002b36;
+  --crust: #00212b;
+  --agent-soft: color-mix(in srgb, var(--mauve) 15%, transparent);
+  --agent-border: color-mix(in srgb, var(--mauve) 35%, transparent);
+  --shadow-sm: 0 1px 2px 0 color-mix(in srgb, var(--crust) 30%, transparent);
+  --shadow-lg: 0 10px 15px -3px color-mix(in srgb, var(--crust) 50%, transparent), 0 4px 6px -4px color-mix(in srgb, var(--crust) 50%, transparent);
+  --shadow-2xl: 0 25px 50px -12px color-mix(in srgb, var(--crust) 70%, transparent);
+  --shadow-popover: 0 8px 24px color-mix(in srgb, var(--crust) 60%, transparent);
+  --glow-agent: 0 0 24px color-mix(in srgb, var(--mauve) 18%, transparent);
+  --glow-thinking: 0 0 28px color-mix(in srgb, var(--mauve) 12%, transparent);
+  --glow-assistant: 0 0 28px color-mix(in srgb, var(--mauve) 25%, transparent);
+  --glow-user: 0 0 28px color-mix(in srgb, var(--blue) 24%, transparent);
+  --glow-online: 0 0 10px color-mix(in srgb, var(--green) 80%, transparent);
+}
+
+/* Gruvbox · Light / Dark */
+
+[data-palette="gruvbox"][data-theme="light"], [data-palette="gruvbox"]:not([data-theme]) {
+  --rosewater: #b57614;
+  --flamingo: #af3a03;
+  --pink: #8f3f71;
+  --mauve: #8f3f71;
+  --red: #9d0006;
+  --maroon: #cc241d;
+  --peach: #af3a03;
+  --yellow: #b57614;
+  --green: #79740e;
+  --teal: #427b58;
+  --sky: #076678;
+  --sapphire: #076678;
+  --blue: #076678;
+  --lavender: #458588;
+  --text: #3c3836;
+  --subtext1: #504945;
+  --subtext0: #665c54;
+  --overlay2: #7c6f64;
+  --overlay1: #928374;
+  --overlay0: #a89984;
+  --surface2: #bdae93;
+  --surface1: #d5c4a1;
+  --surface0: #ebdbb2;
+  --base: #fbf1c7;
+  --mantle: #f2e5bc;
+  --crust: #ebdbb2;
+  --agent-soft: color-mix(in srgb, var(--mauve) 8%, transparent);
+  --agent-border: color-mix(in srgb, var(--mauve) 30%, transparent);
+  --shadow-sm: 0 1px 2px 0 color-mix(in srgb, var(--text) 5%, transparent);
+  --shadow-lg: 0 10px 15px -3px color-mix(in srgb, var(--text) 10%, transparent), 0 4px 6px -4px color-mix(in srgb, var(--text) 10%, transparent);
+  --shadow-2xl: 0 25px 50px -12px color-mix(in srgb, var(--text) 25%, transparent);
+  --shadow-popover: 0 8px 24px color-mix(in srgb, var(--text) 20%, transparent);
+  --glow-agent: 0 0 24px color-mix(in srgb, var(--mauve) 18%, transparent);
+  --glow-thinking: 0 0 28px color-mix(in srgb, var(--mauve) 12%, transparent);
+  --glow-assistant: 0 0 28px color-mix(in srgb, var(--mauve) 25%, transparent);
+  --glow-user: 0 0 28px color-mix(in srgb, var(--blue) 24%, transparent);
+  --glow-online: 0 0 10px color-mix(in srgb, var(--green) 80%, transparent);
+}
+
+[data-palette="gruvbox"][data-theme="dark"] {
+  --rosewater: #d79921;
+  --flamingo: #fe8019;
+  --pink: #d3869b;
+  --mauve: #d3869b;
+  --red: #fb5844;
+  --maroon: #cc241d;
+  --peach: #fe8019;
+  --yellow: #fabd2f;
+  --green: #b8bb26;
+  --teal: #8ec07c;
+  --sky: #83a598;
+  --sapphire: #458588;
+  --blue: #83a598;
+  --lavender: #83a598;
+  --text: #ebdbb2;
+  --subtext1: #d5c4a1;
+  --subtext0: #bdae93;
+  --overlay2: #a89984;
+  --overlay1: #928374;
+  --overlay0: #7c6f64;
+  --surface2: #665c54;
+  --surface1: #504945;
+  --surface0: #3c3836;
+  --base: #282828;
+  --mantle: #1d2021;
+  --crust: #161819;
+  --agent-soft: color-mix(in srgb, var(--mauve) 15%, transparent);
+  --agent-border: color-mix(in srgb, var(--mauve) 35%, transparent);
+  --shadow-sm: 0 1px 2px 0 color-mix(in srgb, var(--crust) 30%, transparent);
+  --shadow-lg: 0 10px 15px -3px color-mix(in srgb, var(--crust) 50%, transparent), 0 4px 6px -4px color-mix(in srgb, var(--crust) 50%, transparent);
+  --shadow-2xl: 0 25px 50px -12px color-mix(in srgb, var(--crust) 70%, transparent);
+  --shadow-popover: 0 8px 24px color-mix(in srgb, var(--crust) 60%, transparent);
+  --glow-agent: 0 0 24px color-mix(in srgb, var(--mauve) 18%, transparent);
+  --glow-thinking: 0 0 28px color-mix(in srgb, var(--mauve) 12%, transparent);
+  --glow-assistant: 0 0 28px color-mix(in srgb, var(--mauve) 25%, transparent);
+  --glow-user: 0 0 28px color-mix(in srgb, var(--blue) 24%, transparent);
+  --glow-online: 0 0 10px color-mix(in srgb, var(--green) 80%, transparent);
+}
+
+/* Everforest · Light / Dark */
+
+[data-palette="everforest"][data-theme="light"], [data-palette="everforest"]:not([data-theme]) {
+  --rosewater: #f57d26;
+  --flamingo: #f85552;
+  --pink: #df69ba;
+  --mauve: #a14c86;
+  --red: #bc413e;
+  --maroon: #f85552;
+  --peach: #ce6920;
+  --yellow: #dfa000;
+  --green: #7c8e01;
+  --teal: #35a77c;
+  --sky: #3a94c5;
+  --sapphire: #3a94c5;
+  --blue: #388ebd;
+  --lavender: #3a94c5;
+  --text: #5c6a72;
+  --subtext1: #626e75;
+  --subtext0: #708089;
+  --overlay2: #829181;
+  --overlay1: #939f91;
+  --overlay0: #a6b0a0;
+  --surface2: #bdc3af;
+  --surface1: #e0dcc7;
+  --surface0: #e6e2cc;
+  --base: #fdf6e3;
+  --mantle: #f4f0d9;
+  --crust: #efebd4;
+  --agent-soft: color-mix(in srgb, var(--mauve) 8%, transparent);
+  --agent-border: color-mix(in srgb, var(--mauve) 30%, transparent);
+  --shadow-sm: 0 1px 2px 0 color-mix(in srgb, var(--text) 5%, transparent);
+  --shadow-lg: 0 10px 15px -3px color-mix(in srgb, var(--text) 10%, transparent), 0 4px 6px -4px color-mix(in srgb, var(--text) 10%, transparent);
+  --shadow-2xl: 0 25px 50px -12px color-mix(in srgb, var(--text) 25%, transparent);
+  --shadow-popover: 0 8px 24px color-mix(in srgb, var(--text) 20%, transparent);
+  --glow-agent: 0 0 24px color-mix(in srgb, var(--mauve) 18%, transparent);
+  --glow-thinking: 0 0 28px color-mix(in srgb, var(--mauve) 12%, transparent);
+  --glow-assistant: 0 0 28px color-mix(in srgb, var(--mauve) 25%, transparent);
+  --glow-user: 0 0 28px color-mix(in srgb, var(--blue) 24%, transparent);
+  --glow-online: 0 0 10px color-mix(in srgb, var(--green) 80%, transparent);
+}
+
+[data-palette="everforest"][data-theme="dark"] {
+  --rosewater: #e69875;
+  --flamingo: #e67e80;
+  --pink: #d699b6;
+  --mauve: #d699b6;
+  --red: #e67e80;
+  --maroon: #e67e80;
+  --peach: #e69875;
+  --yellow: #dbbc7f;
+  --green: #a7c080;
+  --teal: #83c092;
+  --sky: #7fbbb3;
+  --sapphire: #7fbbb3;
+  --blue: #7fbbb3;
+  --lavender: #7fbbb3;
+  --text: #d3c6aa;
+  --subtext1: #c0b8a0;
+  --subtext0: #a7b0a5;
+  --overlay2: #9da9a0;
+  --overlay1: #859289;
+  --overlay0: #7a8478;
+  --surface2: #475258;
+  --surface1: #3d484d;
+  --surface0: #343f44;
+  --base: #2d353b;
+  --mantle: #232a2e;
+  --crust: #1e2326;
+  --agent-soft: color-mix(in srgb, var(--mauve) 15%, transparent);
+  --agent-border: color-mix(in srgb, var(--mauve) 35%, transparent);
+  --shadow-sm: 0 1px 2px 0 color-mix(in srgb, var(--crust) 30%, transparent);
+  --shadow-lg: 0 10px 15px -3px color-mix(in srgb, var(--crust) 50%, transparent), 0 4px 6px -4px color-mix(in srgb, var(--crust) 50%, transparent);
+  --shadow-2xl: 0 25px 50px -12px color-mix(in srgb, var(--crust) 70%, transparent);
+  --shadow-popover: 0 8px 24px color-mix(in srgb, var(--crust) 60%, transparent);
+  --glow-agent: 0 0 24px color-mix(in srgb, var(--mauve) 18%, transparent);
+  --glow-thinking: 0 0 28px color-mix(in srgb, var(--mauve) 12%, transparent);
+  --glow-assistant: 0 0 28px color-mix(in srgb, var(--mauve) 25%, transparent);
+  --glow-user: 0 0 28px color-mix(in srgb, var(--blue) 24%, transparent);
+  --glow-online: 0 0 10px color-mix(in srgb, var(--green) 80%, transparent);
+}
+
+/* GitHub · Light / Dark */
+
+[data-palette="github"][data-theme="light"], [data-palette="github"]:not([data-theme]) {
+  --rosewater: #bc4c00;
+  --flamingo: #bf3989;
+  --pink: #bf3989;
+  --mauve: #8250df;
+  --red: #d1242f;
+  --maroon: #cf222e;
+  --peach: #bc4c00;
+  --yellow: #9a6700;
+  --green: #1a7f37;
+  --teal: #1b7c83;
+  --sky: #0969da;
+  --sapphire: #0550ae;
+  --blue: #0969da;
+  --lavender: #218bff;
+  --text: #1f2328;
+  --subtext1: #424a53;
+  --subtext0: #59636e;
+  --overlay2: #57606a;
+  --overlay1: #6e7781;
+  --overlay0: #8c959f;
+  --surface2: #afb8c1;
+  --surface1: #d0d7de;
+  --surface0: #eaeef2;
+  --base: #ffffff;
+  --mantle: #f6f8fa;
+  --crust: #eaeef2;
+  --agent-soft: color-mix(in srgb, var(--mauve) 8%, transparent);
+  --agent-border: color-mix(in srgb, var(--mauve) 30%, transparent);
+  --shadow-sm: 0 1px 2px 0 color-mix(in srgb, var(--text) 5%, transparent);
+  --shadow-lg: 0 10px 15px -3px color-mix(in srgb, var(--text) 10%, transparent), 0 4px 6px -4px color-mix(in srgb, var(--text) 10%, transparent);
+  --shadow-2xl: 0 25px 50px -12px color-mix(in srgb, var(--text) 25%, transparent);
+  --shadow-popover: 0 8px 24px color-mix(in srgb, var(--text) 20%, transparent);
+  --glow-agent: 0 0 24px color-mix(in srgb, var(--mauve) 18%, transparent);
+  --glow-thinking: 0 0 28px color-mix(in srgb, var(--mauve) 12%, transparent);
+  --glow-assistant: 0 0 28px color-mix(in srgb, var(--mauve) 25%, transparent);
+  --glow-user: 0 0 28px color-mix(in srgb, var(--blue) 24%, transparent);
+  --glow-online: 0 0 10px color-mix(in srgb, var(--green) 80%, transparent);
+}
+
+[data-palette="github"][data-theme="dark"] {
+  --rosewater: #ffa198;
+  --flamingo: #db61a2;
+  --pink: #db61a2;
+  --mauve: #a371f7;
+  --red: #f85149;
+  --maroon: #ff7b72;
+  --peach: #db6d28;
+  --yellow: #d29922;
+  --green: #3fb950;
+  --teal: #39c5cf;
+  --sky: #79c0ff;
+  --sapphire: #58a6ff;
+  --blue: #58a6ff;
+  --lavender: #79c0ff;
+  --text: #e6edf3;
+  --subtext1: #b1bac4;
+  --subtext0: #9198a1;
+  --overlay2: #8b949e;
+  --overlay1: #7d8590;
+  --overlay0: #6e7681;
+  --surface2: #484f58;
+  --surface1: #30363d;
+  --surface0: #21262d;
+  --base: #161b22;
+  --mantle: #0d1117;
+  --crust: #010409;
+  --agent-soft: color-mix(in srgb, var(--mauve) 15%, transparent);
+  --agent-border: color-mix(in srgb, var(--mauve) 35%, transparent);
+  --shadow-sm: 0 1px 2px 0 color-mix(in srgb, var(--crust) 30%, transparent);
+  --shadow-lg: 0 10px 15px -3px color-mix(in srgb, var(--crust) 50%, transparent), 0 4px 6px -4px color-mix(in srgb, var(--crust) 50%, transparent);
+  --shadow-2xl: 0 25px 50px -12px color-mix(in srgb, var(--crust) 70%, transparent);
+  --shadow-popover: 0 8px 24px color-mix(in srgb, var(--crust) 60%, transparent);
+  --glow-agent: 0 0 24px color-mix(in srgb, var(--mauve) 18%, transparent);
+  --glow-thinking: 0 0 28px color-mix(in srgb, var(--mauve) 12%, transparent);
+  --glow-assistant: 0 0 28px color-mix(in srgb, var(--mauve) 25%, transparent);
+  --glow-user: 0 0 28px color-mix(in srgb, var(--blue) 24%, transparent);
+  --glow-online: 0 0 10px color-mix(in srgb, var(--green) 80%, transparent);
+}
+
+/* Ayu · Light / Dark */
+
+[data-palette="ayu"][data-theme="light"], [data-palette="ayu"]:not([data-theme]) {
+  --rosewater: #f2ae49;
+  --flamingo: #f07171;
+  --pink: #ed9366;
+  --mauve: #8262a3;
+  --red: #c14343;
+  --maroon: #f07171;
+  --peach: #c87132;
+  --yellow: #ffaa33;
+  --green: #719600;
+  --teal: #4cbf99;
+  --sky: #55b4d4;
+  --sapphire: #399ee6;
+  --blue: #3491d4;
+  --lavender: #478acc;
+  --text: #5c6166;
+  --subtext1: #6b7076;
+  --subtext0: #787b80;
+  --overlay2: #787b80;
+  --overlay1: #8a9199;
+  --overlay0: #a0a6ac;
+  --surface2: #b8bec4;
+  --surface1: #cfd3d7;
+  --surface0: #dfe2e5;
+  --base: #fcfcfc;
+  --mantle: #f3f4f5;
+  --crust: #e7e8e9;
+  --agent-soft: color-mix(in srgb, var(--mauve) 8%, transparent);
+  --agent-border: color-mix(in srgb, var(--mauve) 30%, transparent);
+  --shadow-sm: 0 1px 2px 0 color-mix(in srgb, var(--text) 5%, transparent);
+  --shadow-lg: 0 10px 15px -3px color-mix(in srgb, var(--text) 10%, transparent), 0 4px 6px -4px color-mix(in srgb, var(--text) 10%, transparent);
+  --shadow-2xl: 0 25px 50px -12px color-mix(in srgb, var(--text) 25%, transparent);
+  --shadow-popover: 0 8px 24px color-mix(in srgb, var(--text) 20%, transparent);
+  --glow-agent: 0 0 24px color-mix(in srgb, var(--mauve) 18%, transparent);
+  --glow-thinking: 0 0 28px color-mix(in srgb, var(--mauve) 12%, transparent);
+  --glow-assistant: 0 0 28px color-mix(in srgb, var(--mauve) 25%, transparent);
+  --glow-user: 0 0 28px color-mix(in srgb, var(--blue) 24%, transparent);
+  --glow-online: 0 0 10px color-mix(in srgb, var(--green) 80%, transparent);
+}
+
+[data-palette="ayu"][data-theme="dark"] {
+  --rosewater: #ffb454;
+  --flamingo: #f07178;
+  --pink: #f29668;
+  --mauve: #d2a6ff;
+  --red: #f07178;
+  --maroon: #d95757;
+  --peach: #ff8f40;
+  --yellow: #e6b450;
+  --green: #aad94c;
+  --teal: #95e6cb;
+  --sky: #39bae6;
+  --sapphire: #59c2ff;
+  --blue: #59c2ff;
+  --lavender: #73b8ff;
+  --text: #bfbdb6;
+  --subtext1: #acb6bf;
+  --subtext0: #8a9199;
+  --overlay2: #6c7380;
+  --overlay1: #626a73;
+  --overlay0: #565b66;
+  --surface2: #3d4451;
+  --surface1: #2d3340;
+  --surface0: #1e232d;
+  --base: #131721;
+  --mantle: #0b0e14;
+  --crust: #07090d;
+  --agent-soft: color-mix(in srgb, var(--mauve) 15%, transparent);
+  --agent-border: color-mix(in srgb, var(--mauve) 35%, transparent);
+  --shadow-sm: 0 1px 2px 0 color-mix(in srgb, var(--crust) 30%, transparent);
+  --shadow-lg: 0 10px 15px -3px color-mix(in srgb, var(--crust) 50%, transparent), 0 4px 6px -4px color-mix(in srgb, var(--crust) 50%, transparent);
+  --shadow-2xl: 0 25px 50px -12px color-mix(in srgb, var(--crust) 70%, transparent);
+  --shadow-popover: 0 8px 24px color-mix(in srgb, var(--crust) 60%, transparent);
+  --glow-agent: 0 0 24px color-mix(in srgb, var(--mauve) 18%, transparent);
+  --glow-thinking: 0 0 28px color-mix(in srgb, var(--mauve) 12%, transparent);
+  --glow-assistant: 0 0 28px color-mix(in srgb, var(--mauve) 25%, transparent);
+  --glow-user: 0 0 28px color-mix(in srgb, var(--blue) 24%, transparent);
+  --glow-online: 0 0 10px color-mix(in srgb, var(--green) 80%, transparent);
+}
+
+/* Flexoki · Light / Dark */
+
+[data-palette="flexoki"][data-theme="light"], [data-palette="flexoki"]:not([data-theme]) {
+  --rosewater: #bc5215;
+  --flamingo: #a02f6f;
+  --pink: #a02f6f;
+  --mauve: #5e409d;
+  --red: #af3029;
+  --maroon: #af3029;
+  --peach: #bc5215;
+  --yellow: #ad8301;
+  --green: #66800b;
+  --teal: #24837b;
+  --sky: #24837b;
+  --sapphire: #205ea6;
+  --blue: #205ea6;
+  --lavender: #5e409d;
+  --text: #100f0f;
+  --subtext1: #575653;
+  --subtext0: #6f6e69;
+  --overlay2: #878580;
+  --overlay1: #9f9d96;
+  --overlay0: #b7b5ac;
+  --surface2: #cecdc3;
+  --surface1: #dad8ce;
+  --surface0: #e6e4d9;
+  --base: #fffcf0;
+  --mantle: #f2f0e5;
+  --crust: #e6e4d9;
+  --agent-soft: color-mix(in srgb, var(--mauve) 8%, transparent);
+  --agent-border: color-mix(in srgb, var(--mauve) 30%, transparent);
+  --shadow-sm: 0 1px 2px 0 color-mix(in srgb, var(--text) 5%, transparent);
+  --shadow-lg: 0 10px 15px -3px color-mix(in srgb, var(--text) 10%, transparent), 0 4px 6px -4px color-mix(in srgb, var(--text) 10%, transparent);
+  --shadow-2xl: 0 25px 50px -12px color-mix(in srgb, var(--text) 25%, transparent);
+  --shadow-popover: 0 8px 24px color-mix(in srgb, var(--text) 20%, transparent);
+  --glow-agent: 0 0 24px color-mix(in srgb, var(--mauve) 18%, transparent);
+  --glow-thinking: 0 0 28px color-mix(in srgb, var(--mauve) 12%, transparent);
+  --glow-assistant: 0 0 28px color-mix(in srgb, var(--mauve) 25%, transparent);
+  --glow-user: 0 0 28px color-mix(in srgb, var(--blue) 24%, transparent);
+  --glow-online: 0 0 10px color-mix(in srgb, var(--green) 80%, transparent);
+}
+
+[data-palette="flexoki"][data-theme="dark"] {
+  --rosewater: #da702c;
+  --flamingo: #ce5d97;
+  --pink: #ce5d97;
+  --mauve: #8b7ec8;
+  --red: #d76258;
+  --maroon: #d14d41;
+  --peach: #da702c;
+  --yellow: #d0a215;
+  --green: #879a39;
+  --teal: #3aa99f;
+  --sky: #3aa99f;
+  --sapphire: #4385be;
+  --blue: #4385be;
+  --lavender: #8b7ec8;
+  --text: #cecdc3;
+  --subtext1: #b7b5ac;
+  --subtext0: #9f9d96;
+  --overlay2: #878580;
+  --overlay1: #6f6e69;
+  --overlay0: #575653;
+  --surface2: #403e3c;
+  --surface1: #343331;
+  --surface0: #282726;
+  --base: #1c1b1a;
+  --mantle: #100f0f;
+  --crust: #0a0909;
+  --agent-soft: color-mix(in srgb, var(--mauve) 15%, transparent);
+  --agent-border: color-mix(in srgb, var(--mauve) 35%, transparent);
+  --shadow-sm: 0 1px 2px 0 color-mix(in srgb, var(--crust) 30%, transparent);
+  --shadow-lg: 0 10px 15px -3px color-mix(in srgb, var(--crust) 50%, transparent), 0 4px 6px -4px color-mix(in srgb, var(--crust) 50%, transparent);
+  --shadow-2xl: 0 25px 50px -12px color-mix(in srgb, var(--crust) 70%, transparent);
+  --shadow-popover: 0 8px 24px color-mix(in srgb, var(--crust) 60%, transparent);
+  --glow-agent: 0 0 24px color-mix(in srgb, var(--mauve) 18%, transparent);
+  --glow-thinking: 0 0 28px color-mix(in srgb, var(--mauve) 12%, transparent);
+  --glow-assistant: 0 0 28px color-mix(in srgb, var(--mauve) 25%, transparent);
+  --glow-user: 0 0 28px color-mix(in srgb, var(--blue) 24%, transparent);
+  --glow-online: 0 0 10px color-mix(in srgb, var(--green) 80%, transparent);
+}

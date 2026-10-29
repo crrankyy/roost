@@ -1,0 +1,20 @@
+<!-- @dsCard group="Lynx · Reports" height=150 subtitle="Hover or focus a number for its source" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>CitationPill — preview</title>
+<style>html,body{margin:0}body{background:var(--background);color:var(--foreground);font-family:var(--font-sans);padding:24px}</style>
+</head>
+<body>
+<div id="root" style="display:flex;justify-content:center;padding-top:64px"></div>
+<script>
+  var K = window.Lynx, h = React.createElement;
+  var cites = [
+    { label: 'Worker routing docs', type: 'Document', href: '#' },
+    { label: 'report-hub repository', type: 'GitHub repo', href: '#' },
+    { label: 'R2 pricing notes', type: 'Blog post', href: '#' }];
+  ReactDOM.createRoot(document.getElementById('root')).render(
+    h('p', { style: { fontSize: 14, lineHeight: '24px', maxWidth: 520, margin: 0 } }, 'Serving reports from R2 avoids a redeploy for every new report.',
+      h('span', { style: { marginLeft: 6, display: 'inline-flex', gap: 4 } }, cites.map(function (c, i) { return h(K.CitationPill, { key: i, citation: c, index: i }) }))));
+</script>
+</body>
+</html>

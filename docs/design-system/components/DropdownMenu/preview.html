@@ -1,0 +1,38 @@
+<!-- @dsCard group="Menus" height=470 subtitle="Open menu: items, checkbox, radio, disabled, destructive" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>DropdownMenu — preview</title>
+<style>html,body{margin:0}body{background:var(--background);color:var(--foreground);font-family:var(--font-sans);padding:24px}</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+  var K = window.Lynx, h = React.createElement, I = K.Icons;
+  function Demo() {
+    var a = React.useState(true), notify = a[0], setNotify = a[1]
+    var b = React.useState(false), archive = b[0], setArchive = b[1]
+    var c = React.useState('balanced'), mode = c[0], setMode = c[1]
+    React.useEffect(function () { var t = setTimeout(function () { var el = document.querySelector('[role=menu] [role=menuitem]'); if (el) el.focus() }, 80); return function () { clearTimeout(t) } }, [])
+    return h('div', { style: { display: 'flex', justifyContent: 'center' } },
+      h(K.DropdownMenu, { open: true, modal: false },
+        h(K.DropdownMenuTrigger, { asChild: true }, h(K.Button, { variant: 'outline' }, h(I.Inbox), 'Inbox agent', h(I.ChevronDown))),
+        h(K.DropdownMenuContent, { style: { width: 240 } },
+          h(K.DropdownMenuLabel, null, 'Inbox agent'),
+          h(K.DropdownMenuItem, null, h(I.Pause), 'Pause agent', h(K.DropdownMenuShortcut, null, '⌘P')),
+          h(K.DropdownMenuItem, null, h(I.FileText), 'View run log'),
+          h(K.DropdownMenuItem, { disabled: true }, h(I.Share2), 'Share agent'),
+          h(K.DropdownMenuSeparator),
+          h(K.DropdownMenuCheckboxItem, { checked: notify, onCheckedChange: setNotify }, 'Notify when done'),
+          h(K.DropdownMenuCheckboxItem, { checked: archive, onCheckedChange: setArchive }, 'Auto-archive newsletters'),
+          h(K.DropdownMenuSeparator),
+          h(K.DropdownMenuLabel, null, 'Speed'),
+          h(K.DropdownMenuRadioGroup, { value: mode, onValueChange: setMode },
+            h(K.DropdownMenuRadioItem, { value: 'fast' }, 'Fast'),
+            h(K.DropdownMenuRadioItem, { value: 'balanced' }, 'Balanced')),
+          h(K.DropdownMenuSeparator),
+          h(K.DropdownMenuItem, null, h(I.Trash2), 'Delete agent'))))
+  }
+  ReactDOM.createRoot(document.getElementById('root')).render(h(Demo));
+</script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!-- @dsCard height=288 -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>lynx-reports</title>
+<style>
+  html, body { margin:0; height:100%; }
+  body { background:var(--background); color:var(--foreground); font-family:var(--font-sans); overflow:hidden; }
+  .cover { position:relative; width:960px; height:288px; overflow:hidden; }
+  .art { position:absolute; top:0; left:480px; width:480px; height:288px; overflow:hidden; }
+  .art svg { display:block; width:480px; height:288px; }
+  .agent { fill:var(--agent); }
+  .user { fill:var(--blue); }
+  .ink { fill:var(--foreground); }
+  .tint { fill:var(--lavender); }
+  .hue { fill:var(--peach); }
+  .shell { rx:var(--radius-2xl); }
+  .pill { rx:var(--space-2); }  /* half the 16px short side: a true pill */
+  .cut { fill:var(--background); }
+  .think { fill:var(--agent); }
+  .words { position:absolute; left:var(--space-6); bottom:var(--space-6); max-width:440px; }
+  .name { margin:0; font-size:120px; line-height:.92; font-weight:600; letter-spacing:-.035em; color:var(--foreground); }
+  .tag { margin:var(--space-2) 0 0 6px; font-size:14px; line-height:20px; color:var(--muted-foreground); }
+</style>
+</head>
+<body>
+<div class="cover">
+<div class="art" aria-hidden="true">
+<svg viewBox="0 0 480 288" width="480" height="288">
+<!--
+  blocks      agent 144×232 bled off the top (Catppuccin mauve, the agent: the identity) · blue 112×168 (the person) · foreground 168×248 bleeding off the right edge (ink: Lynx's primary action is ink, not colour) · lavender 112×48 tint · peach 48×16 pill once (a destination hue, only ever on hover) — ≈35% of 960×288
+  arrangement one tall agent slab with satellites, staggered like MenuBar items mid-flip; space-4 gutters
+  pattern     "soft, friendly, large radii" row, made literal: Lynx's thinking dots — a 5×7 grid of 8px discs (radius-full) at space-6 pitch cut out of the ink block, three of them lit in agent like ThinkingIndicator
+  scales      radius-2xl on every block, radius-full on discs, space-2 rx (half its height) on the pill; space-2 disc, space-4 gutter, space-6 pitch
+-->
+  <rect class="agent shell" x="24" y="-16" width="144" height="232"/>
+  <rect class="user shell" x="184" y="56" width="112" height="168"/>
+  <rect class="tint shell" x="184" y="240" width="112" height="48"/>
+  <rect class="hue pill" x="64" y="236" width="48" height="16"/>
+  <rect class="ink shell" x="312" y="24" width="184" height="248"/>
+  <g>
+    <circle class="cut" cx="340" cy="52" r="4"/><circle class="cut" cx="364" cy="52" r="4"/><circle class="cut" cx="388" cy="52" r="4"/><circle class="cut" cx="412" cy="52" r="4"/><circle class="cut" cx="436" cy="52" r="4"/>
+    <circle class="cut" cx="340" cy="76" r="4"/><circle class="cut" cx="364" cy="76" r="4"/><circle class="cut" cx="388" cy="76" r="4"/><circle class="cut" cx="412" cy="76" r="4"/><circle class="cut" cx="436" cy="76" r="4"/>
+    <circle class="cut" cx="340" cy="100" r="4"/><circle class="cut" cx="364" cy="100" r="4"/><circle class="cut" cx="388" cy="100" r="4"/><circle class="cut" cx="412" cy="100" r="4"/><circle class="cut" cx="436" cy="100" r="4"/>
+    <circle class="cut" cx="340" cy="124" r="4"/><circle class="think" cx="364" cy="124" r="4"/><circle class="think" cx="388" cy="118" r="4"/><circle class="think" cx="412" cy="124" r="4"/><circle class="cut" cx="436" cy="124" r="4"/>
+    <circle class="cut" cx="340" cy="148" r="4"/><circle class="cut" cx="364" cy="148" r="4"/><circle class="cut" cx="388" cy="148" r="4"/><circle class="cut" cx="412" cy="148" r="4"/><circle class="cut" cx="436" cy="148" r="4"/>
+    <circle class="cut" cx="340" cy="172" r="4"/><circle class="cut" cx="364" cy="172" r="4"/><circle class="cut" cx="388" cy="172" r="4"/><circle class="cut" cx="412" cy="172" r="4"/><circle class="cut" cx="436" cy="172" r="4"/>
+    <circle class="cut" cx="340" cy="196" r="4"/><circle class="cut" cx="364" cy="196" r="4"/><circle class="cut" cx="388" cy="196" r="4"/><circle class="cut" cx="412" cy="196" r="4"/><circle class="cut" cx="436" cy="196" r="4"/>
+  </g>
+</svg>
+</div>
+<div class="words">
+  <h1 class="name">lynx-reports</h1>
+  <p class="tag">Quiet surfaces for reading the reports Claude Code writes.</p>
+</div>
+</div>
+</body>
+</html>

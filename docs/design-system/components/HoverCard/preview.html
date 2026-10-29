@@ -1,0 +1,25 @@
+<!-- @dsCard group="Overlays" height=220 subtitle="Open hover card: agent profile on a mention" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>HoverCard — preview</title>
+<style>html,body{margin:0}body{background:var(--background);color:var(--foreground);font-family:var(--font-sans);padding:24px}</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+  var K = window.Lynx, h = React.createElement, I = K.Icons;
+  function Tile(Icon) { return h('span', { style: { display: 'flex', width: 32, height: 32, flex: 'none', alignItems: 'center', justifyContent: 'center', borderRadius: 12, border: '1px solid var(--agent-border)', background: 'var(--agent-soft)', color: 'var(--agent)' } }, h(Icon, { size: 16 })) }
+  ReactDOM.createRoot(document.getElementById('root')).render(
+    h('p', { style: { fontSize: 14, margin: 0, color: 'var(--muted-foreground)' } }, 'Handed off to ',
+      h(K.HoverCard, { open: true },
+        h(K.HoverCardTrigger, { href: '#', style: { color: 'var(--agent)', fontWeight: 500, textDecoration: 'underline', textUnderlineOffset: 4 } }, '@research-agent'),
+        h(K.HoverCardContent, { align: 'start', style: { width: 280 } },
+          h('div', { style: { display: 'flex', gap: 12 } }, Tile(I.Brain),
+            h('div', { style: { display: 'grid', gap: 4 } },
+              h('div', { style: { fontSize: 14, fontWeight: 600, color: 'var(--foreground)' } }, 'Research agent'),
+              h('div', { style: { fontSize: 12, color: 'var(--muted-foreground)', lineHeight: 1.5 } }, 'Finds, reads and cites sources. Writes a summary with citations when the run ends.'),
+              h('div', { style: { display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--muted-foreground)', marginTop: 4 } }, h(I.Clock, { size: 12 }), '142 runs · last active 4 min ago'))))),
+      ' for the source review.'));
+</script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+<!-- @dsCard group="Lynx · Reports" height=120 subtitle="32 · 48 · 64px, in flamingo, mauve and teal" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>LiveAvatar — preview</title>
+<style>html,body{margin:0}body{background:var(--background);color:var(--foreground);font-family:var(--font-sans);padding:24px}</style>
+</head>
+<body>
+<div id="root" style="display:flex;align-items:center;justify-content:center;gap:32px"></div>
+<script>
+  var K = window.Lynx, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment, null,
+    h(K.LiveAvatar, { size: 32 }),
+    h(K.LiveAvatar, { size: 48, hue: 'mauve', label: 'Report Hub' }),
+    h(K.LiveAvatar, { size: 64, hue: 'teal', label: 'Publisher' })));
+</script>
+</body>
+</html>

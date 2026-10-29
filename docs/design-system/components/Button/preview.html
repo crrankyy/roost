@@ -1,0 +1,28 @@
+<!-- @dsCard group="Actions" height=150 subtitle="default · outline · secondary · ghost · destructive · link; sizes" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Button — preview</title>
+<style>html,body{margin:0}body{background:var(--background);color:var(--foreground);font-family:var(--font-sans);padding:24px}
+.row{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:16px}</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+  var K = window.Lynx, h = React.createElement, I = K.Icons;
+  ReactDOM.createRoot(document.getElementById('root')).render(h('div', null,
+    h('div', { className: 'row' },
+      h(K.Button, null, 'Run agent'),
+      h(K.Button, { variant: 'outline' }, h(I.FilePlus2), 'Attach file'),
+      h(K.Button, { variant: 'secondary' }, 'Save draft'),
+      h(K.Button, { variant: 'ghost' }, 'Cancel'),
+      h(K.Button, { variant: 'destructive' }, 'Stop agent'),
+      h(K.Button, { variant: 'link' }, 'View logs')),
+    h('div', { className: 'row' },
+      h(K.Button, { size: 'sm' }, 'Small'),
+      h(K.Button, { size: 'lg' }, 'Large'),
+      h(K.Button, { size: 'icon', 'aria-label': 'Send message' }, h(I.ArrowUp)),
+      h(K.Button, { size: 'icon', variant: 'outline', 'aria-label': 'Voice input' }, h(I.Mic)),
+      h(K.Button, { disabled: true }, 'Disabled'))));
+</script>
+</body>
+</html>

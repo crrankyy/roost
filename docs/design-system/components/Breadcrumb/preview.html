@@ -1,0 +1,31 @@
+<!-- @dsCard group="Navigation" height=120 subtitle="Trail to a run; collapsed trail with ellipsis" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Breadcrumb — preview</title>
+<style>html,body{margin:0}body{background:var(--background);color:var(--foreground);font-family:var(--font-sans);padding:24px}</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+  var K = window.Lynx, h = React.createElement, I = K.Icons;
+  var B = K
+  function Trail(items) { return h(B.Breadcrumb, null, h(B.BreadcrumbList, null, items)) }
+  ReactDOM.createRoot(document.getElementById('root')).render(
+    h('div', { style: { display: 'grid', gap: 20 } },
+      Trail([
+        h(B.BreadcrumbItem, { key: 1 }, h(B.BreadcrumbLink, { href: '#' }, 'Agents')),
+        h(B.BreadcrumbSeparator, { key: 2 }),
+        h(B.BreadcrumbItem, { key: 3 }, h(B.BreadcrumbLink, { href: '#' }, 'Research agent')),
+        h(B.BreadcrumbSeparator, { key: 4 }),
+        h(B.BreadcrumbItem, { key: 5 }, h(B.BreadcrumbPage, null, 'Run 142'))]),
+      Trail([
+        h(B.BreadcrumbItem, { key: 1 }, h(B.BreadcrumbLink, { href: '#' }, 'Workspace')),
+        h(B.BreadcrumbSeparator, { key: 2 }),
+        h(B.BreadcrumbItem, { key: 3 }, h(B.BreadcrumbEllipsis)),
+        h(B.BreadcrumbSeparator, { key: 4 }),
+        h(B.BreadcrumbItem, { key: 5 }, h(B.BreadcrumbLink, { href: '#' }, 'Sources')),
+        h(B.BreadcrumbSeparator, { key: 6 }),
+        h(B.BreadcrumbItem, { key: 7 }, h(B.BreadcrumbPage, null, 'Latency guidance'))])));
+</script>
+</body>
+</html>

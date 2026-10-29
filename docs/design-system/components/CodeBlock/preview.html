@@ -1,0 +1,14 @@
+<!-- @dsCard group="Report · Content" height=280 subtitle="filename caption, a diff, copy button with reports.js" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>CodeBlock — preview</title>
+<link rel="stylesheet" href="../reports.css"><style>body.lr-report{padding:24px;min-height:0}</style>
+</head>
+<body class="lr-report">
+<figure class="lr-code">
+  <figcaption><span>worker/src/publish.ts</span></figcaption>
+<pre><code><span class="lr-del">const token = req.headers.get('cf-access-client-secret')</span><span class="lr-del">log.debug('publish', { token })</span><span class="lr-add">const token = req.headers.get('cf-access-jwt-assertion')</span><span class="lr-add">if (!token) return new Response('Forbidden', { status: 403 })</span>await verify(token, env.POLICY_AUD)</code></pre>
+</figure>
+<script src="../reports.js"></script>
+</body>
+</html>

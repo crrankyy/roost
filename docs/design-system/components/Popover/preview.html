@@ -1,0 +1,30 @@
+<!-- @dsCard group="Overlays" height=320 subtitle="Open popover: model and budget for an agent" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Popover — preview</title>
+<style>html,body{margin:0}body{background:var(--background);color:var(--foreground);font-family:var(--font-sans);padding:24px}</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+  var K = window.Lynx, h = React.createElement, I = K.Icons;
+  function Line(label, value) {
+    return h('div', { style: { display: 'flex', justifyContent: 'space-between', fontSize: 13, padding: '6px 0', borderTop: '1px solid color-mix(in srgb, var(--border) 60%, transparent)' } },
+      h('span', { style: { color: 'var(--muted-foreground)' } }, label), h('span', { style: { fontWeight: 500 } }, value))
+  }
+  ReactDOM.createRoot(document.getElementById('root')).render(
+    h('div', { style: { display: 'flex', justifyContent: 'center' } },
+      h(K.Popover, { open: true },
+        h(K.PopoverTrigger, { asChild: true }, h(K.Button, { variant: 'outline' }, h(I.Settings), 'Agent settings')),
+        h(K.PopoverContent, { onOpenAutoFocus: function (e) { e.preventDefault() }, align: 'center' },
+          h('div', { style: { fontSize: 14, fontWeight: 600 } }, 'Research agent'),
+          h('p', { style: { fontSize: 12, color: 'var(--muted-foreground)', margin: '4px 0 12px' } }, 'Applies to new runs. Current runs keep their settings.'),
+          Line('Model', 'Claude Sonnet'),
+          Line('Tools', '4 enabled'),
+          Line('Step budget', '20 steps'),
+          h('div', { style: { display: 'flex', gap: 8, marginTop: 12 } },
+            h(K.Button, { size: 'sm', variant: 'ghost', style: { flex: 1 } }, 'Reset'),
+            h(K.Button, { size: 'sm', style: { flex: 1 } }, 'Save'))))));
+</script>
+</body>
+</html>

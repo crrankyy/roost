@@ -1,0 +1,88 @@
+<!-- @dsCard group="Report · Layout" height=1500 width=1240 subtitle="a complete report: shell, header, stats, findings, evidence, steps, sources" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>ReportExample — preview</title>
+<link rel="stylesheet" href="../reports.css">
+</head>
+<body class="lr-report">
+<div class="lr-shell">
+  <aside class="lr-nav">
+    <div class="lr-panel"><div class="lr-brand"><span class="live-avatar" style="--size: 36px; --avatar-hue: var(--flamingo)" aria-hidden="true"><span class="live-avatar-ring"></span><span class="live-avatar-orb"></span></span><div><div class="lr-brand-name">Lynx</div><div class="lr-brand-sub">Memory research</div></div></div></div>
+    <nav class="lr-panel" aria-label="Sections"><ul class="lr-toc">
+      <li><a class="lr-toc-link lynx-bloom" href="#summary"><svg class="lr-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg>Summary</a></li>
+      <li><a class="lr-toc-link lynx-bloom" href="#named"><svg class="lr-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></svg>Named sources</a></li>
+      <li><a class="lr-toc-link lynx-bloom" href="#rules"><svg class="lr-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></svg>Design rules</a></li>
+      <li><a class="lr-toc-link lynx-bloom" href="#design"><svg class="lr-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/></svg>Recommended design</a></li>
+      <li><a class="lr-toc-link lynx-bloom" href="#order"><svg class="lr-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Build order</a></li>
+      <li><a class="lr-toc-link lynx-bloom" href="#sources"><svg class="lr-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>Sources</a></li>
+    </ul></nav>
+    <div class="lr-panel lr-nav-foot"><span>28 Oct 2026</span><button class="lr-icon-btn lynx-halo lynx-halo-moon" type="button" data-lr-theme-toggle aria-label="Switch theme"><svg class="lr-icon lr-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg><svg class="lr-icon lr-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg></button></div>
+  </aside>
+  <main class="lr-main">
+    <section class="lr-section" id="summary">
+      <header class="lr-header">
+        <div class="lr-eyebrow"><span class="lr-badge" data-kind="research">Research</span><span>Mastra, Honcho, ReasoningBank and about 40 links</span></div>
+        <h1 class="lr-title">How Lynx should remember</h1>
+        <p class="lr-lead">Don’t adopt a memory framework. The plan’s direction holds: keep every message, compact older turns, search history, keep a list of facts. The research changes six parts of it, and every infrastructure change it needs is free.</p>
+        <div class="lr-meta"><span>Lynx › memory</span><span>28 Oct 2026</span><span>v2</span></div>
+      </header>
+      <div class="lr-grid lr-grid-4">
+        <div class="lr-panel lr-stat"><div class="lr-stat-value">53%</div><div class="lr-stat-label">of 20 project rules lost after three rounds of summarising</div><div class="lr-stat-src">Facts as First Class Objects</div></div>
+        <div class="lr-panel lr-stat"><div class="lr-stat-value">94.87%</div><div class="lr-stat-label">on LongMemEval with an observation log</div><div class="lr-stat-src">Mastra, vendor-reported</div></div>
+        <div class="lr-panel lr-stat"><div class="lr-stat-value">0</div><div class="lr-stat-label">extra model calls per turn</div><div class="lr-stat-src">Recommended design</div></div>
+        <div class="lr-panel lr-stat"><div class="lr-stat-value">~9M</div><div class="lr-stat-label">embedding tokens a day inside the free allowance</div><div class="lr-stat-src">Workers AI pricing</div></div>
+      </div>
+      <div class="lr-grid lr-grid-2">
+        <div class="lr-panel lr-finding"><span class="lr-num">1</span><div><h3>Facts live in their own table</h3><p>With keys and versions. Summaries never hold facts.</p></div></div>
+        <div class="lr-panel lr-finding"><span class="lr-num">2</span><div><h3>Background work runs in batches</h3><p>One cheap call every few thousand tokens, not one after every turn.</p></div></div>
+      </div>
+    </section>
+    <section class="lr-section" id="named">
+      <div class="lr-section-head"><h2>The named sources</h2><p>What each one does and what to take from it.</p></div>
+      <article class="lr-panel lr-subject">
+        <div class="lr-subject-top"><div><h3>Mastra memory</h3><div class="lr-subject-meta">TypeScript · Apache-2.0 · four kinds of memory</div></div><span class="lr-badge" data-tone="accent">Borrow the design</span></div>
+        <div class="lr-table-wrap"><table class="lr-table"><thead><tr><th>Kind</th><th>What it does</th></tr></thead><tbody>
+          <tr><td>Message history</td><td>The last N messages.</td></tr>
+          <tr><td>Semantic recall</td><td>Embeds every message and retrieves the top matches each turn.</td></tr>
+          <tr><td>Observational Memory</td><td>Background agents turn old messages into a dense, dated log.</td></tr>
+        </tbody></table></div>
+        <div class="lr-takeaway"><div class="lr-label">For Lynx</div><ul><li>Copy the observer and reflector design, scaled down.</li><li>Don’t install the package; it would replace the chat engine.</li></ul></div>
+      </article>
+    </section>
+    <section class="lr-section" id="rules">
+      <div class="lr-section-head"><h2>Design rules</h2><p>Each with the evidence behind it.</p></div>
+      <div class="lr-panel lr-items">
+        <details class="lr-item" open><summary><span class="lr-num">1</span>Facts are records, not summary text</summary><div class="lr-item-body"><p>Three rounds of compaction lost 53% of 20 project rules.</p><div class="lr-src">Facts as First Class Objects</div></div></details>
+        <details class="lr-item"><summary><span class="lr-num">2</span>Put what changes every turn at the end of the prompt</summary><div class="lr-item-body"><p>A change invalidates the provider’s cache for everything after it.</p><div class="lr-src">Anthropic prompt caching docs</div></div></details>
+      </div>
+    </section>
+    <section class="lr-section" id="design">
+      <div class="lr-section-head"><h2>Recommended design</h2><p>What the model sees, in prompt order.</p></div>
+      <div class="lr-panel lr-card">
+        <div class="lr-stack" role="list">
+          <div class="lr-layer" role="listitem"><span class="lr-num">1</span><div><div class="lr-layer-name">Instructions</div><div class="lr-layer-sub">Change rarely</div></div><div><div class="lr-bar"><span style="width:19%"></span></div><div class="lr-bar-label">~1.5k</div></div></div>
+          <div class="lr-layer" role="listitem"><span class="lr-num">2</span><div><div class="lr-layer-name">Recent turns, word for word</div><div class="lr-layer-sub">Appended each turn</div></div><div><div class="lr-bar"><span style="width:100%"></span></div><div class="lr-bar-label">~8k</div></div></div>
+          <div class="lr-divider">cached above · changes every turn below</div>
+          <div class="lr-layer" data-volatile role="listitem"><span class="lr-num">3</span><div><div class="lr-layer-name">Date, time and strong search matches</div><div class="lr-layer-sub">Only when the top match clearly wins</div></div><div><div class="lr-bar"><span style="width:38%"></span></div><div class="lr-bar-label">~3k</div></div></div>
+        </div>
+      </div>
+      <div class="lr-callout"><svg class="lr-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg><p>At about 50 turns a day: 4–6 observer calls plus 1 nightly call.</p></div>
+    </section>
+    <section class="lr-section" id="order">
+      <div class="lr-section-head"><h2>Build order</h2><p>Start with the test, so every later step can be measured.</p></div>
+      <div class="lr-panel lr-card"><ol class="lr-steps">
+        <li class="lr-step"><span class="lr-num">0</span><div><h3>Eval first</h3><p>A scripted multi-day conversation with planted facts.</p></div></li>
+        <li class="lr-step"><span class="lr-num">1</span><div><h3>The server builds the context</h3><p>Observer batches, the observation log and the facts table.</p></div></li>
+        <li class="lr-step"><span class="lr-num">2</span><div><h3>Full-text search</h3><p>Strong-match results at the end of the prompt.</p></div></li>
+      </ol></div>
+    </section>
+    <section class="lr-section" id="sources">
+      <div class="lr-section-head"><h2>Sources</h2></div>
+      <div class="lr-panel lr-card lr-sources"><h3>Named</h3><ul><li><a href="#">Mastra memory overview</a></li><li><a href="#">plastic-labs/honcho</a></li></ul><h3>Memory design</h3><ul><li><a href="#">MemArchitect</a> · <a href="#">Facts as First Class Objects</a></li></ul></div>
+    </section>
+    <footer class="lr-footer">Results are as reported by each source; most are vendor- or author-reported.</footer>
+  </main>
+</div>
+<script src="../reports.js"></script>
+</body>
+</html>

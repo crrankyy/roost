@@ -1,0 +1,40 @@
+<!-- @dsCard group="Menus" height=340 subtitle="shadcn Menubar with the Run menu open" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>AppMenubar — preview</title>
+<style>html,body{margin:0}body{background:var(--background);color:var(--foreground);font-family:var(--font-sans);padding:24px}</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+  var K = window.Lynx, h = React.createElement, I = K.Icons;
+  function Demo() {
+    var a = React.useState(true), stream = a[0], setStream = a[1]
+    var b = React.useState(false), tools = b[0], setTools = b[1]
+    React.useEffect(function () { var t = setTimeout(function () { var el = document.querySelector('[role=menu] [role=menuitem]'); if (el) el.focus() }, 80); return function () { clearTimeout(t) } }, [])
+    return h(K.AppMenubar, { defaultValue: 'run', style: { width: 'max-content' } },
+      h(K.MenubarMenu, { value: 'agent' },
+        h(K.MenubarTrigger, null, 'Agent'),
+        h(K.MenubarContent, null, h(K.MenubarItem, null, 'New agent'))),
+      h(K.MenubarMenu, { value: 'run' },
+        h(K.MenubarTrigger, null, 'Run'),
+        h(K.MenubarContent, null,
+          h(K.MenubarItem, null, h(I.Play), 'Start run', h(K.MenubarShortcut, null, '⌘R')),
+          h(K.MenubarItem, null, h(I.Pause), 'Pause', h(K.MenubarShortcut, null, '⌘.')),
+          h(K.MenubarItem, { disabled: true }, h(I.RotateCcw), 'Retry last step'),
+          h(K.MenubarSeparator),
+          h(K.MenubarCheckboxItem, { checked: stream, onCheckedChange: setStream }, 'Stream output'),
+          h(K.MenubarCheckboxItem, { checked: tools, onCheckedChange: setTools }, 'Show tool calls'),
+          h(K.MenubarSeparator),
+          h(K.MenubarItem, null, h(I.X), 'Clear context'))),
+      h(K.MenubarMenu, { value: 'view' },
+        h(K.MenubarTrigger, null, 'View'),
+        h(K.MenubarContent, null, h(K.MenubarItem, null, 'Sources'))),
+      h(K.MenubarMenu, { value: 'help' },
+        h(K.MenubarTrigger, null, 'Help'),
+        h(K.MenubarContent, null, h(K.MenubarItem, null, 'Shortcuts'))))
+  }
+  ReactDOM.createRoot(document.getElementById('root')).render(h(Demo));
+</script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+<!-- @dsCard group="Overlays" height=150 subtitle="Open tooltips on composer actions, top and bottom" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Tooltip — preview</title>
+<style>html,body{margin:0}body{background:var(--background);color:var(--foreground);font-family:var(--font-sans);padding:24px}</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+  var K = window.Lynx, h = React.createElement, I = K.Icons;
+  function Tip(label, Icon, side, open) {
+    return h(K.Tooltip, { open: open },
+      h(K.TooltipTrigger, { asChild: true }, h(K.Button, { variant: 'outline', size: 'icon', 'aria-label': label }, h(Icon))),
+      h(K.TooltipContent, { side: side }, label))
+  }
+  ReactDOM.createRoot(document.getElementById('root')).render(
+    h(K.TooltipProvider, { delayDuration: 0 },
+      h('div', { style: { display: 'flex', gap: 12, justifyContent: 'center', paddingTop: 34 } },
+        Tip('Attach file', I.FilePlus2, 'top', true),
+        Tip('Voice input', I.Mic, 'bottom', true),
+        Tip('Regenerate response', I.RotateCcw, 'top', undefined))));
+</script>
+</body>
+</html>

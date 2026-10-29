@@ -1,0 +1,24 @@
+<!-- @dsCard group="Feedback" height=320 subtitle="Run progress at 12, 64 and 100 percent · indeterminate (no value)" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Progress — preview</title>
+<style>html,body{margin:0}body{background:var(--background);color:var(--foreground);font-family:var(--font-sans);padding:24px}</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+  var K = window.Lynx, h = React.createElement;
+  function Row(props) {
+    return h('div', { style: { marginBottom: 18, maxWidth: 460 } },
+      h('div', { style: { display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 8 } },
+        h('span', null, props.label), h('span', { style: { color: 'var(--muted-foreground)', fontFamily: 'var(--font-mono)', fontSize: 12 } }, props.value == null ? 'working…' : props.value + '%')),
+      h(K.Progress, { value: props.value, 'aria-label': props.label }));
+  }
+  ReactDOM.createRoot(document.getElementById('root')).render(h('div', null,
+    h(Row, { label: 'Calendar agent · syncing', value: 12 }),
+    h(Row, { label: 'Research agent · reading sources', value: 64 }),
+    h(Row, { label: 'Inbox agent · triage complete', value: 100 }),
+    h(Row, { label: 'Coding agent · indexing the repository', value: null })));
+</script>
+</body>
+</html>

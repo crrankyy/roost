@@ -1,0 +1,24 @@
+<!-- @dsCard group="Forms" height=200 subtitle="permission list: checked · unchecked · disabled" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Checkbox — preview</title>
+<style>html,body{margin:0}body{background:var(--background);color:var(--foreground);font-family:var(--font-sans);padding:24px}
+.row{display:flex;flex-wrap:wrap;align-items:center;gap:12px}.col{display:flex;flex-direction:column;gap:8px}.g2{display:grid;grid-template-columns:1fr 1fr;gap:20px 24px}.cap{font-size:12px;color:var(--muted-foreground)}.shell{border:1px solid color-mix(in srgb,var(--border) 50%,transparent);border-radius:var(--radius-2xl);background:color-mix(in srgb,var(--card) 75%,transparent);box-shadow:var(--shadow-lg)}</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+  var K = window.Lynx, h = React.createElement, I = K.Icons;
+  function Row(id, label, hint, p) { return h('div', { className: 'row', style: { alignItems: 'flex-start', gap: 10 } },
+    h(K.Checkbox, Object.assign({ id: id, style: { marginTop: 2 } }, p)),
+    h('div', { className: 'col', style: { gap: 4 } }, h(K.Label, { htmlFor: id }, label), h('span', { className: 'cap' }, hint))) }
+  ReactDOM.createRoot(document.getElementById('root')).render(h('div', { className: 'g2' },
+    Row('c1', 'Read my inbox', 'Triage and summarize new mail.', { defaultChecked: true }),
+    Row('c2', 'Send email on my behalf', 'Drafts always wait for approval.', {}),
+    Row('c3', 'Access my calendar', 'See free time and suggest slots.', { defaultChecked: true }),
+    Row('c4', 'Browse the web', 'Fetch pages cited as sources.', {}),
+    Row('c5', 'Delete files', 'Blocked by your workspace policy.', { disabled: true }),
+    Row('c6', 'Use workspace memory', 'Required for every agent.', { disabled: true, defaultChecked: true })));
+</script>
+</body>
+</html>

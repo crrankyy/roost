@@ -1,0 +1,18 @@
+<!-- @dsCard group="Data display" height=160 subtitle="single keys, groups, inline in a hint" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Kbd — preview</title>
+<style>html,body{margin:0}body{background:var(--background);color:var(--foreground);font-family:var(--font-sans);padding:24px}</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+  var K = window.Lynx, h = React.createElement, I = K.Icons;
+  var row = { display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, color: 'var(--muted-foreground)', marginBottom: 14 };
+  ReactDOM.createRoot(document.getElementById('root')).render(h('div', null,
+    h('div', { style: row }, 'Open the command bar', h(K.KbdGroup, null, h(K.Kbd, null, h(I.Command)), h(K.Kbd, null, 'K'))),
+    h('div', { style: row }, 'Send to agent', h(K.Kbd, null, 'Enter'), 'new line', h(K.KbdGroup, null, h(K.Kbd, null, 'Shift'), h(K.Kbd, null, 'Enter'))),
+    h('div', { style: row }, 'Stop the run', h(K.Kbd, null, 'Esc'))));
+</script>
+</body>
+</html>

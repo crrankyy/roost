@@ -1,0 +1,24 @@
+<!-- @dsCard group="Navigation" height=100 subtitle="Run history pages; current page in agent tint" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Pagination — preview</title>
+<style>html,body{margin:0}body{background:var(--background);color:var(--foreground);font-family:var(--font-sans);padding:24px}</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+  var K = window.Lynx, h = React.createElement, I = K.Icons;
+  function Demo() {
+    var s = React.useState(2), page = s[0], setPage = s[1]
+    function L(n) { return h(K.PaginationItem, { key: n }, h(K.PaginationLink, { href: '#', isActive: page === n, onClick: function (e) { e.preventDefault(); setPage(n) } }, n)) }
+    return h(K.Pagination, null, h(K.PaginationContent, null,
+      h(K.PaginationItem, null, h(K.PaginationPrevious, { href: '#', onClick: function (e) { e.preventDefault(); setPage(Math.max(1, page - 1)) } })),
+      L(1), L(2), L(3),
+      h(K.PaginationItem, null, h(K.PaginationEllipsis)),
+      L(12),
+      h(K.PaginationItem, null, h(K.PaginationNext, { href: '#', onClick: function (e) { e.preventDefault(); setPage(Math.min(12, page + 1)) } }))))
+  }
+  ReactDOM.createRoot(document.getElementById('root')).render(h(Demo));
+</script>
+</body>
+</html>

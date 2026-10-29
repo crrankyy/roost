@@ -1,0 +1,30 @@
+<!-- @dsCard group="Overlays" height=420 subtitle="Open bottom drawer: quick actions for the inbox agent" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Drawer — preview</title>
+<style>html,body{margin:0}body{background:var(--background);color:var(--foreground);font-family:var(--font-sans);padding:24px}</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+  var K = window.Lynx, h = React.createElement, I = K.Icons;
+  function Demo() {
+    var s = React.useState(true), open = s[0], setOpen = s[1]
+    return h(K.Drawer, { open: open, onOpenChange: setOpen, shouldScaleBackground: false },
+      h(K.DrawerTrigger, { asChild: true }, h(K.Button, { variant: 'outline' }, 'Inbox actions')),
+      h(K.DrawerContent, null,
+        h('div', { style: { maxWidth: 420, width: '100%', margin: '0 auto' } },
+          h(K.DrawerHeader, null,
+            h(K.DrawerTitle, null, 'Inbox agent'),
+            h(K.DrawerDescription, null, '18 new messages triaged since this morning. 3 need your reply.')),
+          h('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, padding: '0 16px' } },
+            h(K.Button, { variant: 'outline' }, h(I.Inbox), 'Open inbox'),
+            h(K.Button, { variant: 'outline' }, h(I.FileText), 'Draft replies')),
+          h(K.DrawerFooter, null,
+            h(K.Button, null, 'Summarize unread'),
+            h(K.DrawerClose, { asChild: true }, h(K.Button, { variant: 'ghost' }, 'Close'))))))
+  }
+  ReactDOM.createRoot(document.getElementById('root')).render(h(Demo));
+</script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<!-- @dsCard group="Overlays" height=460 subtitle="Open right sheet: run details for an agent" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Sheet — preview</title>
+<style>html,body{margin:0}body{background:var(--background);color:var(--foreground);font-family:var(--font-sans);padding:24px}</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+  var K = window.Lynx, h = React.createElement, I = K.Icons;
+  function Tile(Icon) { return h('span', { style: { display: 'flex', width: 32, height: 32, flex: 'none', alignItems: 'center', justifyContent: 'center', borderRadius: 12, border: '1px solid var(--agent-border)', background: 'var(--agent-soft)', color: 'var(--agent)' } }, h(Icon, { size: 16 })) }
+  function Step(Icon, label, state) {
+    return h('div', { style: { display: 'flex', alignItems: 'center', gap: 10, fontSize: 13 } },
+      h('span', { style: { color: state === 'done' ? 'var(--agent)' : 'var(--muted-foreground)', display: 'flex' } }, h(Icon, { size: 14 })),
+      h('span', { style: { flex: 1, color: state === 'done' ? 'var(--foreground)' : 'var(--muted-foreground)' } }, label))
+  }
+  function Demo() {
+    var s = React.useState(true), open = s[0], setOpen = s[1]
+    return h(K.Sheet, { open: open, onOpenChange: setOpen },
+      h(K.SheetTrigger, { asChild: true }, h(K.Button, { variant: 'outline' }, 'Run details')),
+      h(K.SheetContent, { onOpenAutoFocus: function (e) { e.preventDefault() }, side: 'right' },
+        h(K.SheetHeader, null,
+          h('div', { style: { display: 'flex', alignItems: 'center', gap: 10 } }, Tile(I.Brain), h(K.SheetTitle, null, 'Research agent · run 142')),
+          h(K.SheetDescription, null, 'Started 10:42 AM with 4 tools. Reviewing sources on agent latency.')),
+        h('div', { style: { display: 'grid', gap: 12, padding: '20px 0' } },
+          Step(I.Check, 'Collected 12 sources', 'done'),
+          Step(I.Check, 'Compared response latency trends', 'done'),
+          Step(I.CircleDot, 'Drafting the summary', 'live'),
+          Step(I.Clock, 'Send digest to inbox agent', 'todo')),
+        h(K.SheetFooter, null,
+          h(K.Button, { variant: 'outline' }, h(I.Pause), 'Pause'),
+          h(K.Button, null, 'Open run log'))))
+  }
+  ReactDOM.createRoot(document.getElementById('root')).render(h(Demo));
+</script>
+</body>
+</html>

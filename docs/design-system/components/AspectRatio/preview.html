@@ -1,0 +1,21 @@
+<!-- @dsCard group="Layout" height=250 subtitle="16:9 and 1:1 frames" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>AspectRatio — preview</title>
+<style>html,body{margin:0}body{background:var(--background);color:var(--foreground);font-family:var(--font-sans);padding:24px}</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+  var K = window.Lynx, h = React.createElement, I = K.Icons;
+  function frame(label, icon) {
+    return h('div', { style: { width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8,
+      background: 'var(--agent-soft)', border: '1px solid var(--agent-border)', borderRadius: 'var(--radius-2xl)', color: 'var(--agent)', boxSizing: 'border-box' } },
+      h(icon, { size: 20 }), h('span', { style: { fontSize: 12, color: 'var(--muted-foreground)' } }, label));
+  }
+  ReactDOM.createRoot(document.getElementById('root')).render(h('div', { style: { display: 'flex', gap: 24, alignItems: 'flex-start' } },
+    h('div', { style: { width: 360 } }, h(K.AspectRatio, { ratio: 16 / 9 }, frame('Run replay · 16:9', I.Play))),
+    h('div', { style: { width: 140 } }, h(K.AspectRatio, { ratio: 1 }, frame('Avatar · 1:1', I.Bot)))));
+</script>
+</body>
+</html>

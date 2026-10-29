@@ -1,0 +1,34 @@
+<!-- @dsCard group="Overlays" height=420 subtitle="Open modal: frosted shell, permission rows, footer actions" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Dialog — preview</title>
+<style>html,body{margin:0}body{background:var(--background);color:var(--foreground);font-family:var(--font-sans);padding:24px}</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+  var K = window.Lynx, h = React.createElement, I = K.Icons;
+  function Tile(Icon) { return h('span', { style: { display: 'flex', width: 32, height: 32, flex: 'none', alignItems: 'center', justifyContent: 'center', borderRadius: 12, border: '1px solid var(--agent-border)', background: 'var(--agent-soft)', color: 'var(--agent)' } }, h(Icon, { size: 16 })) }
+  function Row(Icon, title, desc) {
+    return h('div', { style: { display: 'flex', gap: 12, alignItems: 'center' } }, Tile(Icon),
+      h('div', null, h('div', { style: { fontSize: 14, fontWeight: 500 } }, title), h('div', { style: { fontSize: 12, color: 'var(--muted-foreground)' } }, desc)))
+  }
+  function Demo() {
+    var s = React.useState(true), open = s[0], setOpen = s[1]
+    return h(K.Dialog, { open: open, onOpenChange: setOpen },
+      h(K.DialogTrigger, { asChild: true }, h(K.Button, { variant: 'outline' }, h(I.Calendar), 'Connect calendar')),
+      h(K.DialogContent, { onOpenAutoFocus: function (e) { e.preventDefault() }, style: { maxWidth: 440 } },
+        h(K.DialogHeader, null,
+          h(K.DialogTitle, null, 'Connect calendar agent'),
+          h(K.DialogDescription, null, 'The calendar agent needs access to schedule and move meetings for you. You can revoke it any time.')),
+        h('div', { style: { display: 'grid', gap: 12 } },
+          Row(I.Calendar, 'Read and edit events', 'Work and shared calendars'),
+          Row(I.Mail, 'Send invitations', 'Only to people already in the thread')),
+        h(K.DialogFooter, null,
+          h(K.DialogClose, { asChild: true }, h(K.Button, { variant: 'outline' }, 'Not now')),
+          h(K.Button, { onClick: function () { setOpen(false) } }, 'Allow access'))))
+  }
+  ReactDOM.createRoot(document.getElementById('root')).render(h(Demo));
+</script>
+</body>
+</html>

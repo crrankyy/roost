@@ -1,0 +1,27 @@
+<!-- @dsCard group="Layout" height=270 subtitle="sidebar · thread · log with grip handles" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>ResizablePanelGroup — preview</title>
+<style>html,body{margin:0}body{background:var(--background);color:var(--foreground);font-family:var(--font-sans);padding:24px}</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+  var K = window.Lynx, h = React.createElement, I = K.Icons;
+  function pane(title, body) {
+    return h('div', { style: { height: '100%', padding: 16, boxSizing: 'border-box' } },
+      h('div', { style: { fontSize: 13, fontWeight: 500 } }, title),
+      h('div', { style: { fontSize: 12, color: 'var(--muted-foreground)', marginTop: 4 } }, body));
+  }
+  ReactDOM.createRoot(document.getElementById('root')).render(
+    h(K.ResizablePanelGroup, { direction: 'horizontal', style: { height: 220, maxWidth: 640, border: '1px solid color-mix(in srgb, var(--border) 50%, transparent)', borderRadius: 'var(--radius-2xl)' } },
+      h(K.ResizablePanel, { defaultSize: 30, minSize: 20 }, pane('Agents', 'Research, inbox, calendar')),
+      h(K.ResizableHandle, { withHandle: true }),
+      h(K.ResizablePanel, { defaultSize: 70 },
+        h(K.ResizablePanelGroup, { direction: 'vertical' },
+          h(K.ResizablePanel, { defaultSize: 60 }, pane('Thread', 'Chatting with the research agent')),
+          h(K.ResizableHandle, { withHandle: true }),
+          h(K.ResizablePanel, { defaultSize: 40 }, pane('Run log', '12 steps · 3 tool calls'))))));
+</script>
+</body>
+</html>

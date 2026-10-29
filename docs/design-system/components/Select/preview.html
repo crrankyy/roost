@@ -1,0 +1,36 @@
+<!-- @dsCard group="Forms" height=340 subtitle="open model picker with groups · placeholder · disabled" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Select — preview</title>
+<style>html,body{margin:0}body{background:var(--background);color:var(--foreground);font-family:var(--font-sans);padding:24px}
+.row{display:flex;flex-wrap:wrap;align-items:center;gap:12px}.col{display:flex;flex-direction:column;gap:8px}.g2{display:grid;grid-template-columns:1fr 1fr;gap:20px 24px}.cap{font-size:12px;color:var(--muted-foreground)}.shell{border:1px solid color-mix(in srgb,var(--border) 50%,transparent);border-radius:var(--radius-2xl);background:color-mix(in srgb,var(--card) 75%,transparent);box-shadow:var(--shadow-lg)}</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+  var K = window.Lynx, h = React.createElement, I = K.Icons;
+  ReactDOM.createRoot(document.getElementById('root')).render(h('div', { className: 'row', style: { alignItems: 'flex-start', gap: 24, padding: 24 } },
+    h('div', { className: 'col', style: { width: 240 } },
+      h(K.Label, null, 'Model'),
+      h(K.Select, { defaultValue: 'sonnet', defaultOpen: true },
+        h(K.SelectTrigger, { 'aria-label': 'Model' }, h(K.SelectValue)),
+        h(K.SelectContent, null,
+          h(K.SelectGroup, null,
+            h(K.SelectLabel, null, 'Anthropic'),
+            h(K.SelectItem, { value: 'opus' }, 'Claude Opus'),
+            h(K.SelectItem, { value: 'sonnet' }, 'Claude Sonnet'),
+            h(K.SelectItem, { value: 'haiku' }, 'Claude Haiku')),
+          h(K.SelectSeparator),
+          h(K.SelectGroup, null,
+            h(K.SelectLabel, null, 'OpenAI'),
+            h(K.SelectItem, { value: 'gpt4o' }, 'GPT-4o'),
+            h(K.SelectItem, { value: 'o1', disabled: true }, 'o1 (needs API key)'))))),
+    h('div', { className: 'col', style: { width: 200 } },
+      h(K.Label, null, 'Default agent'),
+      h(K.Select, null, h(K.SelectTrigger, { 'aria-label': 'Default agent' }, h(K.SelectValue, { placeholder: 'Choose an agent' })), h(K.SelectContent, null, h(K.SelectItem, { value: 'r' }, 'Research agent')))),
+    h('div', { className: 'col', style: { width: 180 } },
+      h(K.Label, null, 'Region'),
+      h(K.Select, { defaultValue: 'eu', disabled: true }, h(K.SelectTrigger, { 'aria-label': 'Region' }, h(K.SelectValue)), h(K.SelectContent, null, h(K.SelectItem, { value: 'eu' }, 'Europe (Frankfurt)'))))));
+</script>
+</body>
+</html>

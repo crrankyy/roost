@@ -1,0 +1,29 @@
+<!-- @dsCard group="Menus" height=340 subtitle="Right-click target; the menu opens at the pointer" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>ContextMenu — preview</title>
+<style>html,body{margin:0}body{background:var(--background);color:var(--foreground);font-family:var(--font-sans);padding:24px}</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+  var K = window.Lynx, h = React.createElement, I = K.Icons;
+  ReactDOM.createRoot(document.getElementById('root')).render(
+    h(K.ContextMenu, null,
+      h(K.ContextMenuTrigger, { style: { display: 'flex', height: 120, alignItems: 'center', justifyContent: 'center', gap: 8, borderRadius: 16, border: '1px dashed color-mix(in srgb, var(--muted-foreground) 60%, transparent)', background: 'color-mix(in srgb, var(--background) 75%, transparent)', color: 'var(--muted-foreground)', fontSize: 14 } }, h(I.Bot, { size: 16 }), 'Right-click for agent actions'),
+      h(K.ContextMenuContent, { style: { width: 230 } },
+        h(K.ContextMenuLabel, null, 'Coding agent'),
+        h(K.ContextMenuItem, null, h(I.Play), 'Resume run', h(K.ContextMenuShortcut, null, '⌘R')),
+        h(K.ContextMenuItem, null, h(I.Copy), 'Copy run link'),
+        h(K.ContextMenuSub, null,
+          h(K.ContextMenuSubTrigger, null, h(I.Folder), 'Move to'),
+          h(K.ContextMenuSubContent, null,
+            h(K.ContextMenuItem, null, 'Work'),
+            h(K.ContextMenuItem, null, 'Personal'))),
+        h(K.ContextMenuSeparator),
+        h(K.ContextMenuCheckboxItem, { checked: true }, 'Show tool calls'),
+        h(K.ContextMenuSeparator),
+        h(K.ContextMenuItem, { disabled: true }, h(I.Trash2), 'Delete run'))));
+</script>
+</body>
+</html>

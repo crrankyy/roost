@@ -1,0 +1,23 @@
+<!-- @dsCard group="Data display" height=270 subtitle="no-runs state with icon and actions" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Empty — preview</title>
+<style>html,body{margin:0}body{background:var(--background);color:var(--foreground);font-family:var(--font-sans);padding:24px}</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+  var K = window.Lynx, h = React.createElement, I = K.Icons;
+  ReactDOM.createRoot(document.getElementById('root')).render(
+    h(K.Empty, { style: { borderWidth: 1 } },
+      h(K.EmptyHeader, null,
+        h(K.EmptyMedia, { variant: 'icon' }, h(I.Bot)),
+        h(K.EmptyTitle, null, 'No runs yet'),
+        h(K.EmptyDescription, null, 'Start an agent to see its runs, tool calls and sources here.')),
+      h(K.EmptyContent, null,
+        h('div', { style: { display: 'flex', gap: 8 } },
+          h(K.Button, null, 'Run agent'),
+          h(K.Button, { variant: 'outline' }, 'Browse templates')))));
+</script>
+</body>
+</html>

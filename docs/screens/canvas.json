@@ -1,0 +1,54 @@
+{
+  "v": 3,
+  "createdOnFiles": {"v": 1, "at": "2026-10-29T15:30:00Z"},
+  "title": "Report Hub",
+  "launch": {"view": "canvas"},
+  "pages": [],
+  "boards": {
+    "HomePhone.dc.html": {"x": 0, "y": 0, "w": 380, "h": 2760, "title": "1 · Home · phone"},
+    "Main.dc.html": {"x": 460, "y": 0, "w": 1240, "h": 1960, "title": "1 · Home · desktop", "is_interactive": true},
+    "HomePhoneDark.dc.html": {"x": 1780, "y": 0, "w": 380, "h": 2760, "title": "1 · Home · phone · dark"},
+    "HomeDesktopDark.dc.html": {"x": 2240, "y": 0, "w": 1240, "h": 1960, "title": "1 · Home · desktop · dark"},
+
+    "ProjectPhone.dc.html": {"x": 0, "y": 3180, "w": 380, "h": 2400, "title": "2 · Project · phone", "is_interactive": true},
+    "Project.dc.html": {"x": 460, "y": 3180, "w": 1240, "h": 1560, "title": "2 · Project · desktop", "is_interactive": true},
+
+    "FilterSheet.dc.html": {"x": 0, "y": 6000, "w": 380, "h": 844, "title": "3 · Filter sheet · phone"},
+    "FilterSheetCustom.dc.html": {"x": 460, "y": 6000, "w": 380, "h": 844, "title": "3 · Filter sheet · custom range"},
+    "FilterDesktop.dc.html": {"x": 920, "y": 6000, "w": 1240, "h": 860, "title": "3 · Filters inline · desktop"},
+
+    "TriagePhone.dc.html": {"x": 0, "y": 7280, "w": 380, "h": 1180, "title": "4 · Triage confirm · phone", "is_interactive": true},
+    "TriagePhoneReclassify.dc.html": {"x": 460, "y": 7280, "w": 380, "h": 1640, "title": "4 · Reclassify · phone", "is_interactive": true},
+    "TriagePhoneQuarantine.dc.html": {"x": 920, "y": 7280, "w": 380, "h": 1260, "title": "4 · Quarantine · phone", "is_interactive": true},
+    "Triage.dc.html": {"x": 1380, "y": 7280, "w": 1240, "h": 1300, "title": "4 · Triage + reclassify · desktop", "is_interactive": true},
+    "TriageDesktopQuarantine.dc.html": {"x": 2700, "y": 7280, "w": 1240, "h": 1100, "title": "4 · Quarantine · desktop", "is_interactive": true},
+
+    "ReportPhone.dc.html": {"x": 0, "y": 9340, "w": 380, "h": 844, "title": "5 · Report · pill collapsed", "is_interactive": true},
+    "ReportPhoneExpanded.dc.html": {"x": 460, "y": 9340, "w": 380, "h": 844, "title": "5 · Report · pill expanded", "is_interactive": true},
+    "ReportPhoneOld.dc.html": {"x": 920, "y": 9340, "w": 380, "h": 844, "title": "5 · Report · viewing v2 of 4", "is_interactive": true},
+    "ReportPhoneArchived.dc.html": {"x": 1380, "y": 9340, "w": 380, "h": 844, "title": "5 · Report · archived", "is_interactive": true},
+    "Report.dc.html": {"x": 1840, "y": 9340, "w": 1240, "h": 900, "title": "5 · Report · desktop, v2 of 4, pill expanded", "is_interactive": true},
+    "ReportDesktopArchived.dc.html": {"x": 3160, "y": 9340, "w": 1240, "h": 900, "title": "5 · Report · desktop, archived", "is_interactive": true}
+  },
+  "order": [
+    "HomePhone.dc.html", "Main.dc.html", "HomePhoneDark.dc.html", "HomeDesktopDark.dc.html",
+    "ProjectPhone.dc.html", "Project.dc.html",
+    "FilterSheet.dc.html", "FilterSheetCustom.dc.html", "FilterDesktop.dc.html",
+    "TriagePhone.dc.html", "TriagePhoneReclassify.dc.html", "TriagePhoneQuarantine.dc.html", "Triage.dc.html", "TriageDesktopQuarantine.dc.html",
+    "ReportPhone.dc.html", "ReportPhoneExpanded.dc.html", "ReportPhoneOld.dc.html", "ReportPhoneArchived.dc.html", "Report.dc.html", "ReportDesktopArchived.dc.html"
+  ],
+  "notes": {
+    "t-home": {"x": 0, "y": -300, "text": "1 · Home", "kind": "title1", "maxW": 3480},
+    "t-project": {"x": 0, "y": 2880, "text": "2 · Project page: Payments API", "kind": "title1", "maxW": 1700},
+    "t-filter": {"x": 0, "y": 5700, "text": "3 · Filters", "kind": "title1", "maxW": 2160},
+    "t-triage": {"x": 0, "y": 6980, "text": "4 · Triage confirm and quarantine", "kind": "title1", "maxW": 3940},
+    "t-report": {"x": 0, "y": 9040, "text": "5 · A report inside the hub", "kind": "title1", "maxW": 4400},
+    "n-home": {"x": 3560, "y": 0, "w": 340, "fill": "purple", "size": "s", "text": "Order of the page: triage (only when non-empty), pinned (only when something is pinned), recent with its filter, active streams, projects.\n\nConfirm files a report under Claude's proposal in one tap and shows an Undo toast. Quarantined reports can't be confirmed from the strip: Review opens the findings."},
+    "n-project": {"x": 1780, "y": 3180, "w": 340, "fill": "purple", "size": "s", "text": "The Streams / Kind toggle works in Play. By kind, groups are ordered by their latest report and each row names its stream.\n\nDone streams stay collapsed; a stream is active while it has a report in the last 14 days."},
+    "n-triage": {"x": 4020, "y": 7280, "w": 340, "fill": "purple", "size": "s", "text": "Classification (project, stream, kind) is metadata, never part of the URL, so confirming or reclassifying never breaks a link.\n\nRejecting a quarantined report keeps it in the archive, unpublished. Nothing in the hub deletes."},
+    "n-report": {"x": 4480, "y": 9340, "w": 340, "fill": "purple", "size": "s", "text": "The pill owns the bottom-right corner (rh- is reserved in lynx-reports). Collapsed it is 36px tall; on phones it slides away while you scroll down and returns on scroll up or at the end, and the report keeps 96px of bottom space so the footer is never covered.\n\nIn Play: scroll the report, and tap the pill to open or close it."}
+  },
+  "designSystems": [
+    {"title": "lynx-reports", "namespace": "lynx", "artifact": "https://claude.ai/code/artifact/8191e292-bd49-45cd-8d28-77baaaa58fcb", "version": "1793284328-7416", "copiedAt": "2026-10-29T15:30:00Z"}
+  ]
+}

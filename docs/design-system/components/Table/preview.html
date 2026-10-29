@@ -1,0 +1,31 @@
+<!-- @dsCard group="Data display" height=370 subtitle="recent runs; one row selected; footer and caption" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Table — preview</title>
+<style>html,body{margin:0}body{background:var(--background);color:var(--foreground);font-family:var(--font-sans);padding:24px}</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+  var K = window.Lynx, h = React.createElement, I = K.Icons;
+  var rows = [['Research agent', 'Done', '7', '1m 42s'], ['Inbox agent', 'Running', '3', '0m 18s'], ['Calendar agent', 'Needs approval', '1', '0m 05s'], ['Coding agent', 'Failed', '4', '2m 10s']];
+  var variant = { 'Done': 'secondary', 'Running': 'default', 'Needs approval': 'outline', 'Failed': 'destructive' };
+  ReactDOM.createRoot(document.getElementById('root')).render(
+    h(K.Table, null,
+      h(K.TableCaption, null, 'Last four runs across your agents'),
+      h(K.TableHeader, null, h(K.TableRow, null,
+        h(K.TableHead, null, 'Agent'), h(K.TableHead, null, 'Status'), h(K.TableHead, { style: { textAlign: 'right' } }, 'Tool calls'), h(K.TableHead, { style: { textAlign: 'right' } }, 'Duration'))),
+      h(K.TableBody, null, rows.map(function (r, i) {
+        return h(K.TableRow, { key: i, 'data-state': i === 1 ? 'selected' : undefined },
+          h(K.TableCell, { style: { fontWeight: 500 } }, r[0]),
+          h(K.TableCell, null, h(K.Badge, { variant: variant[r[1]] }, r[1])),
+          h(K.TableCell, { style: { textAlign: 'right', fontFamily: 'var(--font-mono)' } }, r[2]),
+          h(K.TableCell, { style: { textAlign: 'right', fontFamily: 'var(--font-mono)' } }, r[3]));
+      })),
+      h(K.TableFooter, null, h(K.TableRow, null,
+        h(K.TableCell, { colSpan: 2 }, 'Total'),
+        h(K.TableCell, { style: { textAlign: 'right', fontFamily: 'var(--font-mono)' } }, '15'),
+        h(K.TableCell, { style: { textAlign: 'right', fontFamily: 'var(--font-mono)' } }, '4m 15s')))));
+</script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+<!-- @dsCard group="Overlays" height=360 subtitle="Open confirmation: stop a running agent" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>AlertDialog — preview</title>
+<style>html,body{margin:0}body{background:var(--background);color:var(--foreground);font-family:var(--font-sans);padding:24px}</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+  var K = window.Lynx, h = React.createElement, I = K.Icons;
+  function Demo() {
+    var s = React.useState(true), open = s[0], setOpen = s[1]
+    return h(K.AlertDialog, { open: open, onOpenChange: setOpen },
+      h(K.AlertDialogTrigger, { asChild: true }, h(K.Button, { variant: 'destructive' }, 'Stop agent')),
+      h(K.AlertDialogContent, { style: { maxWidth: 420 } },
+        h(K.AlertDialogHeader, null,
+          h(K.AlertDialogTitle, null, 'Stop the research agent?'),
+          h(K.AlertDialogDescription, null, 'It still has 3 sources to review. Progress so far stays in the run log, but the summary will not be written.')),
+        h(K.AlertDialogFooter, null,
+          h(K.AlertDialogCancel, null, 'Keep running'),
+          h(K.AlertDialogAction, { className: K.buttonVariants({ variant: 'destructive' }) }, 'Stop agent'))))
+  }
+  ReactDOM.createRoot(document.getElementById('root')).render(h(Demo));
+</script>
+</body>
+</html>

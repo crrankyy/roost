@@ -1,0 +1,42 @@
+<!-- @dsCard group="Navigation" height=488 subtitle="Entries flip and glow in their hue on hover, like GlowSidebar" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Sidebar — preview</title>
+<style>html,body{margin:0}body{background:var(--background);color:var(--foreground);font-family:var(--font-sans);padding:24px}</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+  var K = window.Lynx, h = React.createElement, I = K.Icons;
+  var S = K
+  function Item(Icon, label, active, badge, hue) {
+    return h(S.SidebarMenuItem, { key: label },
+      h(S.SidebarMenuButton, { isActive: !!active, hue: hue }, h(Icon), h('span', null, label)),
+      badge ? h(S.SidebarMenuBadge, null, badge) : null)
+  }
+  ReactDOM.createRoot(document.getElementById('root')).render(
+    h(S.SidebarProvider, { style: { minHeight: 0, height: 440, position: 'relative', overflow: 'hidden', borderRadius: 16, border: '1px solid color-mix(in srgb, var(--border) 50%, transparent)' } },
+      h(S.Sidebar, { collapsible: 'none', style: { borderRight: '1px solid color-mix(in srgb, var(--border) 50%, transparent)', width: 232 } },
+        h(S.SidebarHeader, null,
+          h('div', { style: { display: 'flex', alignItems: 'center', gap: 10, padding: '4px 6px' } },
+            h('span', { style: { display: 'flex', width: 28, height: 28, alignItems: 'center', justifyContent: 'center', borderRadius: 10, border: '1px solid var(--agent-border)', background: 'var(--agent-soft)', color: 'var(--agent)' } }, h(I.Sparkles, { size: 14 })),
+            h('span', { style: { fontSize: 14, fontWeight: 600 } }, 'Lynx'))),
+        h(S.SidebarContent, null,
+          h(S.SidebarGroup, null,
+            h(S.SidebarGroupLabel, null, 'Agents'),
+            h(S.SidebarGroupAction, { title: 'New agent' }, h(I.Plus)),
+            h(S.SidebarGroupContent, null,
+              h(S.SidebarMenu, null,
+                Item(I.Brain, 'Research agent', true, '2', 'violet'),
+                Item(I.Inbox, 'Inbox agent', false, '18', 'orange'),
+                Item(I.Calendar, 'Calendar agent', false, null, 'green'),
+                Item(I.Terminal, 'Coding agent', false, null, 'blue'))))),
+        h(S.SidebarFooter, null,
+          h(S.SidebarMenu, null, Item(I.Settings, 'Settings', false, null, 'red')))),
+      h(S.SidebarInset, { style: { minHeight: 0, padding: 24, background: 'transparent' } },
+        h('div', { style: { fontSize: 12, color: 'var(--muted-foreground)' } }, 'Research agent'),
+        h('div', { style: { fontSize: 18, fontWeight: 600, margin: '4px 0 8px' } }, 'Run 142 · agent latency'),
+        h('p', { style: { fontSize: 14, lineHeight: 1.6, color: 'var(--muted-foreground)', margin: 0, maxWidth: 380 } }, 'Collected 12 sources and compared response latency trends. Drafting the summary now.'))));
+</script>
+</body>
+</html>

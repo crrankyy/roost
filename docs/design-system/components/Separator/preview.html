@@ -1,0 +1,22 @@
+<!-- @dsCard group="Layout" height=150 subtitle="horizontal and vertical hairlines" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Separator — preview</title>
+<style>html,body{margin:0}body{background:var(--background);color:var(--foreground);font-family:var(--font-sans);padding:24px}</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+  var K = window.Lynx, h = React.createElement, I = K.Icons;
+  var link = { fontSize: 14, color: 'var(--muted-foreground)' };
+  ReactDOM.createRoot(document.getElementById('root')).render(h('div', { style: { maxWidth: 420 } },
+    h('div', { style: { fontSize: 14, fontWeight: 500 } }, 'Inbox agent'),
+    h('div', { style: { fontSize: 14, color: 'var(--muted-foreground)', marginTop: 4 } }, 'Triages new mail every 15 minutes.'),
+    h(K.Separator, { style: { margin: '16px 0' } }),
+    h('div', { style: { display: 'flex', alignItems: 'center', gap: 12, height: 20 } },
+      h('span', { style: link }, 'Runs'), h(K.Separator, { orientation: 'vertical' }),
+      h('span', { style: link }, 'Tools'), h(K.Separator, { orientation: 'vertical' }),
+      h('span', { style: link }, 'Permissions'))));
+</script>
+</body>
+</html>

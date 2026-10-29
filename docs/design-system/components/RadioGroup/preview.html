@@ -1,0 +1,24 @@
+<!-- @dsCard group="Forms" height=258 subtitle="approval mode: selected · unselected · disabled" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>RadioGroup — preview</title>
+<style>html,body{margin:0}body{background:var(--background);color:var(--foreground);font-family:var(--font-sans);padding:24px}
+.row{display:flex;flex-wrap:wrap;align-items:center;gap:12px}.col{display:flex;flex-direction:column;gap:8px}.g2{display:grid;grid-template-columns:1fr 1fr;gap:20px 24px}.cap{font-size:12px;color:var(--muted-foreground)}.shell{border:1px solid color-mix(in srgb,var(--border) 50%,transparent);border-radius:var(--radius-2xl);background:color-mix(in srgb,var(--card) 75%,transparent);box-shadow:var(--shadow-lg)}</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+  var K = window.Lynx, h = React.createElement, I = K.Icons;
+  function Opt(v, label, hint, p) { return h('div', { className: 'row', style: { alignItems: 'flex-start', gap: 10 } },
+    h(K.RadioGroupItem, Object.assign({ value: v, id: 'r-' + v, style: { marginTop: 2 } }, p)),
+    h('div', { className: 'col', style: { gap: 4 } }, h(K.Label, { htmlFor: 'r-' + v }, label), h('span', { className: 'cap' }, hint))) }
+  ReactDOM.createRoot(document.getElementById('root')).render(h('div', { className: 'col', style: { gap: 12 } },
+    h(K.Label, null, 'When should the coding agent ask you?'),
+    h(K.RadioGroup, { defaultValue: 'risky', 'aria-label': 'Approval mode', style: { gap: 12 } },
+      Opt('every', 'Before every action', 'Slowest; you approve each tool call.'),
+      Opt('risky', 'Only for risky actions', 'Pushing code, sending messages, spending money.'),
+      Opt('never', 'Never', 'Runs autonomously and reports when done.'),
+      Opt('admin', 'Let my admin decide', 'Not available on personal workspaces.', { disabled: true }))));
+</script>
+</body>
+</html>

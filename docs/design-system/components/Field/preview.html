@@ -1,0 +1,33 @@
+<!-- @dsCard group="Forms" height=414 subtitle="fieldset with text, invalid, switch row and choice cards" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Field — preview</title>
+<style>html,body{margin:0}body{background:var(--background);color:var(--foreground);font-family:var(--font-sans);padding:24px}
+.row{display:flex;flex-wrap:wrap;align-items:center;gap:12px}.col{display:flex;flex-direction:column;gap:8px}.g2{display:grid;grid-template-columns:1fr 1fr;gap:20px 24px}.cap{font-size:12px;color:var(--muted-foreground)}.shell{border:1px solid color-mix(in srgb,var(--border) 50%,transparent);border-radius:var(--radius-2xl);background:color-mix(in srgb,var(--card) 75%,transparent);box-shadow:var(--shadow-lg)}</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+  var K = window.Lynx, h = React.createElement, I = K.Icons;
+  ReactDOM.createRoot(document.getElementById('root')).render(h(K.FieldSet, null,
+    h(K.FieldLegend, null, 'New inbox agent'),
+    h(K.FieldDescription, null, 'Lynx runs it in the background and reports in your inbox.'),
+    h('div', { className: 'g2', style: { alignItems: 'start' } },
+      h(K.FieldGroup, { style: { gap: 20 } },
+        h(K.Field, null, h(K.FieldLabel, { htmlFor: 'f1' }, 'Agent name'), h(K.Input, { id: 'f1', defaultValue: 'Inbox agent' }), h(K.FieldDescription, null, 'Shown in the sidebar and in reports.')),
+        h(K.Field, { 'data-invalid': 'true' }, h(K.FieldLabel, { htmlFor: 'f2' }, 'Forward reports to'), h(K.Input, { id: 'f2', defaultValue: 'me@lynx', 'aria-invalid': true }), h(K.FieldError, null, 'Enter a complete email address.')),
+        h(K.Field, { orientation: 'horizontal' },
+          h(K.FieldContent, null, h(K.FieldLabel, { htmlFor: 'f3' }, 'Quiet hours'), h(K.FieldDescription, null, 'No notifications 22:00–07:00.')),
+          h(K.Switch, { id: 'f3', defaultChecked: true }))),
+      h(K.FieldGroup, { style: { gap: 12 } },
+        h(K.FieldLabel, { htmlFor: 'f4' }, 'Autonomy'),
+        h(K.RadioGroup, { defaultValue: 'draft', style: { gap: 10 } },
+          h(K.FieldLabel, { htmlFor: 'f4' }, h(K.Field, { orientation: 'horizontal' },
+            h(K.FieldContent, null, h(K.FieldTitle, null, 'Draft replies'), h(K.FieldDescription, null, 'You review before anything is sent.')),
+            h(K.RadioGroupItem, { value: 'draft', id: 'f4' }))),
+          h(K.FieldLabel, { htmlFor: 'f5' }, h(K.Field, { orientation: 'horizontal' },
+            h(K.FieldContent, null, h(K.FieldTitle, null, 'Send for me'), h(K.FieldDescription, null, 'Replies to routine mail on its own.')),
+            h(K.RadioGroupItem, { value: 'send', id: 'f5' }))))))));
+</script>
+</body>
+</html>

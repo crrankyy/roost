@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>How Lynx should remember · Report Hub</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/lynx/tokens.css">
+<link rel="stylesheet" href="ds/lynx/components/bundle.css">
+<link rel="stylesheet" href="ds/lynx/components/reports.css">
+<script src="ds/lynx/components/bundle.js"></script>
+<link rel="stylesheet" href="hub.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="rh-viewport" data-theme="light" style="width: 100%; background: var(--background); font-family: var(--font-sans); color: var(--foreground)">
+<div class="rh-scroll lr-report rh-report" onScroll="{{onScroll}}" style="min-height: 0">
+
+<sc-if value="{{showOld}}" hint-placeholder-val="{{false}}">
+<div class="rh-banner">
+<x-import component-from-global-scope="Lynx.Alert">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l4 2"></path></svg>
+<x-import component-from-global-scope="Lynx.AlertTitle">Viewing v{{viewing}} of 4</x-import>
+<x-import component-from-global-scope="Lynx.AlertDescription">
+<span>From {{viewDate}}. The latest version, v4 from 28 Oct, adds the build order and cost estimates.</span>
+<span style="display: flex; gap: 8px; margin-top: 10px"><x-import component-from-global-scope="Lynx.Button" variant="outline" size="sm" on-click="{{openLatest}}">Open latest version</x-import></span>
+</x-import>
+</x-import>
+</div>
+</sc-if>
+
+<sc-if value="{{archived}}" hint-placeholder-val="{{false}}">
+<div class="rh-banner">
+<x-import component-from-global-scope="Lynx.Alert">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="5" x="2" y="3" rx="1"></rect><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"></path><path d="M10 12h4"></path></svg>
+<x-import component-from-global-scope="Lynx.AlertTitle">Archived on 27 Oct</x-import>
+<x-import component-from-global-scope="Lynx.AlertDescription">
+<span>Hidden from lists and filters unless you include archived. This link keeps working.</span>
+<span style="display: flex; gap: 8px; margin-top: 10px"><x-import component-from-global-scope="Lynx.Button" variant="outline" size="sm">Unarchive</x-import></span>
+</x-import>
+</x-import>
+</div>
+</sc-if>
+
+<div class="lr-shell">
+<aside class="lr-nav">
+<div class="lr-panel"><div class="lr-brand"><span class="live-avatar" style="--size: 36px; --avatar-hue: var(--flamingo)" aria-hidden="true"><span class="live-avatar-ring"></span><span class="live-avatar-orb"></span></span><div><div class="lr-brand-name">Lynx</div><div class="lr-brand-sub">Memory research</div></div></div></div>
+<nav class="lr-panel" aria-label="Sections"><ul class="lr-toc">
+<li><a class="lr-toc-link lynx-bloom" href="#summary" data-active="true" aria-current="location"><svg class="lr-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"></path></svg>Summary</a></li>
+<li><a class="lr-toc-link lynx-bloom" href="#named"><svg class="lr-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M3 5V19A9 3 0 0 0 21 19V5"></path><path d="M3 12A9 3 0 0 0 21 12"></path></svg>Named sources</a></li>
+<li><a class="lr-toc-link lynx-bloom" href="#rules"><svg class="lr-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 17 2 2 4-4"></path><path d="m3 7 2 2 4-4"></path><path d="M13 6h8"></path><path d="M13 12h8"></path><path d="M13 18h8"></path></svg>Design rules</a></li>
+<li><a class="lr-toc-link lynx-bloom" href="#design"><svg class="lr-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"></path><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"></path></svg>Recommended design</a></li>
+<li><a class="lr-toc-link lynx-bloom" href="#order"><svg class="lr-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>Build order</a></li>
+<li><a class="lr-toc-link lynx-bloom" href="#sources"><svg class="lr-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>Sources</a></li>
+</ul></nav>
+<div class="lr-panel lr-nav-foot"><span>{{viewDate}} 2026</span><button class="lr-icon-btn lynx-halo lynx-halo-moon" type="button" data-lr-theme-toggle="" aria-label="Switch to dark theme"><svg class="lr-icon lr-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg><svg class="lr-icon lr-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg></button></div>
+</aside>
+
+<main class="lr-main">
+<section class="lr-section" id="summary">
+<header class="lr-header">
+<div class="lr-eyebrow"><span class="lr-badge" data-kind="research">Research</span><span>Mastra, Honcho, ReasoningBank and about 40 links</span></div>
+<h1 class="lr-title">How Lynx should remember</h1>
+<p class="lr-lead">Don’t adopt a memory framework. The plan’s direction holds: keep every message, compact older turns, search history, keep a list of facts. The research changes six parts of it, and every infrastructure change it needs is free.</p>
+<div class="lr-meta"><span>Lynx › memory</span><span>{{viewDate}} 2026</span><span>v{{viewing}}</span></div>
+</header>
+<div class="lr-grid lr-grid-4">
+<div class="lr-panel lr-stat"><div class="lr-stat-value">53%</div><div class="lr-stat-label">of 20 project rules lost after three rounds of summarising</div><div class="lr-stat-src">Facts as First Class Objects</div></div>
+<div class="lr-panel lr-stat"><div class="lr-stat-value">94.87%</div><div class="lr-stat-label">on LongMemEval with an observation log</div><div class="lr-stat-src">Mastra, vendor-reported</div></div>
+<div class="lr-panel lr-stat"><div class="lr-stat-value">0</div><div class="lr-stat-label">extra model calls per turn</div><div class="lr-stat-src">Recommended design</div></div>
+<div class="lr-panel lr-stat"><div class="lr-stat-value">~9M</div><div class="lr-stat-label">embedding tokens a day inside the free allowance</div><div class="lr-stat-src">Workers AI pricing</div></div>
+</div>
+<div class="lr-grid lr-grid-2">
+<div class="lr-panel lr-finding"><span class="lr-num">1</span><div><h3>Facts live in their own table</h3><p>With keys and versions. Summaries never hold facts.</p></div></div>
+<div class="lr-panel lr-finding"><span class="lr-num">2</span><div><h3>Background work runs in batches</h3><p>One cheap call every few thousand tokens, not one after every turn.</p></div></div>
+</div>
+</section>
+
+<section class="lr-section" id="named">
+<div class="lr-section-head"><h2>The named sources</h2><p>What each one does and what to take from it.</p></div>
+<article class="lr-panel lr-subject">
+<div class="lr-subject-top"><div><h3>Mastra memory</h3><div class="lr-subject-meta">TypeScript · Apache-2.0 · four kinds of memory</div></div><span class="lr-badge" data-tone="accent">Borrow the design</span></div>
+<div class="lr-table-wrap"><table class="lr-table"><thead><tr><th>Kind</th><th>What it does</th></tr></thead><tbody>
+<tr><td>Message history</td><td>The last N messages.</td></tr>
+<tr><td>Semantic recall</td><td>Embeds every message and retrieves the top matches each turn.</td></tr>
+<tr><td>Observational Memory</td><td>Background agents turn old messages into a dense, dated log.</td></tr>
+</tbody></table></div>
+<div class="lr-takeaway"><div class="lr-label">For Lynx</div><ul><li>Copy the observer and reflector design, scaled down.</li><li>Don’t install the package; it would replace the chat engine.</li></ul></div>
+</article>
+</section>
+
+<section class="lr-section" id="rules">
+<div class="lr-section-head"><h2>Design rules</h2><p>Each with the evidence behind it.</p></div>
+<div class="lr-panel lr-items">
+<details class="lr-item" open="{{yes}}"><summary><span class="lr-num">1</span>Facts are records, not summary text</summary><div class="lr-item-body"><p>Three rounds of compaction lost 53% of 20 project rules.</p><div class="lr-src">Facts as First Class Objects</div></div></details>
+<details class="lr-item"><summary><span class="lr-num">2</span>Put what changes every turn at the end of the prompt</summary><div class="lr-item-body"><p>A change invalidates the provider’s cache for everything after it.</p><div class="lr-src">Anthropic prompt caching docs</div></div></details>
+</div>
+</section>
+
+<section class="lr-section" id="design">
+<div class="lr-section-head"><h2>Recommended design</h2><p>What the model sees, in prompt order.</p></div>
+<div class="lr-panel lr-card">
+<div class="lr-stack" role="list">
+<div class="lr-layer" role="listitem"><span class="lr-num">1</span><div><div class="lr-layer-name">Instructions</div><div class="lr-layer-sub">Change rarely</div></div><div><div class="lr-bar"><span style="width: 19%"></span></div><div class="lr-bar-label">~1.5k</div></div></div>
+<div class="lr-layer" role="listitem"><span class="lr-num">2</span><div><div class="lr-layer-name">Recent turns, word for word</div><div class="lr-layer-sub">Appended each turn</div></div><div><div class="lr-bar"><span style="width: 100%"></span></div><div class="lr-bar-label">~8k</div></div></div>
+<div class="lr-divider">cached above · changes every turn below</div>
+<div class="lr-layer" data-volatile="" role="listitem"><span class="lr-num">3</span><div><div class="lr-layer-name">Date, time and strong search matches</div><div class="lr-layer-sub">Only when the top match clearly wins</div></div><div><div class="lr-bar"><span style="width: 38%"></span></div><div class="lr-bar-label">~3k</div></div></div>
+</div>
+</div>
+<div class="lr-callout"><svg class="lr-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg><p>At about 50 turns a day: 4–6 observer calls plus 1 nightly call.</p></div>
+</section>
+
+<section class="lr-section" id="order">
+<div class="lr-section-head"><h2>Build order</h2><p>Start with the test, so every later step can be measured.</p></div>
+<div class="lr-panel lr-card"><ol class="lr-steps">
+<li class="lr-step"><span class="lr-num">0</span><div><h3>Eval first</h3><p>A scripted multi-day conversation with planted facts.</p></div></li>
+<li class="lr-step"><span class="lr-num">1</span><div><h3>The server builds the context</h3><p>Observer batches, the observation log and the facts table.</p></div></li>
+<li class="lr-step"><span class="lr-num">2</span><div><h3>Full-text search</h3><p>Strong-match results at the end of the prompt.</p></div></li>
+</ol></div>
+</section>
+
+<section class="lr-section" id="sources">
+<div class="lr-section-head"><h2>Sources</h2></div>
+<div class="lr-panel lr-card lr-sources"><h3>Named</h3><ul><li><a href="#sources">Mastra memory overview</a></li><li><a href="#sources">plastic-labs/honcho</a></li></ul><h3>Memory design</h3><ul><li><a href="#sources">MemArchitect</a> · <a href="#sources">Facts as First Class Objects</a></li></ul></div>
+</section>
+<footer class="lr-footer">Results are as reported by each source; most are vendor- or author-reported.</footer>
+</main>
+</div>
+</div>
+
+<div class="rh-pill" data-hidden="{{pillHidden}}">
+<sc-if value="{{collapsed}}" hint-placeholder-val="{{true}}">
+<button type="button" class="rh-chip" aria-expanded="false" aria-label="Show Report Hub controls" onClick="{{toggle}}">
+<x-import component-from-global-scope="Lynx.Icons.FileText" size="16" aria-hidden="true"></x-import>
+<span>v{{viewing}}</span>
+<span class="rh-v">of 4</span>
+<span style="display: flex; transform: rotate(180deg); color: var(--muted-foreground)"><x-import component-from-global-scope="Lynx.Icons.ChevronDown" size="16" aria-hidden="true"></x-import></span>
+</button>
+</sc-if>
+<sc-if value="{{expanded}}" hint-placeholder-val="{{false}}">
+<section class="lr-panel rh-panel" aria-label="Report Hub">
+<div style="display: flex; align-items: center; gap: 8px">
+<nav class="rh-crumb" aria-label="Filed under">
+<span style="display: flex"><x-import component-from-global-scope="Lynx.Icons.Folder" size="14" aria-hidden="true"></x-import></span>
+<a href="Project.dc.html">Lynx</a>
+<span aria-hidden="true">›</span>
+<a href="Project.dc.html">memory</a>
+<span class="lr-badge" data-kind="research" style="margin-left: 4px">Research</span>
+</nav>
+<x-import component-from-global-scope="Lynx.Button" variant="ghost" size="icon" aria-label="Hide Report Hub controls" aria-expanded="true" on-click="{{toggle}}"><x-import component-from-global-scope="Lynx.Icons.ChevronDown" size="16" aria-hidden="true"></x-import></x-import>
+</div>
+<div style="display: flex; flex-direction: column; gap: 4px">
+<span class="lr-label" style="padding-left: 10px">Versions</span>
+<div class="rh-versions">
+<sc-for list="{{versions}}" as="v" hint-placeholder-count="4">
+<button type="button" class="rh-version" aria-current="{{v.current}}" onClick="{{v.pick}}">
+<span class="n">v{{v.n}}</span>
+<span class="d">{{v.date}}{{v.tag}}</span>
+<span class="ck"><sc-if value="{{v.isCurrent}}" hint-placeholder-val="{{false}}"><x-import component-from-global-scope="Lynx.Icons.Check" size="14" aria-hidden="true"></x-import></sc-if></span>
+<span class="note">{{v.note}}</span>
+</button>
+</sc-for>
+</div>
+</div>
+<div class="rh-actions">
+<x-import component-from-global-scope="Lynx.Toggle" variant="outline" size="sm" default-pressed="{{yes}}" aria-label="Pinned. Unpin report"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 17v5"></path><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"></path></svg>Pinned</x-import>
+<x-import component-from-global-scope="Lynx.Button" variant="outline" size="sm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="5" x="2" y="3" rx="1"></rect><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"></path><path d="M10 12h4"></path></svg>{{archiveLabel}}</x-import>
+<a href="Project.dc.html" style="margin-left: auto; display: inline-flex; align-items: center; gap: 6px; font: 500 12px/16px var(--font-sans); padding: 8px 6px; color: var(--muted-foreground)"><svg class="i-14" style="width: 14px; height: 14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"></path><path d="M19 12H5"></path></svg>Back to Lynx</a>
+</div>
+</section>
+</sc-if>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"pill":{"editor":"enum","options":["collapsed","expanded"],"default":"expanded"},"banner":{"editor":"enum","options":["none","old","archived"],"default":"old"},"$preview":{"width":1240,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var self = this;
+    var st = this.state || {};
+    var banner = this.props.banner || 'old';
+    var expanded = st.expanded != null ? st.expanded : (this.props.pill || 'expanded') === 'expanded';
+    var viewing = st.viewing || (banner === 'old' ? 2 : 4);
+    var archived = banner === 'archived';
+    var list = [
+      [4, '28 Oct', 'Added the build order and cost estimates.'],
+      [3, '27 Oct', 'Recomputed embedding costs on Workers AI pricing.'],
+      [2, '26 Oct', 'Added Honcho and ReasoningBank.'],
+      [1, '25 Oct', 'First draft.']
+    ];
+    var viewDate = list.filter(function (v) { return v[0] === viewing; })[0][1];
+    return {
+      yes: true,
+      viewing: viewing,
+      viewDate: viewDate,
+      showOld: viewing !== 4,
+      archived: archived,
+      archiveLabel: archived ? 'Unarchive' : 'Archive',
+      collapsed: !expanded,
+      expanded: expanded,
+      pillHidden: !expanded && st.hidden ? 'true' : 'false',
+      toggle: function () { self.setState({ expanded: !expanded, hidden: false }); },
+      openLatest: function () { self.setState({ viewing: 4 }); },
+      onScroll: function (e) {
+        var el = e.currentTarget;
+        var y = el.scrollTop;
+        var last = self._lastY || 0;
+        var atEnd = y + el.clientHeight >= el.scrollHeight - 24;
+        var hide = !atEnd && y > last + 4 && y > 48;
+        var show = atEnd || y < last - 4;
+        self._lastY = y;
+        if (hide && !(self.state && self.state.hidden)) self.setState({ hidden: true });
+        else if (show && self.state && self.state.hidden) self.setState({ hidden: false });
+      },
+      versions: list.map(function (v) {
+        return { n: v[0], date: v[1], tag: v[0] === 4 ? ' · latest' : '', note: v[2],
+          isCurrent: v[0] === viewing, current: v[0] === viewing ? 'true' : 'false',
+          pick: function () { self.setState({ viewing: v[0] }); } };
+      })
+    };
+  }
+}
+</script>
+</body>
+</html>

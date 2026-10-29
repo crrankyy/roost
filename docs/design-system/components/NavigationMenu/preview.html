@@ -1,0 +1,37 @@
+<!-- @dsCard group="Navigation" height=260 subtitle="Top nav with the Agents panel open" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>NavigationMenu — preview</title>
+<style>html,body{margin:0}body{background:var(--background);color:var(--foreground);font-family:var(--font-sans);padding:24px}
+.navgrid{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:6px;width:440px;list-style:none;margin:0}
+.navlink{display:block;border-radius:8px;padding:8px 10px;text-decoration:none;color:var(--foreground);outline:none;transition:background-color .15s}
+.navlink:hover,.navlink:focus-visible{background:var(--agent-soft)}
+.navlink:focus-visible{box-shadow:0 0 0 2px var(--background),0 0 0 4px var(--focus-ring)}
+.navlink b{display:block;font-size:14px;font-weight:500}
+.navlink span{display:block;font-size:12px;line-height:1.5;color:var(--muted-foreground);margin-top:2px}</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+  var K = window.Lynx, h = React.createElement, I = K.Icons;
+  function Link(title, desc) { return h('li', { key: title }, h(K.NavigationMenuLink, { href: '#', className: 'navlink' }, h('b', null, title), h('span', null, desc))) }
+  ReactDOM.createRoot(document.getElementById('root')).render(
+    h('div', { style: { display: 'flex', justifyContent: 'center' } },
+      h(K.NavigationMenu, { defaultValue: 'agents' },
+        h(K.NavigationMenuList, null,
+          h(K.NavigationMenuItem, { value: 'agents' },
+            h(K.NavigationMenuTrigger, null, 'Agents'),
+            h(K.NavigationMenuContent, null,
+              h('ul', { className: 'navgrid' },
+                Link('Research agent', 'Finds and cites sources for a question.'),
+                Link('Inbox agent', 'Triages mail and drafts replies.'),
+                Link('Calendar agent', 'Schedules and moves meetings.'),
+                Link('Coding agent', 'Opens draft pull requests.')))),
+          h(K.NavigationMenuItem, { value: 'runs' },
+            h(K.NavigationMenuTrigger, null, 'Runs'),
+            h(K.NavigationMenuContent, null, h('ul', { className: 'navgrid' }, Link('Active', '3 runs in progress'), Link('History', 'All finished runs')))),
+          h(K.NavigationMenuItem, { value: 'docs' },
+            h(K.NavigationMenuLink, { href: '#', className: K.navigationMenuTriggerStyle() }, 'Docs'))))));
+</script>
+</body>
+</html>

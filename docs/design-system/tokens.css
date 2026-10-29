@@ -1,0 +1,112 @@
+/* lynx-reports tokens as CSS variables, written for this canvas from the system's tokens.json
+   (the system serves tokens.json but no tokens.css). Light = Catppuccin Latte, dark = Mocha.
+   Theme with data-theme="light" | "dark" on <html> or on any wrapper element. */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root, [data-theme="light"] {
+  --rosewater: #dc8a78; --flamingo: #dd7878; --pink: #ea76cb; --mauve: #8839ef; --red: #d20f39; --maroon: #e64553;
+  --peach: #fe640b; --yellow: #df8e1d; --green: #40a02b; --teal: #179299; --sky: #04a5e5; --sapphire: #209fb5;
+  --blue: #1e66f5; --lavender: #7287fd; --text: #4c4f69; --subtext1: #5c5f77; --subtext0: #6c6f85;
+  --overlay2: #7c7f93; --overlay1: #8c8fa1; --overlay0: #9ca0b0; --surface2: #acb0be; --surface1: #bcc0cc;
+  --surface0: #ccd0da; --base: #eff1f5; --mantle: #e6e9ef; --crust: #dce0e8;
+
+  --agent-soft: rgba(136, 57, 239, 0.08);
+  --agent-border: rgba(136, 57, 239, 0.3);
+
+  --shadow-sm: 0 1px 2px 0 rgba(76, 79, 105, 0.05);
+  --shadow-lg: 0 10px 15px -3px rgba(76, 79, 105, 0.1), 0 4px 6px -4px rgba(76, 79, 105, 0.1);
+  --shadow-2xl: 0 25px 50px -12px rgba(76, 79, 105, 0.25);
+  --shadow-popover: 0 8px 24px rgba(76, 79, 105, 0.2);
+  --glow-agent: 0 0 24px rgba(136, 57, 239, 0.18);
+  --glow-thinking: 0 0 28px rgba(136, 57, 239, 0.12);
+  --glow-assistant: 0 0 28px #8839ef40;
+  --glow-user: 0 0 28px #1e66f53f;
+  --glow-online: 0 0 10px rgba(64, 160, 43, 0.8);
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  --rosewater: #f5e0dc; --flamingo: #f2cdcd; --pink: #f5c2e7; --mauve: #cba6f7; --red: #f38ba8; --maroon: #eba0ac;
+  --peach: #fab387; --yellow: #f9e2af; --green: #a6e3a1; --teal: #94e2d5; --sky: #89dceb; --sapphire: #74c7ec;
+  --blue: #89b4fa; --lavender: #b4befe; --text: #cdd6f4; --subtext1: #bac2de; --subtext0: #a6adc8;
+  --overlay2: #9399b2; --overlay1: #7f849c; --overlay0: #6c7086; --surface2: #585b70; --surface1: #45475a;
+  --surface0: #313244; --base: #1e1e2e; --mantle: #181825; --crust: #11111b;
+
+  --agent-soft: rgba(203, 166, 247, 0.15);
+  --agent-border: rgba(203, 166, 247, 0.35);
+
+  --shadow-sm: 0 1px 2px 0 rgba(17, 17, 27, 0.3);
+  --shadow-lg: 0 10px 15px -3px rgba(17, 17, 27, 0.5), 0 4px 6px -4px rgba(17, 17, 27, 0.5);
+  --shadow-2xl: 0 25px 50px -12px rgba(17, 17, 27, 0.7);
+  --shadow-popover: 0 8px 24px rgba(17, 17, 27, 0.6);
+  --glow-agent: 0 0 24px rgba(203, 166, 247, 0.18);
+  --glow-thinking: 0 0 28px rgba(203, 166, 247, 0.12);
+  --glow-assistant: 0 0 28px #cba6f740;
+  --glow-user: 0 0 28px #89b4fa3d;
+  --glow-online: 0 0 10px rgba(166, 227, 161, 0.8);
+  color-scheme: dark;
+}
+
+/* Role aliases, recomputed wherever a theme is set so a themed wrapper resolves its own values. */
+:root, [data-theme] {
+  --foreground: var(--text);
+  --card: var(--base); --card-foreground: var(--text);
+  --popover: var(--base); --popover-foreground: var(--text);
+  --primary: var(--text);
+  --secondary: var(--surface0); --secondary-foreground: var(--text);
+  --muted: var(--surface0);
+  --accent: var(--surface0); --accent-foreground: var(--text);
+  --destructive: var(--red); --destructive-text: var(--red);
+  --border: var(--surface0); --input: var(--surface1);
+  --chart-1: var(--blue); --chart-2: var(--green); --chart-3: var(--peach); --chart-4: var(--mauve); --chart-5: var(--pink);
+  --sidebar-foreground: var(--subtext1); --sidebar-accent: var(--surface0); --sidebar-accent-foreground: var(--text);
+  --sidebar-border: var(--surface0); --sidebar-ring: var(--blue);
+  --agent: var(--mauve); --focus-ring: var(--mauve);
+  --blue-400: var(--blue); --blue-500: var(--blue);
+  --violet-200: var(--mauve); --violet-300: var(--mauve); --violet-400: var(--mauve); --violet-500: var(--mauve); --violet-600: var(--mauve);
+  --pink-500: var(--pink); --red-400: var(--maroon); --red-500: var(--red); --orange-500: var(--peach);
+  --green-500: var(--green); --emerald-400: var(--green); --zinc-400: var(--overlay1);
+
+  /* Latte */
+  --background: var(--base);
+  --primary-foreground: var(--base);
+  --destructive-foreground: var(--base);
+  --muted-foreground: var(--subtext1);
+  --ring: var(--text);
+  --sidebar-background: var(--mantle);
+  --sidebar-primary: var(--text); --sidebar-primary-foreground: var(--base);
+  --agent-foreground: var(--base);
+  --blue-300: var(--blue);
+}
+
+/* Mocha: the ground sits one step darker than stock. */
+[data-theme="dark"] {
+  --background: var(--mantle);
+  --primary-foreground: var(--mantle);
+  --destructive-foreground: var(--crust);
+  --muted-foreground: var(--subtext0);
+  --ring: var(--subtext1);
+  --sidebar-background: var(--crust);
+  --sidebar-primary: var(--blue); --sidebar-primary-foreground: var(--crust);
+  --agent-foreground: var(--crust);
+  --blue-300: var(--lavender);
+}
+
+:root {
+  --font-sans: Inter, ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  --space-0\.5: 2px; --space-1: 4px; --space-1\.5: 6px; --space-2: 8px; --space-2\.5: 10px; --space-3: 12px;
+  --space-4: 16px; --space-5: 20px; --space-6: 24px; --space-12: 48px;
+
+  --radius: 0.5rem; --radius-xl: 0.75rem; --radius-2xl: 1rem; --radius-3xl: 1.5rem; --radius-full: 9999px;
+
+  --blur-item: 6px; --blur-md: 12px; --blur-lg: 16px; --blur-xl: 24px; --blur-3xl: 64px;
+
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+
+  --duration-reveal: 200ms; --duration-tint: 250ms; --duration-color: 300ms; --duration-halo: 350ms;
+  --duration-bloom: 500ms; --duration-toggle: 700ms; --duration-glow-cycle: 8s;
+}

@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Report Hub · Home</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/lynx/tokens.css">
+<link rel="stylesheet" href="ds/lynx/components/bundle.css">
+<link rel="stylesheet" href="ds/lynx/components/reports.css">
+<script src="ds/lynx/components/bundle.js"></script>
+<link rel="stylesheet" href="hub.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="hub {{themeClass}}" data-theme="{{theme}}" style="width: 100%; min-height: 100vh; font-family: var(--font-sans); color: var(--foreground)">
+<div class="hub-page">
+
+<header class="lr-panel hub-bar">
+<a class="hub-brand" href="Main.dc.html">
+<x-import component-from-global-scope="Lynx.LiveAvatar" size="{{n28}}" hue="mauve" label="Report Hub"></x-import>
+<span>Report Hub</span>
+</a>
+<div class="hub-desk" style="align-items: center; gap: 8px">
+<x-import component-from-global-scope="Lynx.Select" default-value="catppuccin">
+<x-import component-from-global-scope="Lynx.SelectTrigger" aria-label="Palette" style="width: 168px">
+<x-import component-from-global-scope="Lynx.SelectValue" placeholder="Palette"></x-import>
+</x-import>
+<x-import component-from-global-scope="Lynx.SelectContent">
+<x-import component-from-global-scope="Lynx.SelectGroup">
+<x-import component-from-global-scope="Lynx.SelectLabel">Expressive</x-import>
+<sc-for list="{{palettesExpressive}}" as="p" hint-placeholder-count="6">
+<x-import component-from-global-scope="Lynx.SelectItem" value="{{p.id}}">{{p.label}}</x-import>
+</sc-for>
+</x-import>
+<x-import component-from-global-scope="Lynx.SelectSeparator"></x-import>
+<x-import component-from-global-scope="Lynx.SelectGroup">
+<x-import component-from-global-scope="Lynx.SelectLabel">Minimal</x-import>
+<sc-for list="{{palettesMinimal}}" as="p" hint-placeholder-count="8">
+<x-import component-from-global-scope="Lynx.SelectItem" value="{{p.id}}">{{p.label}}</x-import>
+</sc-for>
+</x-import>
+</x-import>
+</x-import>
+</div>
+<div class="hub-phone">
+<x-import component-from-global-scope="Lynx.Button" variant="outline" size="icon" aria-label="Choose palette"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"></path></svg></x-import>
+</div>
+<x-import component-from-global-scope="Lynx.ThemeToggle"></x-import>
+</header>
+
+<section class="lr-panel hub-triage" aria-labelledby="triage-h">
+<div class="hub-triage-head">
+<span class="hub-tile"><x-import component-from-global-scope="Lynx.Icons.Inbox" size="16" aria-hidden="true"></x-import></span>
+<div style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+<h2 id="triage-h" class="hub-label">3 reports need confirming</h2>
+<p class="hub-caption">Published by unattended runs. Check where Claude filed them.</p>
+</div>
+<a href="Triage.dc.html" style="font-size: 12px; line-height: 16px; white-space: nowrap; padding: 8px 4px">Review all</a>
+</div>
+<div class="hub-triage-items">
+<sc-for list="{{triage}}" as="t" hint-placeholder-count="3">
+<div class="hub-titem">
+<a class="hub-titem-title" href="Triage.dc.html">{{t.title}}</a>
+<div class="hub-proposal">
+<span>{{t.where}}</span>
+<span>as</span>
+<span class="lr-badge" data-kind="{{t.kind}}">{{t.kindLabel}}</span>
+</div>
+<div class="hub-titem-foot">
+<sc-if value="{{t.quarantined}}" hint-placeholder-val="{{false}}">
+<span class="lr-badge" data-tone="red">{{t.findings}}</span>
+<x-import component-from-global-scope="Lynx.Button" variant="outline" size="sm">Review</x-import>
+</sc-if>
+<sc-if value="{{t.confirmable}}" hint-placeholder-val="{{true}}">
+<span class="hub-micro">{{t.when}}</span>
+<x-import component-from-global-scope="Lynx.Button" variant="outline" size="sm" aria-label="{{t.confirmLabel}}"><x-import component-from-global-scope="Lynx.Icons.Check" size="16" aria-hidden="true"></x-import>Confirm</x-import>
+</sc-if>
+</div>
+</div>
+</sc-for>
+</div>
+</section>
+
+<section class="hub-sec" aria-labelledby="pinned-h">
+<div class="hub-sec-head" style="min-height: 20px">
+<h2 id="pinned-h" class="hub-sec-title">Pinned</h2>
+</div>
+<div class="hub-pins">
+<sc-for list="{{pinned}}" as="p" hint-placeholder-count="2">
+<a class="lr-panel hub-pin" href="Report.dc.html">
+<span style="color: var(--agent); display: flex"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 17v5"></path><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"></path></svg></span>
+<span class="hub-pin-text">
+<span class="hub-pin-title">{{p.title}}</span>
+<span class="hub-meta" style="padding-left: 0; flex-wrap: nowrap"><span class="lr-badge" data-kind="{{p.kind}}">{{p.kindLabel}}</span><span style="white-space: nowrap">{{p.where}}</span></span>
+</span>
+</a>
+</sc-for>
+</div>
+</section>
+
+<div class="hub-cols">
+<div class="hub-col">
+<section class="hub-sec" aria-labelledby="recent-h">
+<div class="hub-sec-head">
+<h2 id="recent-h" class="hub-sec-title">Recent <span class="hub-count">Last 15 across all projects</span></h2>
+<div class="hub-phone">
+<x-import component-from-global-scope="Lynx.Button" variant="outline" size="sm"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"></path><path d="M7 12h10"></path><path d="M10 18h4"></path></svg>Filter</x-import>
+</div>
+</div>
+<div class="hub-filters hub-desk" role="group" aria-label="Filter recent reports">
+<x-import component-from-global-scope="Lynx.Select" default-value="all">
+<x-import component-from-global-scope="Lynx.SelectTrigger" aria-label="Project" style="width: 168px">
+<x-import component-from-global-scope="Lynx.SelectValue" placeholder="All projects"></x-import>
+</x-import>
+<x-import component-from-global-scope="Lynx.SelectContent">
+<x-import component-from-global-scope="Lynx.SelectItem" value="all">All projects</x-import>
+<x-import component-from-global-scope="Lynx.SelectItem" value="payments-api">Payments API</x-import>
+<x-import component-from-global-scope="Lynx.SelectItem" value="report-hub">Report Hub</x-import>
+<x-import component-from-global-scope="Lynx.SelectItem" value="lynx">Lynx</x-import>
+</x-import>
+</x-import>
+<x-import component-from-global-scope="Lynx.DropdownMenu" modal="{{no}}">
+<x-import component-from-global-scope="Lynx.DropdownMenuTrigger" class="{{outlineBtn}}" aria-label="Kind">All kinds<x-import component-from-global-scope="Lynx.Icons.ChevronDown" size="16" aria-hidden="true"></x-import></x-import>
+<x-import component-from-global-scope="Lynx.DropdownMenuContent" align="start" style="width: 220px">
+<x-import component-from-global-scope="Lynx.DropdownMenuLabel">Kind</x-import>
+<sc-for list="{{kinds}}" as="k" hint-placeholder-count="13">
+<x-import component-from-global-scope="Lynx.DropdownMenuCheckboxItem" checked="{{no}}"><span class="lr-badge" data-kind="{{k.id}}">{{k.label}}</span></x-import>
+</sc-for>
+</x-import>
+</x-import>
+<x-import component-from-global-scope="Lynx.Select" default-value="any">
+<x-import component-from-global-scope="Lynx.SelectTrigger" aria-label="Date range" style="width: 156px">
+<x-import component-from-global-scope="Lynx.SelectValue" placeholder="Any time"></x-import>
+</x-import>
+<x-import component-from-global-scope="Lynx.SelectContent">
+<x-import component-from-global-scope="Lynx.SelectItem" value="any">Any time</x-import>
+<x-import component-from-global-scope="Lynx.SelectItem" value="7">Last 7 days</x-import>
+<x-import component-from-global-scope="Lynx.SelectItem" value="30">Last 30 days</x-import>
+<x-import component-from-global-scope="Lynx.SelectItem" value="90">Last 90 days</x-import>
+<x-import component-from-global-scope="Lynx.SelectSeparator"></x-import>
+<x-import component-from-global-scope="Lynx.SelectItem" value="custom">Custom range…</x-import>
+</x-import>
+</x-import>
+<label class="hub-choice" for="home-archived" style="margin-left: 8px; gap: 8px; color: var(--muted-foreground)">
+<x-import component-from-global-scope="Lynx.Switch" id="home-archived" default-checked="{{no}}"></x-import>
+Include archived
+</label>
+</div>
+<div class="lr-panel hub-list">
+<sc-for list="{{recent}}" as="r" hint-placeholder-count="15">
+<a class="hub-row {{r.more}}" href="Report.dc.html">
+<span class="hub-row-top">
+<span class="hub-dot" data-on="{{r.isNew}}" role="img" aria-label="{{r.dotLabel}}"></span>
+<span class="hub-row-title">{{r.title}}</span>
+<span class="hub-time">
+<sc-if value="{{r.pinned}}" hint-placeholder-val="{{false}}"><svg class="i-12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Pinned"><path d="M12 17v5"></path><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"></path></svg></sc-if>
+{{r.when}}
+</span>
+</span>
+<span class="hub-meta">
+<span class="lr-badge" data-kind="{{r.kind}}">{{r.kindLabel}}</span>
+<span class="hub-path">{{r.project}}<sc-if value="{{r.hasStream}}" hint-placeholder-val="{{true}}"> › <b>{{r.stream}}</b></sc-if></span>
+</span>
+<span class="hub-sum">{{r.summary}}</span>
+</a>
+</sc-for>
+<div class="hub-showmore hub-phone">
+<x-import component-from-global-scope="Lynx.Button" variant="ghost" size="sm">Show 5 more</x-import>
+</div>
+</div>
+</section>
+</div>
+
+<div class="hub-col">
+<section class="hub-sec" aria-labelledby="streams-h">
+<div class="hub-sec-head">
+<h2 id="streams-h" class="hub-sec-title">Active streams <span class="hub-count">Reports in the last 14 days</span></h2>
+</div>
+<div class="lr-panel hub-list">
+<sc-for list="{{streams}}" as="s" hint-placeholder-count="7">
+<a class="hub-row hub-row-h" href="Project.dc.html">
+<span class="hub-tile-quiet"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="6" x2="6" y1="3" y2="15"></line><circle cx="18" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><path d="M18 9a9 9 0 0 1-9 9"></path></svg></span>
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+<span class="hub-label">{{s.name}}</span>
+<span class="hub-caption">{{s.project}} · latest {{s.latest}}</span>
+</span>
+<svg class="lr-spark" viewBox="0 0 120 28" style="width: 60px; height: 20px" aria-hidden="true"><polyline points="{{s.points}}"></polyline><circle data-series="1" cx="116" cy="{{s.lastY}}" r="3"></circle></svg>
+<span class="lr-badge lr-badge-plain" style="white-space: nowrap">{{s.count}}</span>
+</a>
+</sc-for>
+</div>
+</section>
+
+<section class="hub-sec" aria-labelledby="projects-h">
+<div class="hub-sec-head">
+<h2 id="projects-h" class="hub-sec-title">Projects</h2>
+</div>
+<div class="lr-panel hub-list">
+<sc-for list="{{projects}}" as="p" hint-placeholder-count="3">
+<a class="hub-row hub-row-h" href="Project.dc.html">
+<x-import component-from-global-scope="Lynx.Avatar"><x-import component-from-global-scope="Lynx.AvatarFallback"><x-import component-from-global-scope="Lynx.Icons.Folder" size="16" aria-hidden="true"></x-import></x-import></x-import>
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+<span class="hub-label">{{p.name}}</span>
+<span class="hub-caption">{{p.detail}}</span>
+</span>
+<span class="hub-time">{{p.last}}</span>
+<span style="color: var(--muted-foreground); display: flex"><x-import component-from-global-scope="Lynx.Icons.ChevronRight" size="16" aria-hidden="true"></x-import></span>
+</a>
+</sc-for>
+</div>
+</section>
+</div>
+</div>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["light","dark"],"default":"light"},"$preview":{"width":1240,"height":1960}}'>
+class Component extends DCLogic {
+  applyTheme() {
+    var t = this.props.theme === 'dark' ? 'dark' : 'light';
+    var el = document.documentElement;
+    el.setAttribute('data-theme', t);
+    if (t === 'dark') el.classList.add('dark'); else el.classList.remove('dark');
+  }
+  componentDidMount() { this.applyTheme(); }
+  componentDidUpdate() { this.applyTheme(); }
+  renderVals() {
+    var theme = this.props.theme === 'dark' ? 'dark' : 'light';
+    var cap = function (s) { return s.charAt(0).toUpperCase() + s.slice(1); };
+    var kindIds = ['investigation', 'incident', 'review', 'audit', 'architecture', 'plan', 'analysis', 'benchmark', 'experiment', 'research', 'explainer', 'runbook', 'summary'];
+    var bv = (window.Lynx && window.Lynx.buttonVariants) ? window.Lynx.buttonVariants({ variant: 'outline' }) : '';
+    var recent = [
+      ['Why refresh tokens expire early', 'Payments API', 'auth-migration', 'investigation', '2h ago', true, false, 'They inherit the access token’s 15-minute TTL after the Redis key rename; the fix is one line in token-store.ts.'],
+      ['Review: ETag retries for manifest writes', 'Report Hub', 'worker', 'review', '5h ago', true, false, 'Approve with two changes: cap retries at three and re-read the manifest before each retry.'],
+      ['Voice turn latency, p95 by device', 'Lynx', 'voice', 'benchmark', '8h ago', true, false, 'p95 is 1.42 s on iPhone and 2.10 s on Pixel 7; the whole gap is voice-activity detection.'],
+      ['How Lynx should remember', 'Lynx', 'memory', 'research', 'Yesterday', false, true, 'Don’t adopt a memory framework: keep every message, compact older turns, keep a table of facts.'],
+      ['Refunds v2 rollout plan', 'Payments API', 'refunds-v2', 'plan', '2 days ago', false, false, 'Ship behind a per-merchant flag in three waves; wave one is 20 low-volume merchants on 4 Nov.'],
+      ['Weekly summary, 20–26 Oct', 'Lynx', '', 'summary', '3 days ago', false, false, 'Memory design settled, voice latency down 18%, two incidents closed.'],
+      ['Settlement recon architecture', 'Payments API', 'settlement-recon', 'architecture', '4 days ago', false, false, 'Match on acquirer reference, amount and date ±1 day in a nightly job; leftovers go to a review queue.'],
+      ['Compaction loses planted facts', 'Lynx', 'memory', 'experiment', '5 days ago', false, false, 'Three rounds of summarising lost 11 of 20 planted facts; the facts table lost none.'],
+      ['How report tokens fit together', 'Report Hub', 'design-system', 'explainer', '6 days ago', false, false, 'tokens.css, reports.css and the palettes, and what a single report may override.'],
+      ['Rotating the Access service token', 'Report Hub', 'worker', 'runbook', '1 week ago', false, true, 'Six steps, about 10 minutes; the publish CLI keeps working on the old token for 24 hours.'],
+      ['Refund webhook retries', 'Payments API', 'refunds-v2', 'analysis', '9 days ago', false, false, '4.2% of refund webhooks were retried last month; 81% of retries were one merchant’s 502s.'],
+      ['Auth migration cutover plan', 'Payments API', 'auth-migration', 'plan', '10 days ago', false, false, 'Dual-write sessions for a week, then flip reads per region, starting with ap-south.'],
+      ['Publish 403s on 14 Oct', 'Report Hub', 'worker', 'incident', '2 weeks ago', false, false, 'An Access policy change blocked the publish token for 47 minutes; six queued reports went out after the fix.'],
+      ['Wake word options', 'Lynx', 'voice', 'research', '2 weeks ago', false, false, 'openWakeWord on device is free and good enough; Porcupine only if false triggers stay above 1 an hour.'],
+      ['Payments API audit, Q3', 'Payments API', '', 'audit', '3 weeks ago', false, false, 'Two high findings, both in webhook signature checks; nine dependencies a major version behind.']
+    ].map(function (r, i) {
+      return { title: r[0], project: r[1], stream: r[2], hasStream: !!r[2], kind: r[3], kindLabel: cap(r[3]), when: r[4],
+        isNew: r[5] ? 'true' : 'false', dotLabel: r[5] ? 'Unread' : '', pinned: r[6], summary: r[7], more: i >= 10 ? 'hub-more' : '' };
+    });
+    var spark = function (vals) {
+      var max = Math.max.apply(null, vals) || 1;
+      var pts = vals.map(function (v, i) { return [4 + i * (112 / (vals.length - 1)), 24 - (v / max) * 20]; });
+      return { points: pts.map(function (p) { return p[0].toFixed(1) + ',' + p[1].toFixed(1); }).join(' '), lastY: pts[pts.length - 1][1].toFixed(1) };
+    };
+    var streams = [
+      ['auth-migration', 'Payments API', '4 reports', '2h ago', [0, 1, 0, 0, 1, 0, 1, 0, 0, 1]],
+      ['worker', 'Report Hub', '7 reports', '5h ago', [1, 0, 2, 1, 0, 1, 0, 0, 1, 1]],
+      ['voice', 'Lynx', '3 reports', '8h ago', [0, 0, 1, 0, 0, 0, 1, 0, 0, 1]],
+      ['memory', 'Lynx', '5 reports', 'yesterday', [0, 1, 1, 0, 1, 0, 0, 1, 1, 0]],
+      ['refunds-v2', 'Payments API', '4 reports', '2 days ago', [1, 0, 0, 1, 0, 0, 1, 0, 1, 0]],
+      ['settlement-recon', 'Payments API', '2 reports', '4 days ago', [0, 0, 0, 1, 0, 0, 0, 1, 0, 0]],
+      ['design-system', 'Report Hub', '3 reports', '6 days ago', [0, 1, 0, 0, 0, 1, 0, 1, 0, 0]]
+    ].map(function (s) { var sp = spark(s[4]); return { name: s[0], project: s[1], count: s[2], latest: s[3], points: sp.points, lastY: sp.lastY }; });
+    return {
+      theme: theme,
+      themeClass: theme === 'dark' ? 'dark' : '',
+      n28: 28, no: false, yes: true,
+      outlineBtn: bv,
+      palettesExpressive: [['catppuccin', 'Catppuccin'], ['tokyo-night', 'Tokyo Night'], ['rose-pine', 'Rosé Pine'], ['nord', 'Nord'], ['dracula', 'Dracula'], ['kanagawa', 'Kanagawa']].map(function (p) { return { id: p[0], label: p[1] }; }),
+      palettesMinimal: [['graphite', 'Graphite'], ['ash', 'Ash'], ['solarized', 'Solarized'], ['gruvbox', 'Gruvbox'], ['everforest', 'Everforest'], ['github', 'GitHub'], ['ayu', 'Ayu'], ['flexoki', 'Flexoki']].map(function (p) { return { id: p[0], label: p[1] }; }),
+      kinds: kindIds.map(function (k) { return { id: k, label: cap(k) }; }),
+      triage: [
+        { title: 'Settlement mismatch, Oct batch', where: 'Payments API › settlement-recon', kind: 'analysis', kindLabel: 'Analysis', when: 'Unattended · 40 min ago', confirmable: true, quarantined: false, confirmLabel: 'Confirm Settlement mismatch, Oct batch' },
+        { title: 'Nightly eval: memory recall', where: 'Lynx › memory', kind: 'benchmark', kindLabel: 'Benchmark', when: 'Unattended · 3h ago', confirmable: true, quarantined: false, confirmLabel: 'Confirm Nightly eval: memory recall' },
+        { title: 'Dependency audit', where: 'Report Hub, no stream', kind: 'audit', kindLabel: 'Audit', when: '', confirmable: false, quarantined: true, findings: '2 secret findings · not published' }
+      ],
+      pinned: [
+        { title: 'How Lynx should remember', where: 'Lynx › memory', kind: 'research', kindLabel: 'Research' },
+        { title: 'Rotating the Access service token', where: 'Report Hub › worker', kind: 'runbook', kindLabel: 'Runbook' }
+      ],
+      recent: recent,
+      streams: streams,
+      projects: [
+        { name: 'Payments API', detail: '21 reports · 3 active streams', last: '2h ago' },
+        { name: 'Report Hub', detail: '12 reports · 2 active streams', last: '5h ago' },
+        { name: 'Lynx', detail: '15 reports · 2 active streams', last: '8h ago' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

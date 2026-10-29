@@ -1,0 +1,898 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Memory research for Lynx</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" />
+<script>
+  // Theme before first paint: saved choice, else the system setting.
+  (function () {
+    var t = null
+    try { t = localStorage.getItem('lynx-report-theme') } catch (e) {}
+    if (t !== 'light' && t !== 'dark') t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+    document.documentElement.setAttribute('data-theme', t)
+  })()
+</script>
+<style>
+/* ---- Lynx design system tokens (client/src/design-system/styles/tokens.css) ---- */
+:root, [data-theme="light"] {
+  --rosewater: #dc8a78; /* Catppuccin rosewater. Reserved; no component uses it yet. */
+  --flamingo: #dd7878; /* Catppuccin flamingo. Reserved. */
+  --pink: #ea76cb; /* Catppuccin pink: composer focus-glow stop (pink-500). */
+  --mauve: #8839ef; /* Catppuccin mauve: Lynx's agent colour (agent, violet-*). */
+  --red: #d20f39; /* Catppuccin red: destructive, errors, Profile hover hue (red-500). */
+  --maroon: #e64553; /* Catppuccin maroon: destructive icons and edges (red-400). */
+  --peach: #fe640b; /* Catppuccin peach: Notifications hover hue (orange-500), chart-3. */
+  --yellow: #df8e1d; /* Catppuccin yellow: ThemeToggle's glow behind the sun. */
+  --green: #40a02b; /* Catppuccin green: Settings hover hue, online dot, success checks (green-500, emerald-400). */
+  --teal: #179299; /* Catppuccin teal. Reserved. */
+  --sky: #04a5e5; /* Catppuccin sky. Reserved. */
+  --sapphire: #209fb5; /* Catppuccin sapphire. Reserved. */
+  --blue: #1e66f5; /* Catppuccin blue: the person's colour, Home hover hue, send halo (blue-400, blue-500). */
+  --lavender: #7287fd; /* Catppuccin lavender: user avatar icon in Mocha (blue-300), thinking-dot glow, ThemeToggle's glow behind the moon. */
+  --text: #4c4f69; /* Catppuccin text: foreground. */
+  --subtext1: #5c5f77; /* Catppuccin subtext1: muted-foreground in Latte (5.5:1 on base), sidebar text. */
+  --subtext0: #6c6f85; /* Catppuccin subtext0: muted-foreground in Mocha (7.9:1 on mantle). */
+  --overlay2: #7c7f93; /* Catppuccin overlay2. */
+  --overlay1: #8c8fa1; /* Catppuccin overlay1 (zinc-400). */
+  --overlay0: #9ca0b0; /* Catppuccin overlay0. */
+  --surface2: #acb0be; /* Catppuccin surface2. */
+  --surface1: #bcc0cc; /* Catppuccin surface1: input (unchecked switch track, stock field edges). */
+  --surface0: #ccd0da; /* Catppuccin surface0: border, secondary, muted, accent fills. */
+  --base: #eff1f5; /* Catppuccin base: the ground in Latte; cards and popovers in both themes (one step above the Mocha ground). */
+  --mantle: #e6e9ef; /* Catppuccin mantle: the ground in Mocha (darker than Mocha's default base, by request); sidebar in Latte. */
+  --crust: #dce0e8; /* Catppuccin crust: Mocha sidebar; text on light fills in Mocha; modal scrim in Mocha. */
+  --background: var(--base); /* Page ground: Latte base, Mocha mantle. Composer, menu bar and sidebar shells sit on it at 75–80% with a backdrop blur. */
+  --foreground: var(--text); /* Primary text and icons on background, card and popover (7.1:1 Latte, 12.1:1 Mocha). Also the fill of the primary (send) button. */
+  --card: var(--base); /* Card and assistant-bubble surface (bubbles at 70%). In Mocha one step above the mantle ground. */
+  --card-foreground: var(--text); /* Text on card. */
+  --popover: var(--base); /* Floating surfaces: menus, tooltips, citation previews, selects. */
+  --popover-foreground: var(--text); /* Text on popover. */
+  --primary: var(--text); /* shadcn primary fill. Lynx's own primary action uses foreground; primary/30 is the composer's focused border. */
+  --primary-foreground: var(--base); /* Text on primary. */
+  --secondary: var(--surface0); /* Secondary buttons, slider and progress tracks. */
+  --secondary-foreground: var(--text); /* Text on secondary. */
+  --muted: var(--surface0); /* Quiet fills: skeletons, kbd keys, table footers. */
+  --muted-foreground: var(--subtext1); /* Secondary text, resting nav labels and icons, on background, card and popover (5.5:1 Latte, 7.4:1+ Mocha). Lynx also uses it at /70 for placeholders and /45–/60 for timestamps and hints — those fade below 4.5:1 by design and are only for non-essential metadata. */
+  --accent: var(--surface0); /* shadcn hover fill. Restyled Lynx components use agent-soft for hover and selection instead. */
+  --accent-foreground: var(--text); /* Text on accent. */
+  --destructive: var(--red); /* Destructive fills and error states (Catppuccin red). */
+  --destructive-foreground: var(--base); /* Text on destructive (4.8:1 Latte, 8.1:1 Mocha). */
+  --border: var(--surface0); /* Hairlines. Lynx shells use it at /40–/60 so edges stay soft over the blur. */
+  --input: var(--surface1); /* Unchecked switch track and stock input borders. */
+  --ring: var(--text); /* shadcn focus ring. Restyled components use focus-ring. */
+  --chart-1: var(--blue); /* Chart series 1. */
+  --chart-2: var(--green); /* Chart series 2. */
+  --chart-3: var(--peach); /* Chart series 3. */
+  --chart-4: var(--mauve); /* Chart series 4. */
+  --chart-5: var(--pink); /* Chart series 5. */
+  --sidebar-background: var(--mantle); /* App-shell Sidebar ground (the shadcn Sidebar, not GlowSidebar): one step below the ground. */
+  --sidebar-foreground: var(--subtext1); /* Text on sidebar-background. */
+  --sidebar-primary: var(--text); /* Sidebar's primary mark (workspace logo tile). */
+  --sidebar-primary-foreground: var(--base); /* Text on sidebar-primary. */
+  --sidebar-accent: var(--surface0); /* Sidebar item hover fill. */
+  --sidebar-accent-foreground: var(--text); /* Text on sidebar-accent. */
+  --sidebar-border: var(--surface0); /* Sidebar hairlines. */
+  --sidebar-ring: var(--blue); /* Sidebar focus ring. */
+  --agent: var(--mauve); /* Lynx's accent (Catppuccin mauve): the agent's voice, selection, checked controls, active tabs, links. As text on background, card and popover (4.8:1 Latte, 8.1:1+ Mocha); on agent-soft use foreground for words in Latte (mauve there is 4.3:1), agent is fine for icons. */
+  --agent-foreground: var(--base); /* Text and check marks on an agent fill (4.8:1 Latte, 9.2:1 Mocha). */
+  --agent-soft: rgba(136, 57, 239, 0.08); /* Mauve tint behind hovered and selected items: menu highlight, active tab, toggled toggle, selected row. Text on it is foreground (or agent in Mocha). */
+  --agent-border: rgba(136, 57, 239, 0.3); /* Edge of agent-tinted elements: badges, avatars, the thinking panel. Decorative, never the only boundary of a control. */
+  --destructive-text: var(--red); /* Error and destructive text and icons (field errors, form messages): 4.8:1 on the Latte ground, 7.6:1 on the Mocha ground. */
+  --focus-ring: var(--agent); /* The 2px keyboard focus ring on every restyled control; solid mauve, 4.4:1+ Latte and 8:1+ Mocha on every surface. */
+  --blue-300: var(--blue); /* User avatar icon (blue in Latte, lavender in Mocha). */
+  --blue-400: var(--blue); /* User bubble tint (/10) and edge (/20), user avatar (/10, /25). */
+  --blue-500: var(--blue); /* Home hover hue and halo; send-button halo (/40); attach-file hover colour. */
+  --violet-200: var(--mauve); /* Thinking-panel label (/90) and model badge text (/75). */
+  --violet-300: var(--mauve); /* Assistant avatar icon, citation numbers, activity-step icons. */
+  --violet-400: var(--mauve); /* Assistant identity: avatar and citation tints (/10, /25, /35), action-bar hover (/15), thinking panel (/6, /20). */
+  --violet-500: var(--mauve); /* Voice-input hover colour and halo; bloom glows. */
+  --violet-600: var(--mauve); /* Thinking dots and orbit in the light theme. */
+  --pink-500: var(--pink); /* Composer focus-glow stop. */
+  --red-400: var(--maroon); /* Destructive icons and edges. */
+  --red-500: var(--red); /* Profile hover hue and halo. */
+  --orange-500: var(--peach); /* Notifications hover hue and halo. */
+  --green-500: var(--green); /* Settings hover hue and halo; composer glow stop. */
+  --emerald-400: var(--green); /* Connected dot and delivered check; copy-confirmed check. */
+  --zinc-400: var(--overlay1); /* Muted grey for inactive icons (no component uses it at the moment). */
+  --shadow-sm: 0 1px 2px 0 rgba(76, 79, 105, 0.05); /* Inputs and quiet buttons. */
+  --shadow-lg: 0 10px 15px -3px rgba(76, 79, 105, 0.1), 0 4px 6px -4px rgba(76, 79, 105, 0.1); /* Nav shells, action bar, cards, menus. */
+  --shadow-2xl: 0 25px 50px -12px rgba(76, 79, 105, 0.25); /* Composer, dialogs, toasts. */
+  --shadow-popover: 0 8px 24px rgba(76, 79, 105, 0.2); /* Citation preview and tooltips. */
+  --glow-agent: 0 0 24px rgba(136, 57, 239, 0.18); /* Assistant avatar; checked controls and active tabs in restyled components. */
+  --glow-thinking: 0 0 28px rgba(136, 57, 239, 0.12); /* Thinking panel. */
+  --glow-assistant: 0 0 28px #8839ef40; /* Assistant bubble. */
+  --glow-user: 0 0 28px #1e66f53f; /* User bubble. */
+  --glow-online: 0 0 10px rgba(64, 160, 43, 0.8); /* Connected status dot. */
+}
+[data-theme="dark"] {
+  --rosewater: #f5e0dc;
+  --flamingo: #f2cdcd;
+  --pink: #f5c2e7;
+  --mauve: #cba6f7;
+  --red: #f38ba8;
+  --maroon: #eba0ac;
+  --peach: #fab387;
+  --yellow: #f9e2af;
+  --green: #a6e3a1;
+  --teal: #94e2d5;
+  --sky: #89dceb;
+  --sapphire: #74c7ec;
+  --blue: #89b4fa;
+  --lavender: #b4befe;
+  --text: #cdd6f4;
+  --subtext1: #bac2de;
+  --subtext0: #a6adc8;
+  --overlay2: #9399b2;
+  --overlay1: #7f849c;
+  --overlay0: #6c7086;
+  --surface2: #585b70;
+  --surface1: #45475a;
+  --surface0: #313244;
+  --base: #1e1e2e;
+  --mantle: #181825;
+  --crust: #11111b;
+  --background: var(--mantle);
+  --foreground: var(--text);
+  --card: var(--base);
+  --card-foreground: var(--text);
+  --popover: var(--base);
+  --popover-foreground: var(--text);
+  --primary: var(--text);
+  --primary-foreground: var(--mantle);
+  --secondary: var(--surface0);
+  --secondary-foreground: var(--text);
+  --muted: var(--surface0);
+  --muted-foreground: var(--subtext0);
+  --accent: var(--surface0);
+  --accent-foreground: var(--text);
+  --destructive: var(--red);
+  --destructive-foreground: var(--crust);
+  --border: var(--surface0);
+  --input: var(--surface1);
+  --ring: var(--subtext1);
+  --chart-1: var(--blue);
+  --chart-2: var(--green);
+  --chart-3: var(--peach);
+  --chart-4: var(--mauve);
+  --chart-5: var(--pink);
+  --sidebar-background: var(--crust);
+  --sidebar-foreground: var(--subtext1);
+  --sidebar-primary: var(--blue);
+  --sidebar-primary-foreground: var(--crust);
+  --sidebar-accent: var(--surface0);
+  --sidebar-accent-foreground: var(--text);
+  --sidebar-border: var(--surface0);
+  --sidebar-ring: var(--blue);
+  --agent: var(--mauve);
+  --agent-foreground: var(--crust);
+  --agent-soft: rgba(203, 166, 247, 0.15);
+  --agent-border: rgba(203, 166, 247, 0.35);
+  --destructive-text: var(--red);
+  --focus-ring: var(--agent);
+  --blue-300: var(--lavender);
+  --blue-400: var(--blue);
+  --blue-500: var(--blue);
+  --violet-200: var(--mauve);
+  --violet-300: var(--mauve);
+  --violet-400: var(--mauve);
+  --violet-500: var(--mauve);
+  --violet-600: var(--mauve);
+  --pink-500: var(--pink);
+  --red-400: var(--maroon);
+  --red-500: var(--red);
+  --orange-500: var(--peach);
+  --green-500: var(--green);
+  --emerald-400: var(--green);
+  --zinc-400: var(--overlay1);
+  --shadow-sm: 0 1px 2px 0 rgba(17, 17, 27, 0.3);
+  --shadow-lg: 0 10px 15px -3px rgba(17, 17, 27, 0.5), 0 4px 6px -4px rgba(17, 17, 27, 0.5);
+  --shadow-2xl: 0 25px 50px -12px rgba(17, 17, 27, 0.7);
+  --shadow-popover: 0 8px 24px rgba(17, 17, 27, 0.6);
+  --glow-agent: 0 0 24px rgba(203, 166, 247, 0.18);
+  --glow-thinking: 0 0 28px rgba(203, 166, 247, 0.12);
+  --glow-assistant: 0 0 28px #cba6f740;
+  --glow-user: 0 0 28px #89b4fa3d;
+  --glow-online: 0 0 10px rgba(166, 227, 161, 0.8);
+}
+:root {
+  --space-0\.5: 2px; /* Gap between voice-input bars; action-bar button gap. */
+  --space-1: 4px; /* Citation-pill gap; tabs-list padding. */
+  --space-1\.5: 6px; /* Status-dot gap; action-bar button padding. */
+  --space-2: 8px; /* Nav shell padding and item gap; composer action gap; bubble meta gap. */
+  --space-2\.5: 10px; /* Activity-list vertical padding; citation-preview padding. */
+  --space-3: 12px; /* Avatar-to-bubble gap; nav item icon-to-label gap; thinking-panel padding. */
+  --space-4: 16px; /* Composer padding; bubble horizontal padding; nav item horizontal padding. */
+  --space-5: 20px; /* Gap between messages in a thread. */
+  --space-6: 24px; /* Card and dialog padding. */
+  --space-12: 48px; /* Gap between major regions of the agent page. */
+  --radius: 0.5rem; /* shadcn base radius (Tailwind rounded-lg); rounded-md and rounded-sm derive from it (−2px, −4px). Tooltips, kbd, action-bar shells. */
+  --radius-xl: 0.75rem; /* Every Lynx control: nav items, composer buttons, inputs, avatars, menu items. */
+  --radius-2xl: 1rem; /* Every Lynx shell and panel: menu bar, sidebar, composer, bubbles, cards, dialogs, menus. */
+  --radius-3xl: 1.5rem; /* Drawer top corners. */
+  --radius-full: 9999px; /* Pills: citation, model badge, status dot, switch. */
+  --blur-item: 6px; /* Per-item hover glow in GlowSidebar. */
+  --blur-md: 12px; /* Blur on the composer buttons' inner glow (clipped to the button). */
+  --blur-lg: 16px; /* Backdrop blur of MenuBar and GlowSidebar shells. */
+  --blur-xl: 24px; /* Backdrop blur of the composer, cards, dialogs, menus. */
+  --blur-3xl: 64px; /* Composer focus glow. */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1); /* Lynx's overshoot: ThemeToggle, switch thumbs, checks, toggles, slider thumbs, bloom growth. */
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1); /* Fades: nav glow opacity, bloom opacity, theme colour transitions. */
+  --duration-reveal: 200ms; /* Message action bar fade-and-rise on hover/focus. */
+  --duration-tint: 250ms; /* Composer action icon turning its hue on hover. */
+  --duration-color: 300ms; /* Nav icon hue change; spring controls (switch, check, toggle). */
+  --duration-halo: 350ms; /* Glow filling a button from the centre on hover (opacity; scale 0.6 to 1.25, clipped to the outline). */
+  --duration-bloom: 500ms; /* Nav item flip and glow, item bloom in menus and tabs. */
+  --duration-toggle: 700ms; /* ThemeToggle sun/moon icon swap. */
+  --duration-glow-cycle: 8s; /* One loop of the composer's blue, violet, pink, green focus glow. */
+  --font-sans: Inter, ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --text-title-lg: 600 24px/1 var(--font-sans); /* Card and page titles (shadcn CardTitle). */
+  --text-title: 600 18px/28px var(--font-sans); /* Dialog, sheet and alert-dialog titles. */
+  --text-nav-label: 400 16px/24px var(--font-sans); /* MenuBar and GlowSidebar item labels. */
+  --text-heading-sm: 500 14px/20px var(--font-sans); /* Thread header; button and tab labels. */
+  --text-body: 400 14px/24px var(--font-sans); /* Message bubbles and the composer textarea. */
+  --text-body-tight: 400 14px/20px var(--font-sans); /* Inputs, menu items, descriptions. */
+  --text-caption: 400 12px/16px var(--font-sans); /* Thinking-panel label, composer hint, badges, tooltips. */
+  --text-micro: 400 11px/16px var(--font-sans); /* Disclaimer, connection status, activity steps, citation preview label. */
+  --text-meta: 400 10px/1.5 var(--font-sans); /* Speaker labels, timestamps, model badge. */
+  --text-citation: 600 10px/1 var(--font-sans); /* Numbers inside citation pills. */
+  --text-kbd: 500 11px/16px var(--font-mono); /* Keyboard keys (Kbd). */
+}
+
+/* ---- Lynx design system: halo and bloom (styles/components.css) ---- */
+.lynx-halo { position: relative; isolation: isolate; overflow: hidden; --halo: var(--violet-500); }
+.lynx-halo::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; border-radius: inherit;
+  background: radial-gradient(ellipse at center, color-mix(in srgb, var(--halo) 32%, transparent) 0%, color-mix(in srgb, var(--halo) 14%, transparent) 60%, color-mix(in srgb, var(--halo) 6%, transparent) 100%);
+  opacity: 0; transform: scale(.6); transition: opacity var(--duration-halo) var(--ease-standard), transform var(--duration-halo) var(--ease-spring); }
+.lynx-halo:hover::before { opacity: 1; transform: scale(1.25); }
+.lynx-halo-sun { --halo: var(--yellow); }
+.lynx-halo-moon { --halo: var(--lavender); }
+.lynx-bloom { position: relative; isolation: isolate; }
+.lynx-bloom::after { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; border-radius: inherit;
+  background: radial-gradient(circle, color-mix(in srgb, var(--violet-500) 15%, transparent) 0%, color-mix(in srgb, var(--violet-500) 6%, transparent) 50%, transparent 100%);
+  opacity: 0; transform: scale(.8); transition: opacity var(--duration-bloom) var(--ease-standard), transform var(--duration-bloom) var(--ease-spring); }
+.lynx-bloom:hover::after, .lynx-bloom[data-active="true"]::after { opacity: 1; transform: scale(1.15); }
+.live-avatar { position: relative; display: inline-grid; place-items: center; flex: none; width: var(--size); height: var(--size); border-radius: 50%; animation: lynx-breathe 4s ease-in-out infinite; }
+.live-avatar-ring { position: absolute; inset: calc(var(--size) * .125); border-radius: 50%; padding: calc(var(--size) * .125); box-sizing: border-box;
+  -webkit-mask: conic-gradient(#000 0 0) content-box, conic-gradient(#000 0 0); -webkit-mask-composite: xor;
+  mask: conic-gradient(#000 0 0) content-box exclude, conic-gradient(#000 0 0); filter: blur(calc(var(--size) * .1125)); }
+.live-avatar-ring::before { content: ""; position: absolute; inset: 0; background: repeating-conic-gradient(transparent 0 5%, var(--avatar-hue), transparent 20% 50%); animation: lynx-live-spin 6s linear infinite; }
+.live-avatar-orb { position: relative; border-radius: 50%; width: 50%; height: 50%;
+  background: radial-gradient(circle at 35% 30%, color-mix(in oklab, var(--avatar-hue) 45%, white) 0%, var(--avatar-hue) 55%, color-mix(in oklab, var(--avatar-hue) 80%, black) 100%);
+  box-shadow: 0 0 calc(var(--size) * .18) color-mix(in srgb, var(--avatar-hue) 75%, transparent), 0 0 calc(var(--size) * .4) color-mix(in srgb, var(--avatar-hue) 40%, transparent); }
+@keyframes lynx-live-spin { to { rotate: 1turn; } }
+@keyframes lynx-breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+@media (prefers-reduced-motion: reduce) {
+  .live-avatar, .live-avatar-ring::before { animation: none; }
+  .lynx-halo::before, .lynx-bloom::after { transition: opacity var(--duration-reveal) linear; }
+}
+
+/* ---- Report layout (tokens only, no raw colours) ---- */
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 24px; }
+body { margin: 0; background: var(--background); color: var(--foreground); font: var(--text-body); -webkit-font-smoothing: antialiased;
+  transition: background-color var(--duration-color) var(--ease-standard), color var(--duration-color) var(--ease-standard); }
+body::before { content: ""; position: fixed; inset: -20% -10% auto -10%; height: 60vh; z-index: -1; pointer-events: none;
+  background: radial-gradient(ellipse at 30% 0%, var(--agent-soft), transparent 60%); }
+a { color: var(--agent); text-decoration: none; }
+a:hover { text-decoration: underline; text-underline-offset: 3px; }
+:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; border-radius: var(--radius); }
+code { font: var(--text-kbd); background: var(--muted); padding: 1px 6px; border-radius: 6px; color: var(--foreground); }
+strong { font-weight: 600; }
+p { margin: 0 0 var(--space-3); }
+ul, ol { margin: 0 0 var(--space-3); padding-left: 20px; }
+li { margin: 2px 0; }
+li::marker { color: var(--muted-foreground); }
+
+.shell { display: grid; grid-template-columns: 256px minmax(0, 1fr); gap: var(--space-12); max-width: 1240px; margin: 0 auto; padding: var(--space-6) var(--space-6) 96px; }
+.nav { position: sticky; top: var(--space-6); align-self: start; display: flex; flex-direction: column; gap: var(--space-4); }
+.panel { background: color-mix(in srgb, var(--card) 82%, transparent); border: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
+  border-radius: var(--radius-2xl); box-shadow: var(--shadow-lg); -webkit-backdrop-filter: blur(var(--blur-xl)); backdrop-filter: blur(var(--blur-xl)); }
+.brand { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4); }
+.brand-name { font: var(--text-heading-sm); }
+.brand-sub { font: var(--text-micro); color: var(--muted-foreground); }
+.nav-list { list-style: none; margin: 0; padding: var(--space-2); display: flex; flex-direction: column; gap: 2px; }
+.nav-list li { margin: 0; }
+.nav-link { display: flex; align-items: center; gap: var(--space-3); padding: 8px 12px; border-radius: var(--radius-xl); color: var(--muted-foreground); font: var(--text-body-tight);
+  transition: color var(--duration-color) var(--ease-standard), background-color var(--duration-color) var(--ease-standard); }
+.nav-link:hover { color: var(--foreground); text-decoration: none; }
+.nav-link[data-active="true"] { background: var(--agent-soft); color: var(--foreground); }
+.nav-link svg { width: 16px; height: 16px; flex: none; }
+.nav-link[data-active="true"] svg { color: var(--agent); }
+.nav-foot { display: flex; align-items: center; justify-content: space-between; padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4); }
+.nav-foot span { font: var(--text-micro); color: var(--muted-foreground); }
+
+.btn-icon { display: inline-grid; place-items: center; width: 36px; height: 36px; border-radius: var(--radius-xl); border: 1px solid var(--foreground); background: transparent;
+  color: var(--foreground); cursor: pointer; padding: 0; }
+.btn-icon svg { width: 16px; height: 16px; }
+.btn-icon .sun { display: none; }
+[data-theme="dark"] .btn-icon .sun { display: block; }
+[data-theme="dark"] .btn-icon .moon { display: none; }
+
+main { min-width: 0; display: flex; flex-direction: column; gap: var(--space-12); }
+section { display: flex; flex-direction: column; gap: var(--space-4); }
+.eyebrow { display: flex; align-items: center; gap: var(--space-2); font: var(--text-caption); color: var(--muted-foreground); }
+h1 { font: var(--text-title-lg); letter-spacing: -0.025em; margin: 0; font-size: 30px; line-height: 36px; }
+h2 { font: var(--text-title); margin: 0; }
+h3 { font: var(--text-heading-sm); margin: 0 0 var(--space-2); }
+.lead { font-size: 15px; line-height: 26px; color: var(--muted-foreground); max-width: 720px; margin: 0; }
+.section-head { display: flex; flex-direction: column; gap: var(--space-1); }
+.section-head p { color: var(--muted-foreground); margin: 0; font: var(--text-body-tight); }
+.card { padding: var(--space-6); }
+.card > :last-child { margin-bottom: 0; }
+.muted { color: var(--muted-foreground); }
+.small { font: var(--text-caption); }
+
+.grid { display: grid; gap: var(--space-4); }
+.grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+.stat { padding: var(--space-4) var(--space-4) var(--space-4); display: flex; flex-direction: column; gap: var(--space-1); }
+.stat-value { font: var(--text-title-lg); letter-spacing: -0.025em; font-size: 26px; line-height: 32px; font-variant-numeric: tabular-nums; }
+.stat-label { font: var(--text-caption); color: var(--muted-foreground); }
+.stat-src { font: var(--text-meta); color: color-mix(in srgb, var(--muted-foreground) 70%, transparent); margin-top: auto; padding-top: var(--space-2); }
+
+.change { padding: var(--space-4); display: flex; gap: var(--space-3); }
+.num { flex: none; display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: var(--radius-full); border: 1px solid var(--agent-border);
+  background: var(--agent-soft); color: var(--agent); font: var(--text-citation); font-size: 11px; box-shadow: var(--glow-agent); }
+.change h3 { margin-bottom: var(--space-1); }
+.change p { font: var(--text-body-tight); color: var(--muted-foreground); margin: 0; }
+
+.badge { display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px; border-radius: var(--radius-full); font: var(--text-caption); white-space: nowrap;
+  border: 1px solid color-mix(in srgb, var(--border) 80%, transparent); color: var(--muted-foreground); }
+.badge-agent { border-color: var(--agent-border); background: var(--agent-soft); color: var(--foreground); }
+.badge-green { border-color: color-mix(in srgb, var(--green-500) 40%, transparent); background: color-mix(in srgb, var(--green-500) 10%, transparent); color: var(--foreground); }
+.badge-blue { border-color: color-mix(in srgb, var(--blue-400) 35%, transparent); background: color-mix(in srgb, var(--blue-400) 10%, transparent); color: var(--foreground); }
+.badge-peach { border-color: color-mix(in srgb, var(--orange-500) 40%, transparent); background: color-mix(in srgb, var(--orange-500) 10%, transparent); color: var(--foreground); }
+.dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.badge-agent .dot { background: var(--agent); }
+.badge-green .dot { background: var(--green-500); }
+.badge-blue .dot { background: var(--blue-500); }
+.badge-peach .dot { background: var(--orange-500); }
+
+.source-card { padding: var(--space-6); display: flex; flex-direction: column; gap: var(--space-4); }
+.source-top { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; }
+.source-top h3 { font: var(--text-title); margin: 0; }
+.source-top .meta { font: var(--text-caption); color: var(--muted-foreground); margin-top: 2px; }
+.cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-6); }
+.label { font: var(--text-meta); text-transform: none; letter-spacing: .02em; color: var(--muted-foreground); margin-bottom: var(--space-1); font-size: 11px; font-weight: 500; }
+.take { border-radius: var(--radius-xl); border: 1px solid var(--agent-border); background: var(--agent-soft); padding: var(--space-3) var(--space-4); }
+.take ul { margin: 0; }
+.take .label { color: var(--agent); }
+
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font: var(--text-body-tight); }
+th { text-align: left; font: var(--text-heading-sm); font-size: 12px; color: var(--muted-foreground); padding: 10px 12px; border-bottom: 1px solid color-mix(in srgb, var(--border) 80%, transparent); white-space: nowrap; }
+td { padding: 10px 12px; border-bottom: 1px solid color-mix(in srgb, var(--border) 50%, transparent); vertical-align: top; }
+tr:last-child td { border-bottom: 0; }
+td:first-child { font-weight: 500; }
+tbody tr { transition: background-color var(--duration-color) var(--ease-standard); }
+tbody tr:hover { background: color-mix(in srgb, var(--agent-soft) 60%, transparent); }
+
+details.rule { border-bottom: 1px solid color-mix(in srgb, var(--border) 50%, transparent); }
+details.rule:last-child { border-bottom: 0; }
+details.rule summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: var(--space-3); padding: 14px var(--space-2); border-radius: var(--radius-xl); font: var(--text-heading-sm); }
+details.rule summary::-webkit-details-marker { display: none; }
+details.rule summary .chev { margin-left: auto; width: 16px; height: 16px; color: var(--muted-foreground); transition: transform var(--duration-color) var(--ease-spring); flex: none; }
+details.rule[open] summary .chev { transform: rotate(180deg); }
+details.rule .body { padding: 0 var(--space-2) var(--space-4) calc(24px + var(--space-3) + var(--space-2)); color: var(--muted-foreground); font: var(--text-body-tight); }
+details.rule .body p { margin-bottom: var(--space-2); }
+details.rule .src { font: var(--text-caption); }
+
+.stack { display: flex; flex-direction: column; gap: var(--space-2); }
+.layer { display: grid; grid-template-columns: 24px minmax(0, 1fr) 150px; gap: var(--space-3); align-items: center; padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-xl); border: 1px solid color-mix(in srgb, var(--border) 60%, transparent); background: color-mix(in srgb, var(--card) 70%, transparent); }
+.layer.volatile { border-style: dashed; border-color: color-mix(in srgb, var(--orange-500) 45%, transparent); }
+.layer-name { font: var(--text-heading-sm); }
+.layer-sub { font: var(--text-caption); color: var(--muted-foreground); margin-top: 2px; }
+.bar { height: 6px; border-radius: var(--radius-full); background: color-mix(in srgb, var(--border) 60%, transparent); overflow: hidden; }
+.bar > span { display: block; height: 100%; border-radius: inherit; background: var(--agent); }
+.layer.volatile .bar > span { background: var(--orange-500); }
+.bar-label { font: var(--text-meta); color: var(--muted-foreground); text-align: right; margin-top: 4px; font-size: 11px; }
+.cache-line { display: flex; align-items: center; gap: var(--space-3); font: var(--text-caption); color: var(--muted-foreground); margin: var(--space-1) 0; }
+.cache-line::before, .cache-line::after { content: ""; flex: 1; border-top: 1px dashed color-mix(in srgb, var(--muted-foreground) 50%, transparent); }
+
+.steps { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; }
+.step { display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: var(--space-3); padding-bottom: var(--space-5); position: relative; margin: 0; }
+.step:not(:last-child)::before { content: ""; position: absolute; left: 11.5px; top: 28px; bottom: 4px; border-left: 1px solid var(--agent-border); }
+.step h3 { margin: 2px 0 var(--space-1); }
+.step p { margin: 0; color: var(--muted-foreground); font: var(--text-body-tight); }
+
+.callout { display: flex; gap: var(--space-3); padding: var(--space-4); border-radius: var(--radius-2xl); border: 1px solid color-mix(in srgb, var(--blue-400) 25%, transparent);
+  background: color-mix(in srgb, var(--blue-400) 7%, transparent); font: var(--text-body-tight); }
+.callout svg { width: 16px; height: 16px; flex: none; margin-top: 2px; color: var(--blue-300); }
+.callout p { margin: 0; }
+
+.schema { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--space-4); }
+.flow { display: flex; flex-direction: column; gap: var(--space-3); }
+.flow-item { padding: var(--space-4); border-radius: var(--radius-xl); border: 1px solid color-mix(in srgb, var(--border) 60%, transparent); background: color-mix(in srgb, var(--card) 70%, transparent); }
+.flow-item h3 { display: flex; align-items: center; gap: var(--space-2); }
+.flow-item p, .flow-item li { font: var(--text-body-tight); color: var(--muted-foreground); }
+.flow-item ul { margin-bottom: 0; }
+.pill-row { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.pill-row .badge { white-space: normal; }
+
+.sources { columns: 2; column-gap: var(--space-6); }
+.sources h3 { break-after: avoid; margin-top: var(--space-4); }
+.sources h3:first-child { margin-top: 0; }
+.sources ul { list-style: none; padding: 0; margin: 0 0 var(--space-2); }
+.sources li { font: var(--text-body-tight); padding: 3px 0; break-inside: avoid; }
+footer { font: var(--text-micro); color: var(--muted-foreground); text-align: center; }
+
+@media (max-width: 1000px) {
+  .shell { grid-template-columns: minmax(0, 1fr); gap: var(--space-6); padding: var(--space-4) var(--space-4) 64px; }
+  .nav { position: static; }
+  .nav-list { flex-direction: row; flex-wrap: wrap; }
+  .grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid-3, .grid-2, .cols, .schema { grid-template-columns: minmax(0, 1fr); }
+  .sources { columns: 1; }
+}
+@media (max-width: 560px) {
+  .grid-4 { grid-template-columns: minmax(0, 1fr); }
+  .layer { grid-template-columns: 24px minmax(0, 1fr); }
+  .layer > :last-child { grid-column: 2; }
+  h1 { font-size: 24px; line-height: 30px; }
+}
+@media print {
+  .nav { display: none; }
+  .shell { grid-template-columns: minmax(0, 1fr); }
+  .panel { box-shadow: none; backdrop-filter: none; }
+  details.rule .body { display: block; }
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></symbol>
+    <symbol id="i-sparkles" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></symbol>
+    <symbol id="i-package" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><path d="m3.3 7 7.703 4.734a2 2 0 0 0 1.994 0L20.7 7"/><path d="m7.5 4.27 9 5.15"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></symbol>
+    <symbol id="i-layers" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></symbol>
+    <symbol id="i-server" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></symbol>
+    <symbol id="i-swap" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3 4 7l4 4"/><path d="M4 7h16"/><path d="m16 21 4-4-4-4"/><path d="M20 17H4"/></symbol>
+    <symbol id="i-ordered" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 12h11"/><path d="M10 18h11"/><path d="M10 6h11"/><path d="M4 10h2"/><path d="M4 6h1v4"/><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></symbol>
+    <symbol id="i-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="i-pen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-database" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></symbol>
+  </defs>
+</svg>
+
+<div class="shell">
+  <aside class="nav">
+    <div class="panel">
+      <div class="brand">
+        <span class="live-avatar" style="--size: 36px; --avatar-hue: var(--flamingo)" aria-hidden="true"><span class="live-avatar-ring"></span><span class="live-avatar-orb"></span></span>
+        <div><div class="brand-name">Lynx</div><div class="brand-sub">Memory research</div></div>
+      </div>
+    </div>
+    <nav class="panel" aria-label="Sections">
+      <ul class="nav-list">
+        <li><a class="nav-link lynx-bloom" href="#summary"><svg><use href="#i-sparkles"/></svg>Summary</a></li>
+        <li><a class="nav-link lynx-bloom" href="#named"><svg><use href="#i-book"/></svg>Named sources</a></li>
+        <li><a class="nav-link lynx-bloom" href="#systems"><svg><use href="#i-package"/></svg>Other systems</a></li>
+        <li><a class="nav-link lynx-bloom" href="#rules"><svg><use href="#i-list"/></svg>Design rules</a></li>
+        <li><a class="nav-link lynx-bloom" href="#design"><svg><use href="#i-layers"/></svg>Recommended design</a></li>
+        <li><a class="nav-link lynx-bloom" href="#stack"><svg><use href="#i-server"/></svg>Stack, all free</a></li>
+        <li><a class="nav-link lynx-bloom" href="#changes"><svg><use href="#i-swap"/></svg>Changes to the plan</a></li>
+        <li><a class="nav-link lynx-bloom" href="#order"><svg><use href="#i-ordered"/></svg>Build order</a></li>
+        <li><a class="nav-link lynx-bloom" href="#sources"><svg><use href="#i-link"/></svg>Sources</a></li>
+      </ul>
+    </nav>
+    <div class="panel nav-foot">
+      <span>28 Oct 2026</span>
+      <button class="btn-icon lynx-halo" id="theme" type="button" aria-label="Switch theme">
+        <svg class="moon"><use href="#i-moon"/></svg><svg class="sun"><use href="#i-sun"/></svg>
+      </button>
+    </div>
+  </aside>
+
+  <main>
+    <section id="summary">
+      <div class="eyebrow"><span class="badge badge-agent"><span class="dot"></span>Research</span><span>Mastra, Honcho, ReasoningBank and about 40 links from awesome-harness-engineering</span></div>
+      <h1>How Lynx should remember</h1>
+      <p class="lead">Don’t adopt a memory framework. The plan’s direction holds: keep every message, compact older turns, search history, keep a list of facts. The research changes six parts of it, and every infrastructure change it needs is free.</p>
+
+      <div class="grid grid-4">
+        <div class="panel stat"><div class="stat-value">53%</div><div class="stat-label">of 20 project rules lost after three rounds of summarising</div><div class="stat-src">Facts as First Class Objects</div></div>
+        <div class="panel stat"><div class="stat-value">94.87%</div><div class="stat-label">on LongMemEval with an observation log instead of raw history</div><div class="stat-src">Mastra, vendor-reported</div></div>
+        <div class="panel stat"><div class="stat-value">0</div><div class="stat-label">extra model calls per turn; background work runs in batches</div><div class="stat-src">Recommended design</div></div>
+        <div class="panel stat"><div class="stat-value">~9M</div><div class="stat-label">embedding tokens a day inside Workers AI’s free allowance</div><div class="stat-src">Workers AI pricing</div></div>
+      </div>
+
+      <div class="grid grid-2">
+        <div class="panel change"><span class="num">1</span><div><h3>Facts live in their own table</h3><p>With keys and versions. Summaries never hold facts, because repeated summarising loses them.</p></div></div>
+        <div class="panel change"><span class="num">2</span><div><h3>Background work runs in batches</h3><p>One cheap call every few thousand tokens or after idle time writes notes and proposes fact changes. Not a call after every turn.</p></div></div>
+        <div class="panel change"><span class="num">3</span><div><h3>An observation log replaces day summaries</h3><p>Dated, prioritised notes that are appended rather than rewritten, each linked to the messages it came from.</p></div></div>
+        <div class="panel change"><span class="num">4</span><div><h3>The overall summary is rebuilt from parts</h3><p>Each night from facts and older notes, never by re-summarising the previous summary.</p></div></div>
+        <div class="panel change"><span class="num">5</span><div><h3>Things that change every turn go last</h3><p>The time and search results sit at the end of the prompt, so the provider can reuse its cache of the start.</p></div></div>
+        <div class="panel change"><span class="num">6</span><div><h3>Search results only when the match is strong</h3><p>Word-for-word history is the main thing searched, and results are added only when the top match clearly wins.</p></div></div>
+      </div>
+    </section>
+    <section id="named">
+      <div class="section-head"><h2>The three named sources</h2><p>What each one does, how it would fit Lynx, and what to take from it.</p></div>
+
+      <article class="panel source-card">
+        <div class="source-top">
+          <div><h3>Mastra memory</h3><div class="meta">TypeScript · Apache-2.0 · an agent framework with four kinds of memory</div></div>
+          <span class="badge badge-agent"><span class="dot"></span>Borrow the design</span>
+        </div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Kind</th><th>What it does</th></tr></thead>
+          <tbody>
+            <tr><td>Message history</td><td>The last N messages.</td></tr>
+            <tr><td>Working memory</td><td>A Markdown block (or typed object) the agent updates with a tool, shared across one user’s threads.</td></tr>
+            <tr><td>Semantic recall</td><td>Embeds every message and retrieves the top matches plus neighbours each turn. Adds latency every turn; the local embedder truncates at 512 tokens.</td></tr>
+            <tr><td>Observational Memory</td><td>Mastra’s recommended option. Background agents turn old messages into a dense, dated log.</td></tr>
+          </tbody>
+        </table></div>
+        <div class="cols">
+          <div>
+            <div class="label">How Observational Memory works</div>
+            <ul>
+              <li><strong>Observer:</strong> once unobserved messages pass a threshold (30k tokens by default, buffered every ~6k), writes dated, prioritised notes. Each note can carry the date observed, the date it refers to, and a relative date.</li>
+              <li><strong>Reflector:</strong> once the log passes 40k, rewrites it, merging related notes and dropping superseded ones.</li>
+              <li><strong>Raw messages</strong> leave the context once observed but stay stored, with links from each note group back to them and a <code>recall</code> tool.</li>
+              <li><strong>Cache-friendly:</strong> the log is only appended to between reflections, so the start of the prompt stays the same.</li>
+            </ul>
+          </div>
+          <div>
+            <div class="label">Reported results (LongMemEval, by Mastra)</div>
+            <div class="table-wrap"><table>
+              <tbody>
+                <tr><td>Observational Memory, gpt-5-mini</td><td>94.87%</td></tr>
+                <tr><td>Observational Memory, gpt-4o</td><td>84.23%</td></tr>
+                <tr><td>Retrieval, top 20, gpt-4o</td><td>80.05%</td></tr>
+                <tr><td>Zep, gpt-4o</td><td>71.20%</td></tr>
+                <tr><td>Full history in context, gpt-4o</td><td>60.20%</td></tr>
+              </tbody>
+            </table></div>
+            <p class="small muted" style="margin-top:8px">Text compresses roughly 3–6×.</p>
+          </div>
+        </div>
+        <div class="take">
+          <div class="label">For Lynx</div>
+          <ul>
+            <li>The closest match to one continuous chat. Copy the observer and reflector design, scaled down: its defaults assume 128k-token models.</li>
+            <li>Don’t install the package. It is tied to Mastra’s agent class and the AI SDK, so it would replace Lynx’s chat engine.</li>
+            <li>The reflector rewrites its own output, which is the repeated-summarising risk. Lynx avoids most of it by keeping facts in their own table and keeping links to source messages.</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="panel source-card">
+        <div class="source-top">
+          <div><h3>Honcho</h3><div class="meta">Plastic Labs · Python server (AGPL-3.0) · TypeScript SDK (Apache-2.0). The linked BunsDev repo is a 3-star fork of plastic-labs/honcho.</div></div>
+          <span class="badge badge-agent"><span class="dot"></span>Borrow ideas</span>
+        </div>
+        <div class="cols">
+          <div>
+            <div class="label">How it works</div>
+            <ul>
+              <li>Models <strong>people, not conversations</strong>: every participant is a “peer”.</li>
+              <li>A background worker reads <strong>every message</strong> and extracts explicit conclusions (things the person said) and deductive ones (with their premises).</li>
+              <li>A “dreamer” consolidates and finds patterns across messages; <strong>peer cards</strong> hold core biographical facts; summaries every 20 and 60 messages.</li>
+              <li>Each peer can hold its own view of another, built only from what it saw. A chat endpoint answers plain questions about a person.</li>
+            </ul>
+          </div>
+          <div>
+            <div class="label">Why not run it</div>
+            <ul>
+              <li>Python, a separate worker, Postgres with pgvector, optional Redis.</li>
+              <li>Model reasoning on every message, which doesn’t suit a small budget.</li>
+              <li>AGPL server; the README describes self-hosting as for testing and evaluation.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="take">
+          <div class="label">For Lynx</div>
+          <ul>
+            <li>Mark each fact as <strong>said</strong> or <strong>inferred</strong>, keep an inferred fact’s premises, and never present an inference as something you said.</li>
+            <li>An <strong>“About you” card</strong>, rebuilt in the background.</li>
+            <li>Each helper sees only the facts its task needs, like Honcho’s per-peer views.</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="panel source-card">
+        <div class="source-top">
+          <div><h3>ReasoningBank</h3><div class="meta">Google Research · ICLR 2026 · Python demo, “not an officially supported Google product”</div></div>
+          <span class="badge badge-blue"><span class="dot"></span>Later, with tools</span>
+        </div>
+        <div class="cols">
+          <div>
+            <div class="label">How it works</div>
+            <ul>
+              <li>Memory of <strong>strategies, not facts</strong>. After each task a model judge labels it a success or a failure.</li>
+              <li>Lessons (title, one-line description, content) are distilled from both, retrieved by similarity into the system prompt, and simply appended.</li>
+              <li>MaTTS runs extra attempts per task to produce contrasting lessons.</li>
+            </ul>
+          </div>
+          <div>
+            <div class="label">Reported results</div>
+            <ul>
+              <li>WebArena success up to +8.3 points over no memory (Gemini 2.5 Pro 46.7 → 53.9; 56.3 with MaTTS).</li>
+              <li>SWE-Bench Verified 34.2 → 38.8 (Gemini 2.5 Flash), with fewer steps per task.</li>
+              <li>Learning from failures helped (46.5 → 49.7), even with a judge only ~72.7% accurate.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="take">
+          <div class="label">For Lynx</div>
+          <ul>
+            <li>It’s about agents getting better at tasks, not remembering you. Relevant once helpers do work with tools.</li>
+            <li>Plan a lessons table per helper, written by a judge-and-distil step batched nightly, and pulled into that helper’s instructions.</li>
+            <li>Skip MaTTS: it multiplies model calls.</li>
+          </ul>
+        </div>
+      </article>
+    </section>
+
+    <section id="systems">
+      <div class="section-head"><h2>Other memory systems in the index</h2><p>Almost all need Python, Postgres or a graph database. The two that match the stack are worth reading as reference code.</p></div>
+      <div class="panel card table-wrap">
+        <table>
+          <thead><tr><th>System</th><th>Runtime and storage</th><th>Extra model calls</th><th>Licence</th><th>Verdict</th></tr></thead>
+          <tbody>
+            <tr><td>TencentDB-Agent-Memory</td><td>Node + SQLite + sqlite-vec</td><td>~1 per 5 turns</td><td>MIT</td><td><span class="badge badge-green"><span class="dot"></span>Read its code</span></td></tr>
+            <tr><td>engram</td><td>Go + SQLite full-text search</td><td>0</td><td>MIT</td><td><span class="badge badge-agent"><span class="dot"></span>Borrow ideas</span></td></tr>
+            <tr><td>Hindsight</td><td>Python + Postgres, 2–3 GB RAM</td><td>1+ per write, plus background</td><td>MIT</td><td><span class="badge badge-blue"><span class="dot"></span>Sidecar later, maybe</span></td></tr>
+            <tr><td>Letta</td><td>TypeScript CLI and app server</td><td>In-turn tools + background</td><td>Apache-2.0</td><td><span class="badge badge-agent"><span class="dot"></span>Borrow ideas</span></td></tr>
+            <tr><td>mem0</td><td>Python or TS; pgvector server</td><td>1 per write</td><td>Apache-2.0</td><td><span class="badge badge-agent"><span class="dot"></span>Borrow ideas</span></td></tr>
+            <tr><td>Zep / Graphiti</td><td>Python + Neo4j or FalkorDB; Zep is cloud-only now</td><td>Several per write</td><td>Apache-2.0 (Graphiti)</td><td><span class="badge"><span class="dot"></span>Skip</span></td></tr>
+            <tr><td>cognee</td><td>Python; SQLite, LanceDB, Kuzu</td><td>0 to several</td><td>Apache-2.0</td><td><span class="badge"><span class="dot"></span>Skip</span></td></tr>
+            <tr><td>Stash</td><td>Go + pgvector, MCP only</td><td>Batched pipeline</td><td>Apache-2.0</td><td><span class="badge badge-agent"><span class="dot"></span>Borrow ideas</span></td></tr>
+            <tr><td>MemPalace</td><td>Python + Chroma, MCP only</td><td>0</td><td>MIT</td><td><span class="badge badge-agent"><span class="dot"></span>Borrow ideas</span></td></tr>
+            <tr><td>OpenViking</td><td>Python, needs an embedder and a vision model</td><td>Background</td><td>AGPL-3.0</td><td><span class="badge badge-agent"><span class="dot"></span>Borrow ideas</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="grid grid-3">
+        <div class="panel card"><h3>TencentDB-Agent-Memory</h3><p class="muted" style="margin:0">Extract facts every 5 conversations or after 10 minutes idle, at most 20 per pass. Every layer links down to raw evidence. Automatic recall has a timeout and a size budget.</p></div>
+        <div class="panel card"><h3>engram</h3><p class="muted" style="margin:0">A topic key turns a save into an update. Hash dedupe. On save, show similar entries so the agent decides. Review-after dates per kind of fact; soft delete.</p></div>
+        <div class="panel card"><h3>Graphiti, Hindsight, Letta</h3><p class="muted" style="margin:0">Facts carry “valid from” and “invalid at” dates. Standing answers refreshed in the background. A few small blocks always in context that the agent edits with a tool.</p></div>
+      </div>
+    </section>
+    <section id="rules">
+      <div class="section-head"><h2>Design rules from the papers and write-ups</h2><p>Twelve rules, each with the evidence behind it. Results are as reported by each source.</p></div>
+      <div class="panel card" style="padding: var(--space-2) var(--space-4)">
+        <details class="rule" open><summary><span class="num">1</span>Facts are records, not summary text<svg class="chev"><use href="#i-chev"/></svg></summary>
+          <div class="body"><p>One summary at 36.7× compression kept 40% of 2,000 facts. Three rounds of compaction lost 53% of 20 project rules, across Claude Sonnet 4.5 and 4.6, Opus and GPT-5.4. Nothing was made up; the model said the information was gone.</p><div class="src">Facts as First Class Objects</div></div></details>
+        <details class="rule"><summary><span class="num">2</span>Key facts by subject and attribute, and version them<svg class="chev"><use href="#i-chev"/></svg></summary>
+          <div class="body"><p>A new value supersedes the old one, which stays retrievable. Embeddings picked the right one of several near-identical facts only 20% of the time, so exact key lookup has to sit beside vector search.</p><div class="src">Graph-Native Cognitive Memory, Graphiti, engram, Facts as First Class Objects</div></div></details>
+        <details class="rule"><summary><span class="num">3</span>Check facts when they’re used; don’t delete by decay<svg class="chev"><use href="#i-chev"/></svg></summary>
+          <div class="body"><p>Copilot cites a source for each memory and refreshes it when confirmed (merged pull requests 90% vs 83% in an A/B test). MemArchitect’s decay-based pruning cost 20–45 points on single-detail and time questions, because facts mentioned once were removed. A personal agent has to keep a birthday you mentioned once.</p><div class="src">GitHub Copilot memory, MemArchitect</div></div></details>
+        <details class="rule"><summary><span class="num">4</span>Turn relative dates into absolute ones when extracting<svg class="chev"><use href="#i-chev"/></svg></summary>
+          <div class="body"><p>The biggest gain was on time questions (+16 points). The graph walk added only +1.2 points over plain retrieval, so skip graphs.</p><div class="src">GAAMA</div></div></details>
+        <details class="rule"><summary><span class="num">5</span>Build the prompt deterministically, within a budget<svg class="chev"><use href="#i-chev"/></svg></summary>
+          <div class="body"><p>Pinned items first. Extract facts before anything is compacted. Keep “no match” distinct from “error”.</p><div class="src">ClawVM</div></div></details>
+        <details class="rule"><summary><span class="num">6</span>Batch the background work<svg class="chev"><use href="#i-chev"/></svg></summary>
+          <div class="body"><p>Extraction every few turns or after idle time, and a nightly compile-and-check pass, instead of a call after every turn.</p><div class="src">TencentDB-Agent-Memory, LangChain on continual learning, claude-memory-compiler</div></div></details>
+        <details class="rule"><summary><span class="num">7</span>Facts from tool content need approval<svg class="chev"><use href="#i-chev"/></svg></summary>
+          <div class="body"><p>A fact taken from an email or web page could be planted, so it waits for you. LangChain also found the extraction prompt is most of the work, and that agents add specifics instead of generalising.</p><div class="src">LangChain Agent Builder</div></div></details>
+        <details class="rule"><summary><span class="num">8</span>Word-for-word retrieval is strong and cheap<svg class="chev"><use href="#i-chev"/></svg></summary>
+          <div class="body"><p>MemPalace: 96.6% R@5 on LongMemEval with no model calls. agentmemory: keyword search alone 86.2%, with embeddings 95.2%. ByteRover: keyword search only, 92.8%. All self-reported.</p><div class="src">MemPalace, agentmemory, ByteRover</div></div></details>
+        <details class="rule"><summary><span class="num">9</span>Put what changes every turn at the end of the prompt<svg class="chev"><use href="#i-chev"/></svg></summary>
+          <div class="body"><p>A change invalidates the provider’s cache for everything after it, so the time and search results go last.</p><div class="src">Anthropic prompt caching and compaction docs, headroom</div></div></details>
+        <details class="rule"><summary><span class="num">10</span>Don’t rely on the model to decide when to compact<svg class="chev"><use href="#i-chev"/></svg></summary>
+          <div class="body"><p>In LangChain’s experiment the models almost never triggered compaction. The Focus paper (5 tasks) needed forced compression to save tokens. Keep token-threshold triggers.</p><div class="src">LangChain autonomous compression, Active Context Compression</div></div></details>
+        <details class="rule"><summary><span class="num">11</span>With tools, search returns snippets and a separate read expands one<svg class="chev"><use href="#i-chev"/></svg></summary>
+          <div class="body"><p>74.1 vs 52.8 for basic retrieval at a similar token cost.</p><div class="src">A-RAG</div></div></details>
+        <details class="rule"><summary><span class="num">12</span>Cap always-on memory and tidy it periodically<svg class="chev"><use href="#i-chev"/></svg></summary>
+          <div class="body"><p>About 1–1.5k tokens of always-on memory, cleaned up by a regular pass, instead of an ever-growing instruction block.</p><div class="src">OpenAI on harness engineering, Anthropic on context engineering</div></div></details>
+      </div>
+    </section>
+
+    <section id="design">
+      <div class="section-head"><h2>Recommended design</h2><p>Everything lives in <code>lynx.db</code>, so Litestream’s backups already cover it.</p></div>
+
+      <div class="panel card table-wrap">
+        <h3 style="display:flex;align-items:center;gap:8px"><svg width="16" height="16" style="color:var(--agent)"><use href="#i-database"/></svg>Data</h3>
+        <table>
+          <thead><tr><th>Table</th><th>Holds</th></tr></thead>
+          <tbody>
+            <tr><td><code>messages</code></td><td>Every message, forever. Exists today. The source of truth for what was said.</td></tr>
+            <tr><td><code>messages_fts</code></td><td>Full-text index over each message and its reply.</td></tr>
+            <tr><td><code>observations</code></td><td>Dated, prioritised note groups, each with the range of messages it covers.</td></tr>
+            <tr><td><code>reflections</code></td><td>Condensed versions of older note groups, linked to the groups they replace.</td></tr>
+            <tr><td><code>facts</code></td><td>One row per version: key (<code>user.timezone</code>, <code>person:arjun.role</code>), value, kind, said or inferred or from a tool, source message, valid from and to, last confirmed, pinned, status, review date. A new value supersedes the old row, so Settings can show history and undo.</td></tr>
+            <tr><td><code>memory_runs</code></td><td>A log of what each background run read, wrote and cost.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="schema">
+        <div class="flow">
+          <div class="flow-item panel">
+            <h3><svg width="16" height="16" style="color:var(--agent)"><use href="#i-pen"/></svg>Writing memory</h3>
+            <ul>
+              <li><strong>During a turn:</strong> no extra calls.</li>
+              <li><strong>Observer batch</strong>, one cheap call, when unobserved turns pass ~8k tokens, after ~10 minutes idle, before <code>/fresh</code>, or straight away on “remember that…”.</li>
+              <li>It gets the new turns, pinned facts and similar existing facts, and returns a dated note group plus fact operations (add, supersede, confirm), each with its source message. Code applies them; facts from tools wait for approval.</li>
+              <li><strong>Nightly pass</strong>, one call: reflect older notes, generalise specific facts into rules, flag contradictions, rebuild the “About you” card and the overall summary from facts and reflections.</li>
+            </ul>
+          </div>
+          <div class="callout"><svg><use href="#i-info"/></svg><p>At about 50 turns a day: 4–6 observer calls plus 1 nightly call.</p></div>
+        </div>
+
+        <div class="flow-item panel">
+          <h3><svg width="16" height="16" style="color:var(--agent)"><use href="#i-eye"/></svg>Reading memory: what the model sees</h3>
+          <div class="stack" role="list">
+            <div class="layer" role="listitem"><span class="num">1</span><div><div class="layer-name">Instructions</div><div class="layer-sub">Change rarely</div></div><div><div class="bar"><span style="width:19%"></span></div><div class="bar-label">~1.5k</div></div></div>
+            <div class="layer" role="listitem"><span class="num">2</span><div><div class="layer-name">“About you” card + pinned facts</div><div class="layer-sub">Nightly or on a new pinned fact</div></div><div><div class="bar"><span style="width:19%"></span></div><div class="bar-label">~1.5k</div></div></div>
+            <div class="layer" role="listitem"><span class="num">3</span><div><div class="layer-name">Reflections, then observations</div><div class="layer-sub">When the observer or nightly pass runs</div></div><div><div class="bar"><span style="width:75%"></span></div><div class="bar-label">~6k before reflecting</div></div></div>
+            <div class="layer" role="listitem"><span class="num">4</span><div><div class="layer-name">Recent turns, word for word</div><div class="layer-sub">Appended each turn</div></div><div><div class="bar"><span style="width:100%"></span></div><div class="bar-label">~8k before observing</div></div></div>
+            <div class="cache-line">cached above · changes every turn below</div>
+            <div class="layer volatile" role="listitem"><span class="num">5</span><div><div class="layer-name">Date and time, strong search matches, relevant facts</div><div class="layer-sub">Search only when the top match clearly wins; dated snippets</div></div><div><div class="bar"><span style="width:38%"></span></div><div class="bar-label">~3k</div></div></div>
+          </div>
+          <p class="small muted" style="margin:12px 0 0">Total stays near the 24k budget. Older history is reached through search, and later through recall and read tools.</p>
+        </div>
+      </div>
+
+      <div class="panel card">
+        <h3>Later</h3>
+        <div class="pill-row">
+          <span class="badge">sqlite-vec + embeddings, fused with keyword and key lookup</span>
+          <span class="badge">recall and read tools</span>
+          <span class="badge">a “current focus” block Lynx edits</span>
+          <span class="badge">lessons per helper</span>
+        </div>
+      </div>
+    </section>
+    <section id="stack">
+      <div class="section-head"><h2>Stack and infrastructure, all free</h2><p>Only model calls cost money. Nothing here needs a paid plan or a new server.</p></div>
+      <div class="panel card table-wrap">
+        <table>
+          <thead><tr><th>Need</th><th>Recommendation</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Full-text search</td><td>SQLite FTS5</td><td>Built into <code>node:sqlite</code>; tested working on Node 22.23 (SQLite 3.53.4). Confirm on the server’s Node 24.</td></tr>
+            <tr><td>Vector search, later</td><td><code>sqlite-vec</code> 0.1.9</td><td>MIT or Apache-2.0, with an ARM64 Linux build on npm. Needs <code>allowExtension: true</code> and <code>loadExtension()</code> (Node 22.13+). Pre-v1, so expect changes.</td></tr>
+            <tr><td>Embeddings, later</td><td>Workers AI: <code>bge-m3</code> or <code>qwen3-embedding-0.6b</code></td><td>1,075 neurons per million tokens; the free 10,000 neurons a day is about 9M tokens. Needs a Workers AI API token. Confirm calls from the server count against the free allowance. Alternative: a small model on the server (~100–300 MB RAM).</td></tr>
+            <tr><td>Background model</td><td>Try Workers AI <code>qwen3-30b-a3b-fp8</code></td><td>A 6k-in, 800-out call is ~52 neurons, so ~190 calls a day fit for free (shared with embeddings). Judge it on the eval; fall back to GLM 5.3 Flash. OpenRouter’s free models allow 50 requests a day, and their providers may log prompts.</td></tr>
+            <tr><td>Prompt caching</td><td>OpenRouter <code>session_id</code></td><td>Z.AI caches GLM automatically (writes free for now, reads ~0.2× input). Send a fixed <code>session_id</code>, never pin a provider, keep the prompt start identical, and log cached tokens. Stickiness ends after 10 minutes idle.</td></tr>
+            <tr><td>Backups</td><td>No change</td><td>New tables live in <code>lynx.db</code>; Litestream already covers them.</td></tr>
+            <tr><td>Not recommended</td><td>Postgres, Neo4j, Python sidecars, LLMLingua</td><td>Hindsight is the one sidecar worth revisiting (MIT, ARM64, 2–3 GB RAM) if recall stops improving.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="changes">
+      <div class="section-head"><h2>What changes in the plan</h2><p>Compared with <code>remembering-the-conversation.md</code>.</p></div>
+      <div class="panel card table-wrap">
+        <table>
+          <thead><tr><th>Was</th><th>Now</th></tr></thead>
+          <tbody>
+            <tr><td>Day summaries</td><td>An observation log plus reflections, still dated and in segments</td></tr>
+            <tr><td>Overall summary, updated in place</td><td>Rebuilt nightly from facts and reflections</td></tr>
+            <tr><td>Fact suggestions after every turn</td><td>Batched with the observer</td></tr>
+            <tr><td>Facts compared as free text</td><td>Keyed facts with versions, origin, dates and source</td></tr>
+            <tr><td>Date, time and search results early in the prompt</td><td>At the end</td></tr>
+            <tr><td>Search results added every turn</td><td>Added only when the match is strong</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="order">
+      <div class="section-head"><h2>Build order</h2><p>Start with the test, so every later step can be measured.</p></div>
+      <div class="panel card">
+        <ol class="steps">
+          <li class="step"><span class="num">0</span><div><h3>Eval first</h3><p>A scripted multi-day conversation with planted facts, a changed fact (dentist moved from 3pm to 4pm), preferences, rules and time questions. Score each category, track cost per day, and rerun on every change. LongMemEval’s public questions can also be sampled.</p></div></li>
+          <li class="step"><span class="num">1</span><div><h3>The server builds the context</h3><p>Observer batches, the observation log, the keyed and versioned facts table, <code>/fresh</code>, and the new prompt order. Replaces “last 40 messages”.</p></div></li>
+          <li class="step"><span class="num">2</span><div><h3>Full-text search</h3><p>Strong-match results added at the end of the prompt, plus <code>session_id</code> and cache logging.</p></div></li>
+          <li class="step"><span class="num">3</span><div><h3>Nightly pass and the memory list</h3><p>Reflections, the “About you” card, contradiction checks, and a memory list in Settings with history and undo.</p></div></li>
+          <li class="step"><span class="num">4</span><div><h3>Embeddings and sqlite-vec</h3><p>Only if the eval shows keyword search missing things.</p></div></li>
+          <li class="step"><span class="num">5</span><div><h3>With tools</h3><p><code>remember</code>, <code>recall</code> and <code>read</code>; lessons per helper.</p></div></li>
+        </ol>
+      </div>
+    </section>
+
+    <section id="sources">
+      <div class="section-head"><h2>Sources</h2><p>Coding-agent-only tools in the index were skipped unless an idea transferred.</p></div>
+      <div class="panel card sources">
+        <h3>Named</h3>
+        <ul>
+          <li><a href="https://mastra.ai/docs/memory/overview">Mastra memory overview</a></li>
+          <li><a href="https://mastra.ai/docs/memory/observational-memory">Mastra Observational Memory</a></li>
+          <li><a href="https://mastra.ai/docs/memory/working-memory">Mastra working memory</a></li>
+          <li><a href="https://mastra.ai/docs/memory/semantic-recall">Mastra semantic recall</a></li>
+          <li><a href="https://mastra.ai/research/observational-memory">Observational Memory results</a></li>
+          <li><a href="https://github.com/BunsDev/honcho">Honcho (BunsDev fork)</a></li>
+          <li><a href="https://github.com/plastic-labs/honcho">plastic-labs/honcho</a></li>
+          <li><a href="https://honcho.dev/docs/v3/documentation/core-concepts/reasoning.md">Honcho reasoning</a></li>
+          <li><a href="https://honcho.dev/docs/v3/documentation/core-concepts/representation.md">Honcho representation</a></li>
+          <li><a href="https://github.com/google-research/reasoning-bank">ReasoningBank repo</a></li>
+          <li><a href="https://arxiv.org/abs/2509.25140">ReasoningBank paper</a></li>
+          <li><a href="https://github.com/ai-boost/awesome-harness-engineering">awesome-harness-engineering</a></li>
+        </ul>
+        <h3>Memory systems</h3>
+        <ul>
+          <li><a href="https://github.com/letta-ai/letta">Letta</a> · <a href="https://www.letta.com/blog/letta-v1-agent">Letta v1 loop</a></li>
+          <li><a href="https://github.com/mem0ai/mem0">mem0</a></li>
+          <li><a href="https://github.com/getzep/zep">Zep</a> · <a href="https://github.com/getzep/graphiti">Graphiti</a></li>
+          <li><a href="https://github.com/topoteretes/cognee">cognee</a></li>
+          <li><a href="https://github.com/vectorize-io/hindsight">Hindsight</a></li>
+          <li><a href="https://github.com/alash3al/stash">Stash</a></li>
+          <li><a href="https://github.com/Tencent/TencentDB-Agent-Memory">TencentDB-Agent-Memory</a></li>
+          <li><a href="https://github.com/Gentleman-Programming/engram">engram</a></li>
+          <li><a href="https://github.com/MemPalace/mempalace">MemPalace</a></li>
+          <li><a href="https://github.com/rohitg00/agentmemory">agentmemory</a> · <a href="https://github.com/coleam00/claude-memory-compiler">claude-memory-compiler</a> · <a href="https://github.com/mex-memory/mex">mex</a></li>
+        </ul>
+        <h3>Memory design</h3>
+        <ul>
+          <li><a href="https://www.anthropic.com/research/building-effective-agents">Building effective agents</a></li>
+          <li><a href="https://blog.langchain.com/how-we-built-agent-builders-memory-system/">LangChain Agent Builder memory</a></li>
+          <li><a href="https://blog.langchain.com/continual-learning-for-ai-agents/">Continual learning for AI agents</a></li>
+          <li><a href="https://github.blog/ai-and-ml/github-copilot/building-an-agentic-memory-system-for-github-copilot/">GitHub Copilot agentic memory</a></li>
+          <li><a href="https://arxiv.org/abs/2603.18330">MemArchitect</a> · <a href="https://arxiv.org/abs/2603.17781">Facts as First Class Objects</a></li>
+          <li><a href="https://arxiv.org/abs/2601.03236">MAGMA</a> · <a href="https://arxiv.org/abs/2603.27910">GAAMA</a> · <a href="https://arxiv.org/abs/2603.17244">Graph-Native Cognitive Memory</a> · <a href="https://arxiv.org/abs/2604.10352">ClawVM</a></li>
+        </ul>
+        <h3>Context and compaction</h3>
+        <ul>
+          <li><a href="https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents">Effective context engineering</a></li>
+          <li><a href="https://platform.claude.com/docs/en/build-with-claude/compaction">Claude compaction</a> · <a href="https://platform.claude.com/docs/en/build-with-claude/prompt-caching">Prompt caching</a></li>
+          <li><a href="https://openrouter.ai/docs/guides/best-practices/prompt-caching">OpenRouter prompt caching</a></li>
+          <li><a href="https://blog.langchain.com/autonomous-context-compression/">Autonomous context compression</a> · <a href="https://arxiv.org/abs/2601.07190">Active Context Compression</a></li>
+          <li><a href="https://arxiv.org/abs/2602.03442">A-RAG</a> · <a href="https://arxiv.org/abs/2604.01599">ByteRover</a></li>
+          <li><a href="https://github.com/volcengine/OpenViking">OpenViking</a> · <a href="https://github.com/alexisfox7/PRO-LONG">PRO-LONG</a> · <a href="https://github.com/microsoft/LLMLingua">LLMLingua</a> · <a href="https://github.com/chopratejas/headroom">headroom</a></li>
+          <li><a href="https://www.langchain.com/blog/organizing-context-in-a-multi-agent-harness">Organizing context in a multi-agent harness</a></li>
+          <li><a href="https://okhlopkov.com/claude-code-compaction-explained/">Claude Code compaction explained</a> · <a href="https://openai.com/index/harness-engineering/">Harness engineering</a></li>
+        </ul>
+        <h3>Infrastructure</h3>
+        <ul>
+          <li><a href="https://nodejs.org/api/sqlite.html">node:sqlite</a> · <a href="https://github.com/asg017/sqlite-vec">sqlite-vec</a></li>
+          <li><a href="https://developers.cloudflare.com/workers-ai/platform/pricing/">Workers AI pricing</a> · <a href="https://developers.cloudflare.com/workers-ai/get-started/rest-api/">Workers AI REST API</a></li>
+          <li><a href="https://openrouter.ai/docs/api/reference/limits">OpenRouter limits</a></li>
+        </ul>
+      </div>
+    </section>
+
+    <footer>Companion to <code>memory-research.md</code> in docs/project/memory. Results are as reported by each source; most are vendor- or author-reported.</footer>
+  </main>
+</div>
+
+<script>
+  (function () {
+    var root = document.documentElement
+    var btn = document.getElementById('theme')
+    function label() { btn.setAttribute('aria-label', root.getAttribute('data-theme') === 'dark' ? 'Switch to light theme' : 'Switch to dark theme') }
+    label()
+    btn.addEventListener('click', function () {
+      var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'
+      root.setAttribute('data-theme', next)
+      btn.classList.toggle('lynx-halo-sun', next === 'dark')
+      btn.classList.toggle('lynx-halo-moon', next === 'light')
+      try { localStorage.setItem('lynx-report-theme', next) } catch (e) {}
+      label()
+    })
+    btn.classList.add(root.getAttribute('data-theme') === 'dark' ? 'lynx-halo-sun' : 'lynx-halo-moon')
+
+    // Highlight the section in view.
+    var links = Array.prototype.slice.call(document.querySelectorAll('.nav-link'))
+    var byId = {}
+    links.forEach(function (a) { byId[a.getAttribute('href').slice(1)] = a })
+    if ('IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (!e.isIntersecting) return
+          links.forEach(function (a) { a.removeAttribute('data-active'); a.removeAttribute('aria-current') })
+          var a = byId[e.target.id]
+          if (a) { a.setAttribute('data-active', 'true'); a.setAttribute('aria-current', 'location') }
+        })
+      }, { rootMargin: '-20% 0px -70% 0px' })
+      document.querySelectorAll('main section').forEach(function (s) { io.observe(s) })
+    }
+  })()
+</script>
+</body>
+</html>

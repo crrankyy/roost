@@ -1,0 +1,30 @@
+<!-- @dsCard group="Menus" height=400 subtitle="Command palette: search, grouped agents and actions" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Command — preview</title>
+<style>html,body{margin:0}body{background:var(--background);color:var(--foreground);font-family:var(--font-sans);padding:24px}</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+  var K = window.Lynx, h = React.createElement, I = K.Icons;
+  ReactDOM.createRoot(document.getElementById('root')).render(
+    h('div', { style: { display: 'flex', justifyContent: 'center' } },
+      h('div', { style: { width: 460, borderRadius: 16, border: '1px solid color-mix(in srgb, var(--border) 50%, transparent)', boxShadow: 'var(--shadow-lg)' } },
+        h(K.Command, null,
+          h(K.CommandInput, { placeholder: 'Ask an agent or search…' }),
+          h(K.CommandList, null,
+            h(K.CommandEmpty, null, 'No agents or actions match.'),
+            h(K.CommandGroup, { heading: 'Agents' },
+              h(K.CommandItem, null, h(I.Brain), 'Research agent'),
+              h(K.CommandItem, null, h(I.Inbox), 'Inbox agent'),
+              h(K.CommandItem, null, h(I.Calendar), 'Calendar agent')),
+            h(K.CommandSeparator),
+            h(K.CommandGroup, { heading: 'Actions' },
+              h(K.CommandItem, null, h(I.Plus), 'New run', h(K.CommandShortcut, null, '⌘N')),
+              h(K.CommandItem, null, h(I.FilePlus2), 'Attach file'),
+              h(K.CommandItem, { disabled: true }, h(I.Github), 'Connect GitHub'),
+              h(K.CommandItem, null, h(I.Settings), 'Settings', h(K.CommandShortcut, null, '⌘,'))))))));
+</script>
+</body>
+</html>
