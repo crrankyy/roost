@@ -3,11 +3,13 @@ import * as api from './api';
 import { serveAsset } from './assets';
 import { home } from './pages/home';
 import { kindPage, projectPage } from './pages/project';
+import { triagePage, triagePreview } from './pages/triage';
 import * as viewer from './viewer';
-import { ID_RE, REPORT_ID_RE, manifestKey, versionKey, type Manifest } from './model';
+import { ID_RE, REPORT_ID_RE, filesProject, manifestKey, versionKey, type Manifest } from './model';
 import { ApiError } from './store';
 
 export interface Env extends AuthEnv {
+  NTFY_TOPIC?: string;
   REPORTS: R2Bucket;
   STATE: KVNamespace;
 }
@@ -74,6 +76,7 @@ async function serveReport(req: Request, env: Env, m: RegExpMatchArray): Promise
   const manifest = await readManifest(env, project);
   const entry = manifest?.reports.find((r) => r.id === id);
   if (!entry) return notFound();
+  if (entry.moved_to) return Response.redirect(new URL(`/p/${entry.moved_to}/r/${id}/${vn ? `v${vn}/` : ''}${rest ?? ''}`, req.url).toString(), 301);
   const n = vn ? Number(vn) : entry.latest;
   const version = entry.versions.find((v) => v.n === n);
   if (!version) return notFound();
@@ -81,7 +84,7 @@ async function serveReport(req: Request, env: Env, m: RegExpMatchArray): Promise
     return page(404, 'Not available', 'This version is waiting in triage or was rejected, so it is not served.');
   }
   const file = path || 'index.html';
-  const obj = await env.REPORTS.get(versionKey(project, id, version.n, file));
+  const obj = await env.REPORTS.get(versionKey(filesProject(manifest!, entry), id, version.n, file));
   if (!obj) return notFound();
   const type = obj.httpMetadata?.contentType ?? typeOf(file);
   const cache = type.startsWith('text/html') ? NO_STORE : vn ? IMMUTABLE : 'private, no-cache';
@@ -98,6 +101,11 @@ const routes: [string, RegExp, Need, Handler][] = [
   ['GET', /^\/p\/([a-z0-9-]+)\/$/, 'browser', (req, env, m) => projectPage(req, env, m[1])],
   ['GET', /^\/p\/([a-z0-9-]+)\/kind\/([a-z]+)\/$/, 'browser', (req, env, m) => projectPage(req, env, m[1], { kind: m[2] })],
   ['GET', /^\/p\/([a-z0-9-]+)\/stream\/([a-z0-9-]+)\/$/, 'browser', (req, env, m) => projectPage(req, env, m[1], { stream: m[2] })],
+  ['GET', /^\/triage$/, 'browser', (req, env) => triagePage(req, env)],
+  ['GET', /^\/triage\/preview\/([a-z0-9-]+)\/([0-9a-z-]+)\/v(\d+)\/(.*)$/, 'browser', async (_r, env, m) => {
+    const path = safePath(m[4]);
+    return (path !== null && (await triagePreview(env, m[1], m[2], +m[3], path))) || notFound();
+  }],
   ['GET', /^\/kind\/([a-z]+)\/$/, 'browser', (req, env, m) => kindPage(req, env, m[1])],
   ['GET', /^\/(p\/[a-z0-9-]+|p\/[a-z0-9-]+\/(?:kind|stream)\/[a-z0-9-]+|kind\/[a-z]+)$/, 'browser', (req, _e, m) => Response.redirect(new URL(`/${m[1]}/`, req.url).toString(), 301)],
   ['GET', /^\/_roost\/([a-z.]+)$/, 'any', (_r, _e, m) => serveAsset(m[1]) ?? notFound()],
@@ -106,7 +114,7 @@ const routes: [string, RegExp, Need, Handler][] = [
   ['GET', /^\/api\/whoami$/, 'any', whoami],
   ['POST', /^\/api\/publish$/, 'service', (req, env) => api.publishBegin(req, env)],
   ['PUT', /^\/api\/publish\/([^/]+)\/([^/]+)\/(\d+)\/([0-9a-f-]{36})\/(.+)$/, 'service', (req, env, m) => api.publishPut(req, env, m[1], m[2], +m[3], m[4], m[5])],
-  ['POST', /^\/api\/publish\/([^/]+)\/([^/]+)\/(\d+)\/([0-9a-f-]{36})\/commit$/, 'service', (_r, env, m) => api.publishCommit(env, m[1], m[2], +m[3], m[4])],
+  ['POST', /^\/api\/publish\/([^/]+)\/([^/]+)\/(\d+)\/([0-9a-f-]{36})\/commit$/, 'service', (req, env, m, _w, ctx) => api.publishCommit(env, m[1], m[2], +m[3], m[4], new URL(req.url).origin, ctx)],
   ['GET', /^\/api\/registry$/, 'service', (_r, env) => api.registryGet(env)],
   ['PUT', /^\/api\/registry$/, 'service', (req, env) => api.registryPut(req, env)],
   ['GET', /^\/api\/manifest\/([^/]+)$/, 'service', (_r, env, m) => api.manifestGet(env, m[1])],
@@ -117,6 +125,7 @@ const routes: [string, RegExp, Need, Handler][] = [
   ['POST', /^\/api\/pin$/, 'browser', (req, env) => viewer.pin(req, env)],
   ['POST', /^\/api\/prefs$/, 'browser', (req, env) => viewer.prefs(req, env)],
   ['POST', /^\/api\/archive$/, 'browser', (req, env) => viewer.archive(req, env)],
+  ['POST', /^\/api\/triage\/([a-z0-9-]+)\/([0-9a-z-]+)$/, 'browser', (req, env, m) => viewer.triageAction(req, env, m[1], m[2])],
 ];
 
 export default {

@@ -18,7 +18,12 @@ const PAGES = [
   ['archived', '/?archived=1'],
   ['filter-sheet', '/', async (p) => { await p.getByRole('button', { name: 'Open filters' }).first().click(); await p.waitForTimeout(600); }, 'phone'],
   ['kind-menu', '/', async (p) => { await p.getByRole('button', { name: /^Kind|All kinds/ }).first().click(); await p.waitForTimeout(400); }, 'desk'],
-  ...(globalThis.EXTRA_PAGES ?? []),
+  ['triage', '/triage'],
+  ['triage-reclassify', '/triage', async (p) => { await p.getByRole('button', { name: 'Reclassify' }).first().click(); await p.waitForTimeout(400); }],
+  ['triage-quarantine', '/triage', async (p) => {
+    const href = await p.locator('[data-href*="dependency-audit"]').first().getAttribute('data-href');
+    await p.goto(new URL(href, p.url()).href, { waitUntil: 'networkidle' });
+  }],
 ];
 const SIZES = [['phone', 380, 844], ['desk', 1240, 900]];
 const THEMES = ['light', 'dark'];

@@ -43,6 +43,8 @@ export interface ReportEntry {
   supersedes: string | null; superseded_by: string | null;
   created: string;
   latest: number | null; // latest live version
+  home?: string;          // project whose R2 prefix holds the files, when reclassified from another project
+  moved_to?: string;      // set on the old entry after a move; its URLs redirect there
   classification: {
     by: 'claude' | 'user'; confirmed: boolean; triage: boolean; why: string;
     proposed_stream?: { id: string; title: string };
@@ -111,6 +113,7 @@ export function begin(cur: Manifest | null, project: string, input: BeginInput, 
     };
     m.reports.push(entry);
   }
+  if (entry.moved_to) throw new ApiError(409, 'moved', `This report moved to ${entry.moved_to}; publish there`, 'project');
   const again = entry.versions.find((v) => v.upload === input.upload);
   if (again) return { doc: m, result: { n: again.n } };
   const n = Math.max(0, ...entry.versions.map((v) => v.n)) + 1;
@@ -223,7 +226,7 @@ export interface RecentItem {
   stream: string | null; status: ReportEntry['status']; published: string; version: number; versions: number;
 }
 export interface TriageItem extends Omit<RecentItem, 'status' | 'versions'> {
-  quarantined: boolean; findings: Finding[]; why: string; unattended: boolean;
+  quarantined: boolean; findings: Finding[]; why: string; unattended: boolean; versions: number;
   proposed_stream?: { id: string; title: string };
 }
 export interface ProjectSummary { id: string; title: string; reports: number; active_streams: number; last: string | null }
@@ -236,14 +239,16 @@ export interface RecentIndex {
 
 export const streamHidden = (m: Manifest, e: ReportEntry) =>
   !!e.stream && m.streams.find((s) => s.id === e.stream)?.status === 'archived';
-export const visible = (m: Manifest, e: ReportEntry) => e.latest !== null && !e.archived && !streamHidden(m, e);
+export const visible = (m: Manifest, e: ReportEntry) => e.latest !== null && !e.archived && !e.moved_to && !streamHidden(m, e);
+/** Where a report's files live in R2 (its original project, if it was moved). */
+export const filesProject = (m: Manifest, e: ReportEntry) => e.home ?? m.project;
 
 export function liveVersion(e: ReportEntry): VersionEntry | undefined {
   return e.versions.find((v) => v.n === e.latest);
 }
 
 export function triageItem(m: Manifest, e: ReportEntry, projectTitle: string): TriageItem | null {
-  if (e.archived) return null;
+  if (e.archived || e.moved_to) return null;
   const q = [...e.versions].reverse().find((v) => v.state === 'quarantined');
   if (!q && !e.classification.triage) return null;
   const v = q ?? liveVersion(e);
@@ -251,7 +256,7 @@ export function triageItem(m: Manifest, e: ReportEntry, projectTitle: string): T
   return {
     project: m.project, project_title: projectTitle, id: e.id, title: e.title, summary: e.summary, kind: e.kind,
     stream: e.stream, published: v.published ?? '', version: v.n, quarantined: !!q, findings: q?.findings ?? [],
-    why: e.classification.why, unattended: v.source.unattended,
+    why: e.classification.why, unattended: v.source.unattended, versions: e.versions.length,
     ...(e.classification.proposed_stream ? { proposed_stream: e.classification.proposed_stream } : {}),
   };
 }
@@ -296,4 +301,62 @@ export function mergeSlice(cur: RecentIndex | null, projectId: string, slice: Re
       .sort((a, b) => (b.last ?? '').localeCompare(a.last ?? '')),
     streams: [...other(i.streams), ...slice.streams].sort((a, b) => b.last_report.localeCompare(a.last_report)),
   };
+}
+
+// ---------- triage (SPEC 5.4, 5.5) ----------
+
+export type TriageAction =
+  | { action: 'confirm' } | { action: 'undo' } | { action: 'publish' } | { action: 'reject' }
+  | { action: 'reclassify'; kind?: Kind; stream?: string | null; new_stream?: { id: string; title: string } };
+
+/** Applies a triage action to one report within its own project. Cross-project moves are handled by the caller. */
+export function triage(cur: Manifest | null, id: string, a: TriageAction, now: string) {
+  const m = cur;
+  const e = m?.reports.find((r) => r.id === id);
+  if (!m || !e || e.moved_to) throw new ApiError(404, 'unknown_report');
+  const q = e.versions.filter((v) => v.state === 'quarantined');
+  const c = e.classification;
+  switch (a.action) {
+    case 'confirm':
+      if (q.length) throw new ApiError(422, 'review_required', 'A quarantined report must be reviewed: publish it anyway or reject it');
+      Object.assign(c, { triage: false, confirmed: true, by: 'user' });
+      break;
+    case 'undo':
+      Object.assign(c, { triage: true, confirmed: false, by: 'claude' });
+      break;
+    case 'publish':
+      if (!q.length) throw new ApiError(409, 'not_quarantined');
+      for (const v of q) { v.state = 'live'; v.allow_secrets = true; }
+      e.latest = Math.max(e.latest ?? 0, ...q.map((v) => v.n));
+      Object.assign(c, { triage: false, confirmed: true, by: 'user' });
+      break;
+    case 'reject':
+      if (!q.length) throw new ApiError(409, 'not_quarantined');
+      for (const v of q) v.state = 'rejected';
+      if (e.latest === null) e.archived = e.archived ?? now; // nothing else to show: keep it, archived
+      c.triage = false;
+      break;
+    case 'reclassify': {
+      if (a.kind) e.kind = a.kind;
+      if (a.new_stream) {
+        if (findStream(m, a.new_stream.id)) throw new ApiError(409, 'stream_exists');
+        m.streams.push({ id: a.new_stream.id, title: a.new_stream.title, description: '', status: 'active', aliases: [], started: now, last_report: null });
+        e.stream = a.new_stream.id;
+      } else if (a.stream !== undefined) {
+        const s = a.stream === null ? undefined : findStream(m, a.stream);
+        if (a.stream !== null && !s) throw new ApiError(422, 'unknown_stream');
+        e.stream = s?.id ?? null;
+      }
+      if (e.stream) {
+        const s = m.streams.find((x) => x.id === e.stream)!;
+        const pub = e.versions.filter((v) => v.published).map((v) => v.published!).sort().at(-1) ?? now;
+        if (!s.last_report || pub > s.last_report) s.last_report = pub;
+      }
+      delete c.proposed_stream;
+      Object.assign(c, { triage: q.length > 0, confirmed: !q.length, by: 'user' });
+      break;
+    }
+  }
+  m.updated = now;
+  return { doc: m, result: e };
 }

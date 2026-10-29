@@ -259,7 +259,7 @@ Breadcrumb, project title and stats; then the project's own triage items; active
 
 ### 6.3 Triage
 
-`/triage` lists the open items (an inbox column from 1000px; on phones one item at a time with previous/next). TriageReview shows the status, how it was published, title, lead, "Open report", and Claude's proposed classification with the reason. Actions: Confirm, or Reclassify (project Select, stream RadioGroup including "No stream" and "Propose a new stream" with a name field, kind Select; "Save and confirm"). Quarantined: a destructive Alert, the masked findings, "Reject" and "Publish anyway". Nothing in the hub deletes.
+`/triage` lists the open items (an inbox column from 1000px; on phones one item at a time with previous/next). TriageReview shows the status, how it was published, title, lead, "Open report", and Claude's proposed classification with the reason. Actions: Confirm, or Reclassify (project Select, stream RadioGroup including "No stream" and "Propose a new stream" with a name field, kind Select; "Save and confirm"). Quarantined: a destructive Alert, the masked findings, "Reject" and "Publish anyway". Nothing in the hub deletes. Reclassifying into another project moves only the metadata: the files stay under their original R2 prefix (the entry records it as `home`), the old entry is marked `moved_to`, and the old URL redirects. "Preview report" on a quarantined item serves that version under `/triage/preview/…` with `Content-Security-Policy: sandbox`, so its scripts never run on Roost's origin; the report URL itself still refuses it.
 
 ### 6.4 Report chrome
 

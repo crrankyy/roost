@@ -1,11 +1,13 @@
 // Service-token endpoints: publishing, registry, streams, export, design-system upload (PLAN 4).
 import {
-  ID_RE, KINDS, REPORT_ID_RE, begin, commit, manifestKey, mergeSlice, projectSlice, reportJson, streamOp, versionKey,
+  ID_RE, KINDS, REPORT_ID_RE, begin, filesProject, commit, manifestKey, mergeSlice, projectSlice, reportJson, streamOp, versionKey,
   type BeginInput, type Finding, type Manifest, type RecentIndex, type Registry, type StreamOp,
 } from './model';
 import { ApiError, casUpdate, getJson, putIfAbsent } from './store';
 
-export interface ApiEnv { REPORTS: R2Bucket }
+import { notify, type NotifyEnv } from './notify';
+
+export interface ApiEnv extends NotifyEnv { REPORTS: R2Bucket }
 
 export const REGISTRY_KEY = 'registry/projects.json';
 export const INDEX_KEY = 'index/recent.json';
@@ -126,9 +128,10 @@ export async function publishBegin(req: Request, env: ApiEnv): Promise<Response>
 
 async function pendingVersion(env: ApiEnv, project: string, id: string, n: number, upload: string) {
   const m = (await getJson<Manifest>(env.REPORTS, manifestKey(project)))?.doc;
-  const v = m?.reports.find((r) => r.id === id)?.versions.find((x) => x.n === n);
-  if (!v || v.upload !== upload) throw new ApiError(404, 'unknown_upload');
-  return v;
+  const e = m?.reports.find((r) => r.id === id);
+  const v = e?.versions.find((x) => x.n === n);
+  if (!m || !e || !v || v.upload !== upload) throw new ApiError(404, 'unknown_upload');
+  return Object.assign(v, { home: filesProject(m, e) });
 }
 
 export async function publishPut(req: Request, env: ApiEnv, project: string, id: string, n: number, upload: string, rawPath: string) {
@@ -140,7 +143,7 @@ export async function publishPut(req: Request, env: ApiEnv, project: string, id:
   const len = Number(req.headers.get('content-length'));
   if (!req.body && f.size !== 0) throw new ApiError(400, 'empty_body');
   if (req.headers.has('content-length') && len !== f.size) throw new ApiError(422, 'size_mismatch', `${path}: expected ${f.size} bytes, got ${len}`);
-  const key = versionKey(project, id, n, path);
+  const key = versionKey(v.home, id, n, path);
   const contentType = req.headers.get('content-type') ?? 'application/octet-stream';
   let created: boolean;
   try {
@@ -157,23 +160,24 @@ export async function publishPut(req: Request, env: ApiEnv, project: string, id:
   return json({ ok: true, path, created });
 }
 
-export async function publishCommit(env: ApiEnv, project: string, id: string, n: number, upload: string, ctx?: { notify?: (m: Manifest, e: any, state: string) => void }) {
+export async function publishCommit(env: ApiEnv, project: string, id: string, n: number, upload: string, origin: string, ctx?: ExecutionContext) {
   const v = await pendingVersion(env, project, id, n, upload);
   if (v.state === 'pending') {
     const missing: string[] = [];
-    for (const f of v.files) if (!(await env.REPORTS.head(versionKey(project, id, n, f.path)))) missing.push(f.path);
+    for (const f of v.files) if (!(await env.REPORTS.head(versionKey(v.home, id, n, f.path)))) missing.push(f.path);
     if (missing.length) throw new ApiError(422, 'missing_files', `Not uploaded: ${missing.slice(0, 10).join(', ')}`);
   }
-  let manifest!: Manifest;
   const { state, entry } = await casUpdate<Manifest, any>(env.REPORTS, manifestKey(project), (cur) => {
-    const r = commit(cur, id, n, upload, now());
-    manifest = r.doc;
-    return r;
+    return commit(cur, id, n, upload, now());
   });
   const version = entry.versions.find((x: any) => x.n === n);
-  await putIfAbsent(env.REPORTS, versionKey(project, id, n, 'report.json'), JSON.stringify(reportJson(project, entry, version)), { httpMetadata: { contentType: 'application/json' } });
+  await putIfAbsent(env.REPORTS, versionKey(v.home, id, n, 'report.json'), JSON.stringify(reportJson(project, entry, version)), { httpMetadata: { contentType: 'application/json' } });
   const indexed = await updateIndex(env, project);
-  if (v.state === 'pending') ctx?.notify?.(manifest, entry, state);
+  if (v.state === 'pending') {
+    const p = notify(env, { title: entry.title, project: (await readRegistry(env)).doc.projects.find((x) => x.id === project)?.title ?? project, kind: entry.kind,
+      url: `${origin}/p/${project}/r/${id}/${state === 'live' ? '' : `v${n}/`}`, needsYou: entry.classification.triage });
+    ctx ? ctx.waitUntil(p) : await p;
+  }
   return json({
     url: `/p/${project}/r/${id}/${state === 'live' ? '' : `v${n}/`}`, project, id, version: n, state,
     triage: entry.classification.triage, index_stale: !indexed,
@@ -245,7 +249,9 @@ export async function streamPost(req: Request, env: ApiEnv, project: string, str
 // ---------- export, design system, reindex ----------
 
 export async function rawGet(env: ApiEnv, project: string, id: string, n: number, path: string) {
-  const obj = await env.REPORTS.get(versionKey(project, id, n, decodeURIComponent(path)));
+  const m = (await getJson<Manifest>(env.REPORTS, manifestKey(project)))?.doc;
+  const e = m?.reports.find((r) => r.id === id);
+  const obj = await env.REPORTS.get(versionKey(m && e ? filesProject(m, e) : project, id, n, decodeURIComponent(path)));
   if (!obj) throw new ApiError(404, 'not_found');
   return new Response(obj.body, { headers: { 'content-type': obj.httpMetadata?.contentType ?? 'application/octet-stream', 'cache-control': 'private, no-store' } });
 }

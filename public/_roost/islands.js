@@ -196,7 +196,102 @@
     return h(L.ThemeToggle);
   }
 
-  var ISLANDS = { palette: Palette, theme: Theme, filters: Filters, 'filter-sheet': FilterSheet };
+  // ---------- triage ----------
+
+  function agoShort(iso) {
+    if (!iso) return 'no reports yet';
+    var d = Math.floor((Date.now() - Date.parse(iso)) / 864e5);
+    return d < 1 ? 'latest today' : d === 1 ? 'latest yesterday' : 'latest ' + d + ' days ago';
+  }
+  function triage(refStr, body) {
+    var p = refStr.split('/');
+    return post('/api/triage/' + p[0] + '/' + p[1], body);
+  }
+  function confirmWithUndo(refStr, title, after) {
+    return triage(refStr, { action: 'confirm' }).then(function () {
+      toast('Confirmed ' + title, { action: { label: 'Undo', onClick: function () { triage(refStr, { action: 'undo' }).then(function () { location.reload(); }); } } });
+      if (after) after();
+    }).catch(function () { toast('Couldn’t confirm. Try again.'); });
+  }
+
+  function Reclassify(p) {
+    var mode = R.useState('idle'), setMode = mode[1]; mode = mode[0];
+    var project = R.useState(p.project), setProject = project[1]; project = project[0];
+    var proj = p.projects.filter(function (x) { return x.id === project; })[0] || { streams: [], title: project };
+    var initialStream = p.proposed ? 'new' : (p.stream || 'none');
+    var stream = R.useState(initialStream), setStream = stream[1]; stream = stream[0];
+    var newName = R.useState(p.proposed ? p.proposed.id : ''), setNewName = newName[1]; newName = newName[0];
+    var kind = R.useState(p.kind), setKind = kind[1]; kind = kind[0];
+    var busy = R.useState(false), setBusy = busy[1]; busy = busy[0];
+    var filed = R.useState(''), setFiled = filed[1]; filed = filed[0];
+    var title = (document.getElementById('tri-title') || {}).textContent || 'report';
+    var validNew = /^[a-z0-9]+(-[a-z0-9]+)*$/.test(newName);
+
+    function done(text) { setFiled(text); setMode('done'); }
+    function confirm() {
+      setBusy(true);
+      var cur = p.projects.filter(function (x) { return x.id === p.project; })[0];
+      confirmWithUndo(p.target, title, function () { done((cur ? cur.title : p.project) + (p.stream ? ' › ' + p.stream : '') + ' as ' + KIND_LABEL(p.kind)); }).then(function () { setBusy(false); });
+    }
+    function save() {
+      setBusy(true);
+      var body = { action: 'reclassify', kind: kind, project: project };
+      if (stream === 'new') body.new_stream = { id: newName, title: newName };
+      else body.stream = stream === 'none' ? null : stream;
+      triage(p.target, body).then(function () {
+        toast('Filed ' + title, { action: { label: 'Undo', onClick: function () { location.reload(); } } });
+        done(proj.title + (stream === 'none' ? '' : ' › ' + (stream === 'new' ? newName : stream)) + ' as ' + KIND_LABEL(kind));
+      }).catch(function (e) { toast('Couldn’t save: ' + e.message); }).then(function () { setBusy(false); });
+    }
+
+    if (mode === 'done') {
+      return h('div', { className: 'lr-callout', 'data-tone': 'success' },
+        h('svg', { className: 'lr-icon', viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': 'true' }, h('path', { d: 'M20 6 9 17l-5-5' })),
+        h('p', { style: { margin: 0 } }, 'Filed under ' + filed + '. ', h('a', { href: p.next }, p.next === '/' ? 'Back home' : 'Next report')));
+    }
+    if (mode === 'idle') {
+      return h('div', { style: { display: 'flex', flexDirection: 'column', gap: 8 } },
+        h('div', { className: 'hub-actions' },
+          h(L.Button, { onClick: confirm, disabled: busy }, h(L.Icons.Check, { size: 16, 'aria-hidden': 'true' }), 'Confirm'),
+          h(L.Button, { variant: 'outline', onClick: function () { setMode('form'); } }, 'Reclassify')),
+        h('p', { className: 'hub-caption' }, 'Classification is metadata, so the report’s link stays the same either way.'));
+    }
+    var choices = [{ value: 'none', label: 'No stream', hint: 'File under General' }].concat(
+      proj.streams.map(function (s) { return { value: s.id, label: s.id, hint: agoShort(s.last) }; }),
+      [{ value: 'new', label: 'Propose a new stream', hint: p.proposed ? 'Claude suggested ' + p.proposed.id : '' }]);
+    var muted = { fontWeight: 400, color: 'var(--muted-foreground)' };
+    return h('section', { className: 'lr-inset', style: { display: 'flex', flexDirection: 'column', gap: 20 }, 'aria-labelledby': 'rc-h' },
+      h('h3', { id: 'rc-h', className: 'hub-label', style: { margin: 0 } }, 'Reclassify'),
+      h('div', { className: 'hub-field' },
+        h('label', { className: 'hub-label', htmlFor: 'rc-project', style: muted }, 'Project'),
+        h(L.Select, { value: project, onValueChange: function (v) { setProject(v); setStream('none'); } },
+          h(L.SelectTrigger, { id: 'rc-project', style: { width: '100%', maxWidth: 320 } }, h(L.SelectValue, { placeholder: 'Choose a project' })),
+          h(L.SelectContent, null, p.projects.map(function (x) { return h(L.SelectItem, { key: x.id, value: x.id }, x.title); })))),
+      h('div', { className: 'hub-field', role: 'group', 'aria-labelledby': 'rc-stream-l' },
+        h('span', { id: 'rc-stream-l', className: 'hub-label', style: muted }, 'Stream'),
+        h(L.RadioGroup, { value: stream, onValueChange: setStream, 'aria-labelledby': 'rc-stream-l' },
+          choices.map(function (c) {
+            return h('label', { key: c.value, className: 'hub-choice', htmlFor: 'rc-s-' + c.value },
+              h(L.RadioGroupItem, { value: c.value, id: 'rc-s-' + c.value }), h('span', null, c.label), c.hint ? h('span', { className: 'hub-caption' }, c.hint) : null);
+          })),
+        stream === 'new' ? h('div', { style: { display: 'flex', flexDirection: 'column', gap: 6, paddingLeft: 26, maxWidth: 346 } },
+          h('label', { className: 'hub-caption', htmlFor: 'rc-new' }, 'New stream name'),
+          h(L.Input, { id: 'rc-new', value: newName, onChange: function (e) { setNewName(e.target.value.toLowerCase()); }, 'aria-invalid': newName && !validNew ? 'true' : undefined }),
+          h('span', { className: 'hub-caption' }, 'Created when you save. Lowercase words joined by hyphens.')) : null),
+      h('div', { className: 'hub-field' },
+        h('label', { className: 'hub-label', htmlFor: 'rc-kind', style: muted }, 'Kind'),
+        h(L.Select, { value: kind, onValueChange: setKind },
+          h(L.SelectTrigger, { id: 'rc-kind', style: { width: '100%', maxWidth: 320 } }, h(L.SelectValue, { placeholder: 'Choose a kind' })),
+          h(L.SelectContent, null, KINDS.map(function (k) { return h(L.SelectItem, { key: k, value: k }, Badge(k)); })))),
+      h('div', { style: { display: 'flex', flexDirection: 'column', gap: 8 } },
+        h('div', { className: 'hub-actions' },
+          h(L.Button, { onClick: save, disabled: busy || (stream === 'new' && !validNew) }, 'Save and confirm'),
+          h(L.Button, { variant: 'ghost', onClick: function () { setMode('idle'); } }, 'Cancel')),
+        h('p', { className: 'hub-caption' }, 'The link stays the same: project, stream and kind are metadata.')));
+  }
+  var KINDS = ['investigation', 'incident', 'review', 'audit', 'architecture', 'plan', 'analysis', 'benchmark', 'experiment', 'research', 'explainer', 'runbook', 'summary'];
+
+  var ISLANDS = { palette: Palette, theme: Theme, filters: Filters, 'filter-sheet': FilterSheet, reclassify: Reclassify };
   window.Roost.islands = ISLANDS;
 
   function mountAll() {
@@ -216,6 +311,24 @@
   // ---------- plain behaviour (no React needed) ----------
 
   document.addEventListener('click', function (e) {
+    var c = e.target.closest('[data-confirm]');
+    if (c) {
+      c.disabled = true;
+      var item = c.closest('.hub-titem');
+      var t = item && item.querySelector('.hub-titem-title');
+      confirmWithUndo(c.getAttribute('data-confirm'), t ? t.textContent : 'report', function () { if (item) item.style.opacity = '.45'; c.textContent = 'Confirmed'; });
+      return;
+    }
+    var act = e.target.closest('[data-triage]');
+    if (act) {
+      var which = act.getAttribute('data-triage');
+      act.disabled = true;
+      triage(act.getAttribute('data-ref'), { action: which }).then(function () {
+        toast(which === 'publish' ? 'Published. The report is live.' : 'Rejected. It stays archived, unpublished.');
+        setTimeout(function () { location.href = '/triage'; }, 900);
+      }).catch(function () { act.disabled = false; toast('That didn’t work. Try again.'); });
+      return;
+    }
     var nav = e.target.closest('[data-href]');
     if (nav) { location.href = nav.getAttribute('data-href'); return; }
     var more = e.target.closest('[data-show-more]');
