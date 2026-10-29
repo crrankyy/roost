@@ -99,3 +99,15 @@ test('lint: the reference report has no blocking errors', () => {
   const r = lint([{ path: 'index.html', abs: 'docs/reference/memory-research.html', size: 76081 }], { kind: 'research', summary: 's' });
   assert.deepEqual(r.errors, []);
 });
+
+test('ntfy request carries metadata only and tags by need', async () => {
+  const { ntfyRequest } = await import('../../cli/roost.mjs');
+  const cfg = { ntfyServer: 'https://ntfy.sh', ntfyTopic: 'roost-abc' };
+  const r = ntfyRequest(cfg, { title: 'Rosé report', project: 'Payments API', kind: 'audit', url: 'https://x/p/a/r/b/', needsYou: true });
+  assert.equal(r.url, 'https://ntfy.sh/roost-abc');
+  assert.equal(r.init.headers.Tags, 'needs-you');
+  assert.equal(r.init.headers.Click, 'https://x/p/a/r/b/');
+  assert.match(r.init.headers.Title, /^=\?UTF-8\?B\?/);
+  assert.equal(r.init.body, 'Payments API · audit · needs you');
+  assert.equal(ntfyRequest(cfg, { title: 'Plain', project: 'P', kind: 'plan', url: 'u', needsYou: false }).init.headers.Tags, 'published');
+});

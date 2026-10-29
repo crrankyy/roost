@@ -529,7 +529,7 @@ Verified locally (44 Worker tests, 13 CLI tests, Playwright contact sheet at 380
 Owner walkthrough (30 Oct): pins, the new dot, versions, the older-version banner, archive/unarchive, palette and triage work on phone and laptop. ntfy is not subscribed yet (owner will do it later). The theme icon mismatch found then is fixed.
 
 Decisions taken on the §10 open questions:
-- Q1: ntfy is sent by the Worker only.
+- Q1: ntfy was first sent by the Worker, but ntfy.sh refuses Cloudflare's shared egress IPs (522, 429 "daily quota"). It moved to the CLI (`ROOST_NTFY_TOPIC`), as the original SPEC 5.2 had it.
 - Q4: version gaps are accepted.
 - Q6: one layout rule in `chrome.css`.
 - Q9: a cross-project move keeps the files in place and the old URL redirects.

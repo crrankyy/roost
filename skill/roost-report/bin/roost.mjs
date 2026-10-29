@@ -55,6 +55,7 @@ export function loadConfig(env = process.env) {
   return {
     url: (cfg.ROOST_URL ?? '').replace(/\/+$/, ''),
     id: cfg.CF_ACCESS_CLIENT_ID ?? '', secret: cfg.CF_ACCESS_CLIENT_SECRET ?? '',
+    ntfyTopic: cfg.ROOST_NTFY_TOPIC ?? '', ntfyServer: (cfg.ROOST_NTFY_SERVER || 'https://ntfy.sh').replace(/\/+$/, ''),
     allowEmails: (cfg.ROOST_ALLOW_EMAILS ?? '').split(',').map((s) => s.trim().toLowerCase()).filter(Boolean),
     file,
   };
@@ -300,6 +301,35 @@ async function pool(items, n, fn) {
   await Promise.all(Array.from({ length: Math.min(n, queue.length) }, async () => { while (queue.length) await fn(queue.shift()); }));
 }
 
+// ---------- notifications (SPEC 5.6) ----------
+
+/** The ntfy push for a publish: title, project, kind and URL only, never report content. */
+export function ntfyRequest(cfg, { title, project, kind, url, needsYou }) {
+  // Header values must be Latin-1; ntfy reads RFC 2047 encoded words for anything else.
+  const header = (s) => (/^[\x20-\x7e]*$/.test(s) ? s : `=?UTF-8?B?${Buffer.from(s).toString('base64')}?=`);
+  return {
+    url: `${cfg.ntfyServer}/${cfg.ntfyTopic}`,
+    init: {
+      method: 'POST', body: `${project} · ${kind}${needsYou ? ' · needs you' : ''}`,
+      headers: { Title: header(title), Tags: needsYou ? 'needs-you' : 'published', Click: url, Priority: needsYou ? '4' : '3' },
+    },
+  };
+}
+
+// Sent from the publishing machine: ntfy.sh rate-limits Cloudflare Workers' shared egress IPs (522/429 from the Worker).
+async function notifyPublish(cfg, n, log) {
+  if (!cfg.ntfyTopic) return false;
+  const { url, init } = ntfyRequest(cfg, n);
+  try {
+    const res = await fetch(url, init);
+    if (!res.ok) { log(`warning: ntfy answered ${res.status}; no push sent`); return false; }
+    return true;
+  } catch (e) {
+    log(`warning: ntfy unreachable (${e.message}); no push sent`);
+    return false;
+  }
+}
+
 // ---------- commands ----------
 
 async function cmdPublish({ pos, flags }, cfg, log) {
@@ -389,8 +419,9 @@ async function cmdPublish({ pos, flags }, cfg, log) {
   }
   if (done.index_stale) await req('/api/reindex', { method: 'POST' }).catch(() => {});
   const url = cfg.url + done.url;
+  const notified = await notifyPublish(cfg, { title, project: projectRec.title, kind, url, needsYou: !!done.triage }, log);
   log(`${done.state === 'quarantined' ? 'Quarantined (needs review in /triage)' : 'Published'}: ${url}`);
-  return { code: EXIT.ok, out: { ok: true, url, project, id, version: done.version, state: done.state, triage: done.triage, match: resolved.match, warnings } };
+  return { code: EXIT.ok, out: { ok: true, url, project, id, version: done.version, state: done.state, triage: done.triage, notified, match: resolved.match, warnings } };
 }
 
 async function cmdProject({ pos, flags }, cfg, log) {
@@ -476,6 +507,7 @@ async function cmdDoctor(_args, cfg, log) {
     if (missing.length) throw new Error(`missing ${missing.join(', ')} (env or ${cfg.file})`);
     return cfg.url;
   });
+  await check('ntfy topic', () => { if (!cfg.ntfyTopic) throw new Error(`ROOST_NTFY_TOPIC is not set; publishes won't push to your phone`); return `${cfg.ntfyServer}/${cfg.ntfyTopic.slice(0, 10)}…`; });
   if (checks.every((c) => c.ok)) {
     const req = client(cfg);
     await check('service token accepted', async () => {

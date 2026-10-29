@@ -44,7 +44,7 @@ Browser (phone or laptop) ─────────email login─────�
 | R2 bucket `roost` | Report versions, project manifests, project registry, settings, design-system assets | Nothing is ever deleted |
 | KV namespace `ROOST_STATE` | Pins, last-visit time, opened report ids, theme and palette | Single user, a few small keys |
 | Cloudflare Access | Email login for the browser; service token for the publisher | One-click Access on the workers.dev route |
-| ntfy.sh | Push notifications on publish and triage, sent by the Worker | Random topic name in the Worker secret `NTFY_TOPIC`, metadata only |
+| ntfy.sh | Push notifications on publish (including triage and quarantine), sent by the CLI | Random topic name in `ROOST_NTFY_TOPIC` on each machine, metadata only |
 | Publisher CLI `roost` | Validates, classifies, uploads, notifies | Single Node script, no dependencies beyond Node 20+ |
 
 **Access and authentication**
@@ -198,7 +198,7 @@ roost export <project> <out-dir>
 roost doctor                      # checks env, Access token, connectivity
 ```
 
-A single Node script (Node 20+, no dependencies), shipped with the Claude Code skill. Configuration from the environment, falling back to `~/.config/roost/env` (mode 600): `ROOST_URL`, `CF_ACCESS_CLIENT_ID`, `CF_ACCESS_CLIENT_SECRET`, optional `ROOST_ALLOW_EMAILS` (addresses the secret scan ignores). `--confirmed` records that the user answered the combined question; `--why` is Claude's reason for the classification. Exit codes: 0 published, 1 network/server/auth, 2 usage or lint errors, 3 needs confirmation, 4 secret findings (attended). `--json` prints one object on stdout.
+A single Node script (Node 20+, no dependencies), shipped with the Claude Code skill. Configuration from the environment, falling back to `~/.config/roost/env` (mode 600): `ROOST_URL`, `CF_ACCESS_CLIENT_ID`, `CF_ACCESS_CLIENT_SECRET`, optional `ROOST_ALLOW_EMAILS` (addresses the secret scan ignores), `ROOST_NTFY_TOPIC` and `ROOST_NTFY_SERVER` (default `https://ntfy.sh`). `--confirmed` records that the user answered the combined question; `--why` is Claude's reason for the classification. Exit codes: 0 published, 1 network/server/auth, 2 usage or lint errors, 3 needs confirmation, 4 secret findings (attended). `--json` prints one object on stdout.
 
 ### 5.2 Steps
 
@@ -208,7 +208,7 @@ A single Node script (Node 20+, no dependencies), shipped with the Claude Code s
 4. **Scan for secrets**; findings are warnings (see 5.5).
 5. **Confirm** with the user when any confidence rule says ask, as one combined question.
 6. **Upload** in three steps, so no request parses a large body (the free plan allows 10 ms of CPU): `POST /api/publish` validates and claims version N in the manifest; each file is `PUT` and streamed into R2 with its sha256 checked, never overwriting; `POST …/commit` writes `report.json`, makes the version live (or quarantined) in the manifest, then recomputes that project's slice of the global index. The manifest is the source of truth; the index is rebuilt from manifests if a write to it fails.
-7. **Notify**: the Worker sends the ntfy push after commit; the CLI prints the report URL.
+7. **Notify**: after a successful commit the CLI sends the ntfy push from the publishing machine and prints the report URL. (ntfy.sh rate-limits the shared egress IPs of Cloudflare Workers, so the Worker cannot send reliably.)
 
 ### 5.3 Classification confidence
 
@@ -232,7 +232,7 @@ When no one can answer (`--unattended`, scheduled runs, or a question left unans
 
 ### 5.6 Notifications
 
-- ntfy.sh topic = a long random string, held only in the Worker secret `NTFY_TOPIC`. The Worker sends every notification.
+- ntfy.sh topic = a long random string in `ROOST_NTFY_TOPIC` on each publishing machine (env or `~/.config/roost/env`). The CLI sends every notification; a failed push is a warning, never a failed publish.
 - Payload: title, project, kind and the report URL only; no summary or content.
 - Two tags: `published` on every publish, `needs-you` on triage and quarantine, so either can be muted.
 - Self-hosted ntfy later needs only a server URL change.
@@ -354,7 +354,7 @@ Everything runs on Cloudflare's free tier for a single user; the only secrets ar
 
 **Operations**
 
-- Deploy with `wrangler deploy` from the `roost` repo; bindings: R2 `REPORTS` (bucket `roost`), KV `STATE` (`ROOST_STATE`), vars `POLICY_AUD`, `TEAM_DOMAIN`, `SERVICE_TOKEN_ID`, secret `NTFY_TOPIC`. Preview URLs are off, so only the Access-protected workers.dev route exists.
+- Deploy with `wrangler deploy` from the `roost` repo; bindings: R2 `REPORTS` (bucket `roost`), KV `STATE` (`ROOST_STATE`), vars `POLICY_AUD`, `TEAM_DOMAIN`, `SERVICE_TOKEN_ID`. The Worker holds no secrets. Preview URLs are off, so only the Access-protected workers.dev route exists.
 - Design-system files are uploaded to `ds/lynx-reports/v1/` by a deploy script from `docs/design-system/` (or a vendored copy in the repo).
 - Backup: `roost export <project> <dir>` pulls every version and the manifest; R2 itself is the system of record.
 - Custom domain later: add it to the Worker; Access covers every hostname on it; redirect the workers.dev URL.

@@ -5,9 +5,7 @@ import {
 } from './model';
 import { ApiError, casUpdate, getJson, putIfAbsent } from './store';
 
-import { notify, type NotifyEnv } from './notify';
-
-export interface ApiEnv extends NotifyEnv { REPORTS: R2Bucket }
+export interface ApiEnv { REPORTS: R2Bucket }
 
 export const REGISTRY_KEY = 'registry/projects.json';
 export const INDEX_KEY = 'index/recent.json';
@@ -160,7 +158,7 @@ export async function publishPut(req: Request, env: ApiEnv, project: string, id:
   return json({ ok: true, path, created });
 }
 
-export async function publishCommit(env: ApiEnv, project: string, id: string, n: number, upload: string, origin: string, ctx?: ExecutionContext) {
+export async function publishCommit(env: ApiEnv, project: string, id: string, n: number, upload: string) {
   const v = await pendingVersion(env, project, id, n, upload);
   if (v.state === 'pending') {
     const missing: string[] = [];
@@ -173,11 +171,6 @@ export async function publishCommit(env: ApiEnv, project: string, id: string, n:
   const version = entry.versions.find((x: any) => x.n === n);
   await putIfAbsent(env.REPORTS, versionKey(v.home, id, n, 'report.json'), JSON.stringify(reportJson(project, entry, version)), { httpMetadata: { contentType: 'application/json' } });
   const indexed = await updateIndex(env, project);
-  if (v.state === 'pending') {
-    const p = notify(env, { title: entry.title, project: (await readRegistry(env)).doc.projects.find((x) => x.id === project)?.title ?? project, kind: entry.kind,
-      url: `${origin}/p/${project}/r/${id}/${state === 'live' ? '' : `v${n}/`}`, needsYou: entry.classification.triage });
-    ctx ? ctx.waitUntil(p) : await p;
-  }
   return json({
     url: `/p/${project}/r/${id}/${state === 'live' ? '' : `v${n}/`}`, project, id, version: n, state,
     triage: entry.classification.triage, index_stale: !indexed,

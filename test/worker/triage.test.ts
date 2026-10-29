@@ -1,5 +1,5 @@
 import { env } from 'cloudflare:test';
-import { beforeAll, describe, expect, it, vi } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 import { browser, call, service, setupAccess } from './helpers';
 
 let svc = '', web = '';
@@ -83,38 +83,5 @@ describe('triage', () => {
     expect(again.version).toBe(2);
     expect(await R2.head('p/tri/r/2026-10-29-mover/v2/index.html')).not.toBeNull();
     expect((await j(svc, '/api/raw/dest/2026-10-29-mover/v1/index.html')).status).toBe(200);
-  });
-});
-
-describe('ntfy', () => {
-  it('sends metadata only, tagged by whether it needs me', async () => {
-    const sent: { url: string; init: RequestInit }[] = [];
-    const real = globalThis.fetch;
-    const spy = vi.spyOn(globalThis, 'fetch').mockImplementation(async (input: any, init?: any) => {
-      const url = typeof input === 'string' ? input : input.url;
-      if (url.startsWith('https://ntfy.sh/')) { sent.push({ url, init }); return new Response('ok'); }
-      return real(input, init);
-    });
-    const { default: worker } = await import('../../src/index');
-    const { testEnv } = await import('./helpers');
-    const e = { ...testEnv(), NTFY_TOPIC: 'topic123' };
-    const html = '<html><title>Pushed</title><body>secret body text</body></html>';
-    const send = async (path: string, method: string, body: any, jwt = svc) => {
-      const ctx = { waitUntil: (p: Promise<unknown>) => p, passThroughOnException() {} } as any;
-      const res = await worker.fetch(new Request(`https://roost.test${path}`, { method, body: typeof body === 'string' ? body : JSON.stringify(body), headers: { 'Cf-Access-Jwt-Assertion': jwt, 'content-type': 'application/json' } }), e, ctx);
-      return res.json<any>();
-    };
-    const b = await send('/api/publish', 'POST', { project: 'tri', id: '2026-10-29-push', kind: 'plan', title: 'Pushed', files: [{ path: 'index.html', size: html.length, sha256: await sha(html) }], unattended: true });
-    await send(`${b.put_base}index.html`, 'PUT', html);
-    await send(`${b.put_base}commit`, 'POST', {});
-    await new Promise((r) => setTimeout(r, 20));
-    spy.mockRestore();
-    expect(sent).toHaveLength(1);
-    const h = new Headers(sent[0].init.headers as any);
-    expect(sent[0].url).toBe('https://ntfy.sh/topic123');
-    expect(h.get('Title')).toBe('Pushed');
-    expect(h.get('Tags')).toBe('needs-you');
-    expect(h.get('Click')).toBe('https://roost.test/p/tri/r/2026-10-29-push/');
-    expect(String(sent[0].init.body)).not.toContain('secret body text');
   });
 });

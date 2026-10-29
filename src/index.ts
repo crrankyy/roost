@@ -11,7 +11,6 @@ import { injectChrome } from './chrome';
 import { viewer as loadViewer } from './pages/data';
 
 export interface Env extends AuthEnv {
-  NTFY_TOPIC?: string;
   REPORTS: R2Bucket;
   STATE: KVNamespace;
 }
@@ -129,7 +128,7 @@ const routes: [string, RegExp, Need, Handler][] = [
   ['GET', /^\/api\/whoami$/, 'any', whoami],
   ['POST', /^\/api\/publish$/, 'service', (req, env) => api.publishBegin(req, env)],
   ['PUT', /^\/api\/publish\/([^/]+)\/([^/]+)\/(\d+)\/([0-9a-f-]{36})\/(.+)$/, 'service', (req, env, m) => api.publishPut(req, env, m[1], m[2], +m[3], m[4], m[5])],
-  ['POST', /^\/api\/publish\/([^/]+)\/([^/]+)\/(\d+)\/([0-9a-f-]{36})\/commit$/, 'service', (req, env, m, _w, ctx) => api.publishCommit(env, m[1], m[2], +m[3], m[4], new URL(req.url).origin, ctx)],
+  ['POST', /^\/api\/publish\/([^/]+)\/([^/]+)\/(\d+)\/([0-9a-f-]{36})\/commit$/, 'service', (_r, env, m) => api.publishCommit(env, m[1], m[2], +m[3], m[4])],
   ['GET', /^\/api\/registry$/, 'service', (_r, env) => api.registryGet(env)],
   ['PUT', /^\/api\/registry$/, 'service', (req, env) => api.registryPut(req, env)],
   ['GET', /^\/api\/manifest\/([^/]+)$/, 'service', (_r, env, m) => api.manifestGet(env, m[1])],
