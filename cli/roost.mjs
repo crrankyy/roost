@@ -61,11 +61,13 @@ export function loadConfig(env = process.env) {
 }
 
 function client(cfg) {
-  if (!cfg.url || !cfg.id || !cfg.secret) {
+  // Local `wrangler dev` with DEV_IDENTITY=1 (see .dev.vars) needs no Access token; deployed Workers ignore the header.
+  const local = /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(cfg.url);
+  if (!cfg.url || (!local && (!cfg.id || !cfg.secret))) {
     throw new CliError(`Set ROOST_URL, CF_ACCESS_CLIENT_ID and CF_ACCESS_CLIENT_SECRET (env or ${cfg.file}).`);
   }
   return async function req(path, { method = 'GET', body, headers = {}, raw = false } = {}) {
-    const h = { 'CF-Access-Client-Id': cfg.id, 'CF-Access-Client-Secret': cfg.secret, ...headers };
+    const h = local ? { 'x-dev-identity': 'service', ...headers } : { 'CF-Access-Client-Id': cfg.id, 'CF-Access-Client-Secret': cfg.secret, ...headers };
     let payload = body;
     if (body !== undefined && !(body instanceof Uint8Array) && typeof body !== 'string') { payload = JSON.stringify(body); h['content-type'] = 'application/json'; }
     let res;

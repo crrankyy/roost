@@ -366,7 +366,7 @@ Everything runs on Cloudflare's free tier for a single user; the only secrets ar
 3. **Browse** — home and project pages, filters, kind and stream views, archive.
 4. **Attention** — triage inbox and review, quarantine, pins, "new" markers, ntfy, theme and palette preferences.
 5. **Report chrome** — pill and banners injected with HTMLRewriter, scroll behaviour, seen tracking.
-6. **Claude Code integration** — a skill that writes reports to the authoring contract (using the ReportExample template and the Chart contract), classifies them, and runs the publisher.
+6. **Claude Code integration** — a skill that writes reports to the authoring contract (using the ReportExample template and the Chart contract), classifies them, and runs the publisher. The skill lives in `skill/roost-report/` (SKILL.md, the ReportExample template, the report-layer and chart cards copied by `scripts/build-skill.mjs`, and a copy of the CLI); `scripts/install.sh` installs it to `~/.claude/skills/roost-report` and links `roost` into `~/.local/bin`. Drafts are written to `~/.roost/drafts/<slug>/`, outside any repository.
 
 **Decided**
 
