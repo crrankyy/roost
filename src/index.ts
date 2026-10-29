@@ -1,5 +1,7 @@
 import { authenticate, type AuthEnv, type Identity } from './auth';
+import * as api from './api';
 import { ID_RE, REPORT_ID_RE, manifestKey, versionKey, type Manifest } from './model';
+import { ApiError } from './store';
 
 export interface Env extends AuthEnv {
   REPORTS: R2Bucket;
@@ -23,7 +25,8 @@ const typeOf = (path: string) => TYPES[path.split('.').pop()!.toLowerCase()] ?? 
 
 export const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json', 'cache-control': NO_STORE } });
-export const apiError = (status: number, code: string, message = code) => json({ error: { code, message } }, status);
+export const apiError = (status: number, code: string, message = code, field?: string) =>
+  json({ error: { code, message, ...(field ? { field } : {}) } }, status);
 
 /** Rejects traversal and odd segments; returns the decoded relative path or null. */
 function safePath(raw: string): string | null {
@@ -90,6 +93,16 @@ const routes: [string, RegExp, Need, Handler][] = [
   ['GET', /^\/_ds\/lynx-reports\/v1\/(.+)$/, 'any', serveDs],
   ['GET', /^\/p\/([^/]+)\/r\/([^/]+)(\/)?(?:v(\d+)\/)?(.*)$/, 'browser', serveReport],
   ['GET', /^\/api\/whoami$/, 'any', whoami],
+  ['POST', /^\/api\/publish$/, 'service', (req, env) => api.publishBegin(req, env)],
+  ['PUT', /^\/api\/publish\/([^/]+)\/([^/]+)\/(\d+)\/([0-9a-f-]{36})\/(.+)$/, 'service', (req, env, m) => api.publishPut(req, env, m[1], m[2], +m[3], m[4], m[5])],
+  ['POST', /^\/api\/publish\/([^/]+)\/([^/]+)\/(\d+)\/([0-9a-f-]{36})\/commit$/, 'service', (_r, env, m) => api.publishCommit(env, m[1], m[2], +m[3], m[4])],
+  ['GET', /^\/api\/registry$/, 'service', (_r, env) => api.registryGet(env)],
+  ['PUT', /^\/api\/registry$/, 'service', (req, env) => api.registryPut(req, env)],
+  ['GET', /^\/api\/manifest\/([^/]+)$/, 'service', (_r, env, m) => api.manifestGet(env, m[1])],
+  ['POST', /^\/api\/stream\/([^/]+)\/([^/]+)$/, 'service', (req, env, m) => api.streamPost(req, env, m[1], m[2])],
+  ['GET', /^\/api\/raw\/([^/]+)\/([^/]+)\/v(\d+)\/(.+)$/, 'service', (_r, env, m) => api.rawGet(env, m[1], m[2], +m[3], m[4])],
+  ['PUT', /^\/api\/ds\/lynx-reports\/v1\/(.+)$/, 'service', (req, env, m) => api.dsPut(req, env, m[1])],
+  ['POST', /^\/api\/reindex$/, 'service', (_r, env) => api.reindex(env)],
 ];
 
 export default {
@@ -105,6 +118,7 @@ export default {
       try {
         return await handler(req, env, match, who, ctx);
       } catch (e) {
+        if (e instanceof ApiError) return apiError(e.status, e.code, e.message, e.field);
         console.error(e);
         return url.pathname.startsWith('/api/') ? apiError(500, 'internal') : page(500, 'Something broke', 'The error was logged.');
       }
