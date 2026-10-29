@@ -519,9 +519,11 @@ async function cmdDoctor(_args, cfg, log) {
       const res = await req('/_ds/lynx-reports/v1/tokens.css', { raw: true });
       if (!res.ok) throw new Error(`HTTP ${res.status}; run scripts/upload-ds.mjs`);
     });
-    let reg;
-    await check('registry readable', async () => { reg = (await req('/api/registry')).data; return `${reg.projects.length} projects`; });
+    let reg, etag;
+    await check('registry readable', async () => { ({ data: reg, etag } = await req('/api/registry')); return `${reg.projects.length} projects`; });
     if (reg) {
+      // Writes the registry back unchanged with the etag just read, the same If-Match path `roost project` uses.
+      await check('registry writable', async () => { await req('/api/registry', { method: 'PUT', body: reg, headers: { 'if-match': etag ?? '""' } }); });
       await check('this folder', () => { const r = resolveProject(reg, process.cwd()); return r.project ? `${r.project} (${r.match})` : 'no project matched; Claude will ask'; });
       await check('no stuck uploads', async () => {
         const stuck = [];

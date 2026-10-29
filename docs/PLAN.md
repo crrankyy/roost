@@ -357,6 +357,7 @@ These run over text files (html, css, js, json, md, txt, csv, svg). Findings are
   - `/api/whoami` returns `identity: service`;
   - `/_ds/lynx-reports/v1/tokens.css` responds 200;
   - the registry is readable;
+  - the registry is writable (a no-op PUT of the registry just read, with its `If-Match`);
   - which project the current folder resolves to;
   - pending versions older than an hour.
 
