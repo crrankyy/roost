@@ -526,7 +526,7 @@ Verified on the live Worker:
 
 Verified locally (44 Worker tests, 13 CLI tests, Playwright contact sheet at 380/1240 px, light/dark, 14 palettes): chrome banners and pill, archive everywhere, triage flows, ntfy payload, pages against the artboards.
 
-Pending, owner on a phone: the logged-in walkthrough of the acceptance list, and comparing the pages with the Claude Design canvas.
+Owner walkthrough (30 Oct): pins, the new dot, versions, the older-version banner, archive/unarchive, palette and triage work on phone and laptop. ntfy is not subscribed yet (owner will do it later). The theme icon mismatch found then is fixed.
 
 Decisions taken on the §10 open questions:
 - Q1: ntfy is sent by the Worker only.
@@ -540,3 +540,4 @@ Upstream DS issues:
 - `.rh-pill` is absolute.
 - `bundle.css` carries preflight and the Google Fonts import.
 - `ThemeToggle` emits a `title` attribute.
+- The theme icons disagree: `ThemeToggle` shows the current mode, `reports.js` shows the mode you'd switch to. You chose "current mode" everywhere; `chrome.css` flips the report icon until `reports.css` is fixed.

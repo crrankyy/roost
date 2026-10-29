@@ -3,3 +3,9 @@
 body > .rh-pill { position: fixed; }
 /* .rh-panel and .rh-chip set display, which would beat the hidden attribute. */
 .rh-pill [hidden] { display: none !important; }
+/* One rule for the theme icon everywhere: it shows the current mode, like the hub's ThemeToggle
+   (reports.js shows the mode you'd switch to). Upstream fix belongs in reports.css. */
+.rh-report .lr-icon-btn .lr-sun { display: block; }
+.rh-report .lr-icon-btn .lr-moon { display: none; }
+[data-theme="dark"] .rh-report .lr-icon-btn .lr-sun { display: none; }
+[data-theme="dark"] .rh-report .lr-icon-btn .lr-moon { display: block; }
