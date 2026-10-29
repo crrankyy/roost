@@ -1,0 +1,14 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "roost",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-01",
+  "workers_dev": true,
+  // Preview URLs would sit outside the Access application on the workers.dev route.
+  "preview_urls": false,
+  "r2_buckets": [{ "binding": "REPORTS", "bucket_name": "roost" }],
+  "kv_namespaces": [{ "binding": "STATE", "id": "0ac5b7ae1d514f36b8ded8f137c8d8e1" }],
+  // Empty values fail closed: every request gets 403 until Access is configured.
+  "vars": { "POLICY_AUD": "", "TEAM_DOMAIN": "", "SERVICE_TOKEN_ID": "" },
+  "observability": { "enabled": true }
+}
