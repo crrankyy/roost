@@ -185,7 +185,8 @@ export async function registryGet(env: ApiEnv) {
 }
 
 export async function registryPut(req: Request, env: ApiEnv) {
-  const ifMatch = (req.headers.get('if-match') ?? '').replace(/^"|"$/g, '');
+  // Cloudflare weakens the etag when it compresses the GET (W/"…"); the only etag issued here is R2's strong one.
+  const ifMatch = (req.headers.get('if-match') ?? '').replace(/^W\//, '').replace(/^"|"$/g, '');
   const next = await body<Registry>(req);
   const cur = await readRegistry(env);
   if (ifMatch !== cur.etag) throw new ApiError(409, 'etag_mismatch', 'The registry changed; re-read it and retry');

@@ -128,7 +128,10 @@ describe('registry and streams', () => {
   it('needs If-Match and never removes a project', async () => {
     const cur = await api('/api/registry');
     expect((await api('/api/registry', 'PUT', cur.body, { 'if-match': '"stale"' })).status).toBe(409);
+    expect((await api('/api/registry', 'PUT', cur.body, { 'if-match': 'W/"stale"' })).status).toBe(409);
     expect((await api('/api/registry', 'PUT', { projects: [] }, { 'if-match': cur.etag! })).body.error.code).toBe('no_delete');
+    // the edge weakens the GET's etag when it compresses it; the PUT must still accept it
+    expect((await api('/api/registry', 'PUT', cur.body, { 'if-match': `W/${cur.etag}` })).status).toBe(200);
   });
 
   it('rename keeps the old id as an alias; merge moves reports', async () => {
