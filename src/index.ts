@@ -1,5 +1,9 @@
 import { authenticate, type AuthEnv, type Identity } from './auth';
 import * as api from './api';
+import { serveAsset } from './assets';
+import { home } from './pages/home';
+import { kindPage, projectPage } from './pages/project';
+import * as viewer from './viewer';
 import { ID_RE, REPORT_ID_RE, manifestKey, versionKey, type Manifest } from './model';
 import { ApiError } from './store';
 
@@ -90,6 +94,13 @@ function whoami(_req: Request, _env: Env, _m: RegExpMatchArray, who: Identity): 
 
 // [method, pattern, identity, handler]. First match wins.
 const routes: [string, RegExp, Need, Handler][] = [
+  ['GET', /^\/$/, 'browser', (req, env, _m, _w, ctx) => home(req, env, ctx)],
+  ['GET', /^\/p\/([a-z0-9-]+)\/$/, 'browser', (req, env, m) => projectPage(req, env, m[1])],
+  ['GET', /^\/p\/([a-z0-9-]+)\/kind\/([a-z]+)\/$/, 'browser', (req, env, m) => projectPage(req, env, m[1], { kind: m[2] })],
+  ['GET', /^\/p\/([a-z0-9-]+)\/stream\/([a-z0-9-]+)\/$/, 'browser', (req, env, m) => projectPage(req, env, m[1], { stream: m[2] })],
+  ['GET', /^\/kind\/([a-z]+)\/$/, 'browser', (req, env, m) => kindPage(req, env, m[1])],
+  ['GET', /^\/(p\/[a-z0-9-]+|p\/[a-z0-9-]+\/(?:kind|stream)\/[a-z0-9-]+|kind\/[a-z]+)$/, 'browser', (req, _e, m) => Response.redirect(new URL(`/${m[1]}/`, req.url).toString(), 301)],
+  ['GET', /^\/_roost\/([a-z.]+)$/, 'any', (_r, _e, m) => serveAsset(m[1]) ?? notFound()],
   ['GET', /^\/_ds\/lynx-reports\/v1\/(.+)$/, 'any', serveDs],
   ['GET', /^\/p\/([^/]+)\/r\/([^/]+)(\/)?(?:v(\d+)\/)?(.*)$/, 'browser', serveReport],
   ['GET', /^\/api\/whoami$/, 'any', whoami],
@@ -103,6 +114,9 @@ const routes: [string, RegExp, Need, Handler][] = [
   ['GET', /^\/api\/raw\/([^/]+)\/([^/]+)\/v(\d+)\/(.+)$/, 'service', (_r, env, m) => api.rawGet(env, m[1], m[2], +m[3], m[4])],
   ['PUT', /^\/api\/ds\/lynx-reports\/v1\/(.+)$/, 'service', (req, env, m) => api.dsPut(req, env, m[1])],
   ['POST', /^\/api\/reindex$/, 'service', (_r, env) => api.reindex(env)],
+  ['POST', /^\/api\/pin$/, 'browser', (req, env) => viewer.pin(req, env)],
+  ['POST', /^\/api\/prefs$/, 'browser', (req, env) => viewer.prefs(req, env)],
+  ['POST', /^\/api\/archive$/, 'browser', (req, env) => viewer.archive(req, env)],
 ];
 
 export default {

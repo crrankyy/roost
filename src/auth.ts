@@ -4,6 +4,8 @@ export interface AuthEnv {
   POLICY_AUD: string;
   TEAM_DOMAIN: string;
   SERVICE_TOKEN_ID: string;
+  /** Local development only (.dev.vars, never deployed): skip Access on localhost. */
+  DEV_IDENTITY?: string;
 }
 
 export type Identity =
@@ -45,6 +47,9 @@ async function keyFor(team: string, kid: string): Promise<CryptoKey | undefined>
 
 /** Returns the caller's identity, or null when the request must get 403. */
 export async function authenticate(req: Request, env: AuthEnv): Promise<Identity | null> {
+  if (env.DEV_IDENTITY === '1' && ['localhost', '127.0.0.1'].includes(new URL(req.url).hostname)) {
+    return req.headers.get('x-dev-identity') === 'service' ? { kind: 'service', commonName: 'dev' } : { kind: 'browser', email: 'dev@localhost' };
+  }
   if (!env.POLICY_AUD || !env.TEAM_DOMAIN) return null; // not configured: fail closed
   const token = req.headers.get('Cf-Access-Jwt-Assertion');
   if (!token) return null;

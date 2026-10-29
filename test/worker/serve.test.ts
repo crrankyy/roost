@@ -53,6 +53,14 @@ describe('Access', () => {
   it('a service token without a matching common_name is refused', async () => {
     expect((await call('/api/whoami', { jwt: await token({ common_name: 'someone-else' }) })).status).toBe(403);
   });
+  it('DEV_IDENTITY works only on localhost', async () => {
+    const { default: worker } = await import('../../src/index');
+    const { testEnv } = await import('./helpers');
+    const e = { ...testEnv(), DEV_IDENTITY: '1' };
+    const ctx = { waitUntil() {}, passThroughOnException() {} } as unknown as ExecutionContext;
+    expect((await worker.fetch(new Request('https://roost.crrankyy.workers.dev/api/whoami'), e, ctx)).status).toBe(403);
+    expect((await worker.fetch(new Request('http://localhost:8787/api/whoami'), e, ctx)).status).toBe(200);
+  });
   it('the service identity cannot open viewer pages', async () => {
     expect((await call('/p/demo/r/2026-10-29-demo/', { jwt: await service() })).status).toBe(403);
   });

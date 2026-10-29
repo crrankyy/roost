@@ -4,3 +4,6 @@ node_modules/
 .roost/
 test/visual/out/
 .DS_Store
+
+# visual output
+test/visual/out/
