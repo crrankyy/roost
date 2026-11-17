@@ -1,18 +1,18 @@
 import { authenticate, type AuthEnv, type Identity } from './auth';
 import * as api from './api';
 import { serveAsset } from './assets';
-import { home } from './pages/home';
-import { kindPage, projectPage } from './pages/project';
-import { triagePage, triagePreview } from './pages/triage';
+import { hub, triagePreview } from './hub';
 import * as viewer from './viewer';
-import { ID_RE, REPORT_ID_RE, filesProject, manifestKey, versionKey, type Manifest } from './model';
+import { ID_RE, KINDS, LEGACY_KIND_URL, REPORT_ID_RE, filesProject, manifestKey, versionKey, type Manifest } from './model';
 import { ApiError } from './store';
-import { injectChrome } from './chrome';
+import { injectChrome, injectHost } from './chrome';
 import { viewer as loadViewer } from './pages/data';
 
 export interface Env extends AuthEnv {
   REPORTS: R2Bucket;
   STATE: KVNamespace;
+  /** web/dist: the hub app (index.html) and the report bar (/_app/). Behind this Worker, so Access still applies. */
+  ASSETS: Fetcher;
 }
 
 type Need = 'browser' | 'service' | 'any';
@@ -57,14 +57,28 @@ async function readManifest(env: Env, project: string): Promise<Manifest | null>
   return obj ? ((await obj.json()) as Manifest) : null;
 }
 
-async function serveDs(_req: Request, env: Env, m: RegExpMatchArray): Promise<Response> {
+/** Immutable files kept in R2 under a versioned prefix: the lynx-reports design system and the report fonts. */
+const serveFrom = (prefix: string) => async (_req: Request, env: Env, m: RegExpMatchArray): Promise<Response> => {
   const path = safePath(m[1]);
   if (!path) return notFound();
-  const obj = await env.REPORTS.get(`ds/lynx-reports/v1/${path}`);
+  const obj = await env.REPORTS.get(`${prefix}${path}`);
   if (!obj) return notFound();
   return new Response(obj.body, {
     headers: { 'content-type': obj.httpMetadata?.contentType ?? typeOf(path), 'cache-control': IMMUTABLE, etag: obj.httpEtag },
   });
+};
+
+/** The hub app's page, for every hub URL (the app routes on the path). */
+async function app(req: Request, env: Env): Promise<Response> {
+  const res = await env.ASSETS.fetch(new Request(new URL('/', req.url)));
+  return new Response(res.body, { status: res.ok ? 200 : res.status, headers: { 'content-type': TYPES.html, 'cache-control': NO_STORE } });
+}
+
+/** A kind filter URL: one of the eight serves the app; one of the old 13 moves to its nearest of the eight. */
+function kindUrl(req: Request, env: Env, kind: string, base: string) {
+  if ((KINDS as readonly string[]).includes(kind)) return app(req, env);
+  const to = LEGACY_KIND_URL[kind];
+  return to ? Response.redirect(new URL(`${base}kind/${to}/`, req.url).toString(), 301) : notFound();
 }
 
 async function serveReport(req: Request, env: Env, m: RegExpMatchArray, _who: Identity, ctx: ExecutionContext): Promise<Response> {
@@ -96,7 +110,8 @@ async function serveReport(req: Request, env: Env, m: RegExpMatchArray, _who: Id
   const p = reg.doc.projects.find((x) => x.id === project) ?? { id: project, title: project, description: '', match: { remotes: [], paths: [], keywords: [] }, status: 'active' as const };
   if (file === 'index.html') ctx.waitUntil(markSeen(env, `${project}/${id}`, v.seen));
   const res = new Response(obj.body, { headers: { 'content-type': type, 'cache-control': NO_STORE } });
-  return injectChrome(res, { m: manifest!, p, e: entry, n: version.n, v });
+  // Report-builder versions are hosted under Roost's bar; earlier ones keep the chrome they were published with.
+  return (version.format ? injectHost : injectChrome)(res, { m: manifest!, p, e: entry, n: version.n, v });
 }
 
 /** SPEC 6.4: serving a report through the Worker marks it seen. */
@@ -111,19 +126,20 @@ function whoami(_req: Request, _env: Env, _m: RegExpMatchArray, who: Identity): 
 
 // [method, pattern, identity, handler]. First match wins.
 const routes: [string, RegExp, Need, Handler][] = [
-  ['GET', /^\/$/, 'browser', (req, env, _m, _w, ctx) => home(req, env, ctx)],
-  ['GET', /^\/p\/([a-z0-9-]+)\/$/, 'browser', (req, env, m) => projectPage(req, env, m[1])],
-  ['GET', /^\/p\/([a-z0-9-]+)\/kind\/([a-z]+)\/$/, 'browser', (req, env, m) => projectPage(req, env, m[1], { kind: m[2] })],
-  ['GET', /^\/p\/([a-z0-9-]+)\/stream\/([a-z0-9-]+)\/$/, 'browser', (req, env, m) => projectPage(req, env, m[1], { stream: m[2] })],
-  ['GET', /^\/triage$/, 'browser', (req, env) => triagePage(req, env)],
+  ['GET', /^\/(?:reports|pinned|archive|triage(?:\/[^/]+)?)?$/, 'browser', (req, env) => app(req, env)],
+  ['GET', /^\/p\/([a-z0-9-]+)\/(?:stream\/[a-z0-9-]+\/)?$/, 'browser', (req, env) => app(req, env)],
+  ['GET', /^\/p\/([a-z0-9-]+)\/kind\/([a-z]+)\/$/, 'browser', (req, env, m) => kindUrl(req, env, m[2], `/p/${m[1]}/`)],
   ['GET', /^\/triage\/preview\/([a-z0-9-]+)\/([0-9a-z-]+)\/v(\d+)\/(.*)$/, 'browser', async (_r, env, m) => {
     const path = safePath(m[4]);
     return (path !== null && (await triagePreview(env, m[1], m[2], +m[3], path))) || notFound();
   }],
-  ['GET', /^\/kind\/([a-z]+)\/$/, 'browser', (req, env, m) => kindPage(req, env, m[1])],
+  ['GET', /^\/kind\/([a-z]+)\/$/, 'browser', (req, env, m) => kindUrl(req, env, m[1], '/')],
+  ['GET', /^\/api\/hub$/, 'browser', (_r, env, _m, _w, ctx) => hub(env, ctx)],
   ['GET', /^\/(p\/[a-z0-9-]+|p\/[a-z0-9-]+\/(?:kind|stream)\/[a-z0-9-]+|kind\/[a-z]+)$/, 'browser', (req, _e, m) => Response.redirect(new URL(`/${m[1]}/`, req.url).toString(), 301)],
   ['GET', /^\/_roost\/([a-z.]+)$/, 'any', (_r, _e, m) => serveAsset(m[1]) ?? notFound()],
-  ['GET', /^\/_ds\/lynx-reports\/v1\/(.+)$/, 'any', serveDs],
+  ['GET', /^\/_ds\/lynx-reports\/v1\/(.+)$/, 'any', serveFrom('ds/lynx-reports/v1/')],
+  ['GET', /^\/_fonts\/v1\/(.+)$/, 'any', serveFrom('fonts/v1/')],
+  ['GET', /^\/_app\/[A-Za-z0-9._-]+$/, 'browser', (req, env) => env.ASSETS.fetch(req)],
   ['GET', /^\/p\/([^/]+)\/r\/([^/]+)(\/)?(?:v(\d+)\/)?(.*)$/, 'browser', serveReport],
   ['GET', /^\/api\/whoami$/, 'any', whoami],
   ['POST', /^\/api\/publish$/, 'service', (req, env) => api.publishBegin(req, env)],
@@ -135,6 +151,8 @@ const routes: [string, RegExp, Need, Handler][] = [
   ['POST', /^\/api\/stream\/([^/]+)\/([^/]+)$/, 'service', (req, env, m) => api.streamPost(req, env, m[1], m[2])],
   ['GET', /^\/api\/raw\/([^/]+)\/([^/]+)\/v(\d+)\/(.+)$/, 'service', (_r, env, m) => api.rawGet(env, m[1], m[2], +m[3], m[4])],
   ['PUT', /^\/api\/ds\/lynx-reports\/v1\/(.+)$/, 'service', (req, env, m) => api.dsPut(req, env, m[1])],
+  ['PUT', /^\/api\/fonts\/v1\/(.+)$/, 'service', (req, env, m) => api.dsPut(req, env, m[1], 'fonts/v1/')],
+  ['POST', /^\/api\/refile\/([a-z0-9-]+)\/([0-9a-z-]+)$/, 'service', (req, env, m) => api.refile(req, env, m[1], m[2])],
   ['POST', /^\/api\/reindex$/, 'service', (_r, env) => api.reindex(env)],
   ['POST', /^\/api\/pin$/, 'browser', (req, env) => viewer.pin(req, env)],
   ['POST', /^\/api\/prefs$/, 'browser', (req, env) => viewer.prefs(req, env)],

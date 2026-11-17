@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Token expiry</title>
+<meta name="report:kind" content="investigation">
+<meta name="report:project" content="alpha">
+<meta name="report:date" content="2026-11-17">
+<link rel="stylesheet" href="/_fonts/v1/report-type.css">
+<style>/* themes/nord.css */
+:root { --canvas: light-dark(#eceff4, #2e3440); }</style>
+<style>/* report.css */
+:root[data-host] [data-slot="host-bar"] { display: none; }@font-face { font-family: X; src: url(data:font/woff2;base64,d09GMgAB) format("woff2"); }</style>
+</head>
+<body>
+<div class="topbar" data-slot="host-bar"><div class="wrap">
+  <span class="wordmark">Token expiry</span>
+  <span class="meta"><button class="theme-toggle" type="button">Theme: System</button></span>
+</div></div>
+<header class="hero"><div class="wrap">
+  <div class="hero-copy">
+    <span class="eyebrow">Auth</span>
+    <h1>Refresh tokens expire <em>early</em> &amp; silently</h1>
+    <p class="lead">Tokens die after 50&nbsp;minutes, not 60, because the clock skew is subtracted twice.</p>
+    <p class="hero-meta">payments-api · 17 November 2026</p>
+  </div>
+</div></header>
+<main><img src="assets/chart.svg" alt=""><a href="/p/payments-api/r/2026-10-01-auth-plan/">Plan</a></main>
+</body>
+</html>

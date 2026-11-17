@@ -1,6 +1,6 @@
 // Service-token endpoints: publishing, registry, streams, export, design-system upload (PLAN 4).
 import {
-  ID_RE, KINDS, REPORT_ID_RE, begin, filesProject, commit, manifestKey, mergeSlice, projectSlice, reportJson, streamOp, versionKey,
+  ID_RE, KINDS, REPORT_ID_RE, begin, filingProblem, readFiling, filesProject, commit, manifestKey, mergeSlice, projectSlice, reportJson, streamOp, versionKey,
   type BeginInput, type Finding, type Manifest, type RecentIndex, type Registry, type StreamOp,
 } from './model';
 import { ApiError, casUpdate, getJson, putIfAbsent } from './store';
@@ -158,6 +158,25 @@ export async function publishPut(req: Request, env: ApiEnv, project: string, id:
   return json({ ok: true, path, created });
 }
 
+/**
+ * The filing a report carries in its own head is the filing (SPEC 3, report-builder). The begin call names the same
+ * kind, project and stream so streams can be checked before upload; at commit they must still agree with the page.
+ */
+async function checkFiling(env: ApiEnv, project: string, id: string, v: Awaited<ReturnType<typeof pendingVersion>>) {
+  const obj = await env.REPORTS.get(versionKey(v.home, id, v.n, 'index.html'));
+  const f = readFiling(obj ? await obj.text() : '');
+  const problem = filingProblem(f);
+  if (problem) throw new ApiError(422, 'bad_filing', problem, 'index.html');
+  const meta = v.pending_meta!;
+  const stream = meta.new_stream?.id ?? meta.proposed_stream?.id ?? meta.stream;
+  const said = { kind: meta.kind, project, stream: stream ?? '' };
+  const page = { kind: f!.kind, project: f!.project, stream: f!.stream };
+  // A stream named by an alias resolves to the stream's id at begin, so compare the page's stream by that too.
+  const off = (Object.keys(said) as (keyof typeof said)[]).filter((k) => said[k] !== page[k] && !(k === 'stream' && meta.stream_alias === page.stream));
+  if (off.length) throw new ApiError(422, 'filing_mismatch', `The page files itself as ${off.map((k) => `${k} "${page[k]}"`).join(', ')}; the publish said ${off.map((k) => `"${said[k]}"`).join(', ')}`, 'index.html');
+  return f!;
+}
+
 export async function publishCommit(env: ApiEnv, project: string, id: string, n: number, upload: string) {
   const v = await pendingVersion(env, project, id, n, upload);
   if (v.state === 'pending') {
@@ -165,8 +184,9 @@ export async function publishCommit(env: ApiEnv, project: string, id: string, n:
     for (const f of v.files) if (!(await env.REPORTS.head(versionKey(v.home, id, n, f.path)))) missing.push(f.path);
     if (missing.length) throw new ApiError(422, 'missing_files', `Not uploaded: ${missing.slice(0, 10).join(', ')}`);
   }
+  const filing = v.state === 'pending' ? await checkFiling(env, project, id, v) : undefined;
   const { state, entry } = await casUpdate<Manifest, any>(env.REPORTS, manifestKey(project), (cur) => {
-    return commit(cur, id, n, upload, now());
+    return commit(cur, id, n, upload, now(), filing);
   });
   const version = entry.versions.find((x: any) => x.n === n);
   await putIfAbsent(env.REPORTS, versionKey(v.home, id, n, 'report.json'), JSON.stringify(reportJson(project, entry, version)), { httpMetadata: { contentType: 'application/json' } });
@@ -240,6 +260,24 @@ export async function streamPost(req: Request, env: ApiEnv, project: string, str
   return json(result);
 }
 
+/**
+ * POST /api/refile/<project>/<id> {kind}: files an existing report under one of the eight kinds. Used once, to move
+ * reports published under the old 13 kinds; new reports carry their kind in their own page.
+ */
+export async function refile(req: Request, env: ApiEnv, project: string, id: string) {
+  const b = await body<any>(req);
+  if (!KINDS.includes(b?.kind)) throw new ApiError(422, 'unknown_kind', `Kind must be one of ${KINDS.join(', ')}`, 'kind');
+  const entry = await casUpdate<Manifest, any>(env.REPORTS, manifestKey(project), (m) => {
+    const e = m?.reports.find((r) => r.id === id);
+    if (!m || !e) throw new ApiError(404, 'unknown_report');
+    e.kind = b.kind;
+    m.updated = now();
+    return { doc: m, result: e };
+  });
+  await updateIndex(env, project);
+  return json({ id, kind: entry.kind });
+}
+
 // ---------- export, design system, reindex ----------
 
 export async function rawGet(env: ApiEnv, project: string, id: string, n: number, path: string) {
@@ -252,12 +290,13 @@ export async function rawGet(env: ApiEnv, project: string, id: string, n: number
 
 const hex = (b: ArrayBuffer) => [...new Uint8Array(b)].map((x) => x.toString(16).padStart(2, '0')).join('');
 
-export async function dsPut(req: Request, env: ApiEnv, path: string) {
+/** Create-if-absent upload of a versioned, immutable file: the design system (ds/lynx-reports/v1/) or the fonts (fonts/v1/). */
+export async function dsPut(req: Request, env: ApiEnv, path: string, prefix = 'ds/lynx-reports/v1/') {
   const p = decodeURIComponent(path);
   if (!safeRelPath(p)) throw new ApiError(422, 'bad_path');
   const bytes = await req.arrayBuffer();
   if (bytes.byteLength > MAX_FILE * 2) throw new ApiError(413, 'too_large');
-  const key = `ds/lynx-reports/v1/${p}`;
+  const key = `${prefix}${p}`;
   const contentType = req.headers.get('content-type') ?? 'application/octet-stream';
   if (await putIfAbsent(env.REPORTS, key, bytes, { httpMetadata: { contentType } })) return json({ status: 'created' }, 201);
   const existing = await env.REPORTS.get(key);

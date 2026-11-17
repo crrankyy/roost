@@ -1,0 +1,89 @@
+/* Theme: Rosé Pine (github.com/rose-pine/palette and rose-pine/neovim palette.lua). Light is Dawn, dark is
+   the main variant; code windows use the main variant in both themes.
+   Every colour the report uses, as light-dark(light, dark). Checked with the dataviz skill's validator and WCAG:
+   - Text: Dawn text 7.92+ on every surface; Dawn "subtle" is 4.02, so light muted text is text too
+     (hierarchy from size and weight). Dark: text 11.51+, subtle 4.71+.
+   - Accent: pine (light, 5.09+) and foam (dark, 8.91+), the same teal family; it is also the link colour.
+   - Fills: base on pine, dark base on foam (5.59 / 10.37). Status text: dark base on gold and rose; light base
+     on light pine (5.59); pure black on light love (5.01), since no Rosé Pine colour reaches 4.5 there.
+   - Charts: only 5 of the 6 hues separate (love and rose are too close): foam, gold, iris, pine, rose, each
+     mode its own colours (worst adjacent CVD dE 9.5, normal 15.5). The first three are not all-pairs distinct:
+     scatter plots should use two series at most. Slots 6 to 8 fall back to "Other" grey.
+   - Status: Rosé Pine has no green, so good is pine/foam; warning gold, serious rose, critical love.
+     Normal-vision dE 10.4 light, 8.9 dark: every status carries its word.
+   - Syntax: Rosé Pine's roles, except keywords are iris (pine is 3.16 on the code background) and comments
+     are subtle (5.12) rather than muted. */
+:root {
+  /* page */
+  --canvas: light-dark(#faf4ed, #191724);
+  --surface-soft: light-dark(#fffaf3, #1f1d2e);
+  --surface-card: light-dark(#f2e9e1, #26233a);
+  --surface-cream-strong: light-dark(#dfdad9, #403d52);
+  --hairline: light-dark(#dfdad9, #403d52);
+  --hairline-soft: light-dark(#f4ede8, #21202e);
+  --border: light-dark(#cecacd, #524f67);
+  /* heading levels: h1, h2, h3 (and "Key findings"), chart and table titles; each its own palette hue, darkened
+     or lightened only as far as its floor needs (3:1 for large headings, 4.5:1 for titles) */
+  --h1: light-dark(#286983, #9ccfd8); /* pine/foam; light 5.59, dark 10.37 */
+  --h2: light-dark(#907aa9, #c4a7e7); /* iris; light 3.47, dark 8.43 */
+  --h3: light-dark(#b4637a, #eb6f92); /* love; light 3.84, dark 6.07 */
+  --title: light-dark(#966421, #f6c177); /* gold; light 36% darker, 4.64, dark 10.77 */
+  /* text */
+  --ink: light-dark(#464261, #e0def4);
+  --body-strong: light-dark(#464261, #e0def4);
+  --body: light-dark(#464261, #e0def4);
+  --muted: light-dark(#464261, #908caa);
+  --muted-soft: light-dark(#9893a5, #6e6a86);
+  /* accent */
+  --primary: light-dark(#286983, #9ccfd8);
+  --primary-active: light-dark(#286983, #9ccfd8);
+  --on-primary: light-dark(#faf4ed, #191724);
+  --primary-disabled: light-dark(#cecacd, #524f67);
+  --link: var(--primary-active);
+  --link-decoration: none;
+  --accent-teal: light-dark(#56949f, #9ccfd8);
+  --accent-amber: light-dark(#ea9d34, #f6c177);
+  --error: light-dark(#b4637a, #eb6f92);
+  /* dark blocks: code windows, footer, tooltips */
+  --surface-dark: light-dark(#191724, #1f1d2e);
+  --surface-dark-elevated: #26233a;
+  --surface-dark-soft: #1f1d2e;
+  --on-dark: #e0def4;
+  --on-dark-soft: #908caa;
+  /* text on a status fill (callouts) */
+  --on-status: #191724;
+  --on-good: light-dark(#faf4ed, #191724);
+  --on-critical: light-dark(#000000, #191724);
+  /* syntax, on the dark code window */
+  --syn-comment: #908caa;
+  --syn-punctuation: #908caa;
+  --syn-keyword: #c4a7e7;
+  --syn-string: #f6c177;
+  --syn-regex: #ebbcba;
+  --syn-number: #f6c177;
+  --syn-operator: #908caa;
+  --syn-function: #ebbcba;
+  --syn-type: #9ccfd8;
+  --syn-builtin: #eb6f92;
+  --syn-property: #9ccfd8;
+  --syn-variable: #e0def4;
+  --syn-macro: #c4a7e7;
+  /* charts */
+  --chart-1: light-dark(#56949f, #9ccfd8); /* foam */
+  --chart-2: light-dark(#ea9d34, #f6c177); /* gold */
+  --chart-3: light-dark(#907aa9, #c4a7e7); /* iris */
+  --chart-4: light-dark(#286983, #31748f); /* pine */
+  --chart-5: light-dark(#d7827e, #ebbcba); /* rose */
+  --chart-6: var(--chart-other); /* Rosé Pine separates 5 hues */
+  --chart-7: var(--chart-other);
+  --chart-8: var(--chart-other);
+  --chart-other: light-dark(#9893a5, #6e6a86);
+  --chart-axis: light-dark(#cecacd, #524f67);
+  --chart-div-neg: light-dark(#286983, #9ccfd8);
+  --chart-div-pos: light-dark(#b4637a, #eb6f92);
+  --chart-div-mid: light-dark(#dfdad9, #403d52);
+  --status-good: light-dark(#286983, #9ccfd8);
+  --status-warning: light-dark(#ea9d34, #f6c177);
+  --status-serious: light-dark(#d7827e, #ebbcba);
+  --status-critical: light-dark(#b4637a, #eb6f92);
+}

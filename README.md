@@ -12,9 +12,9 @@ It runs on your own Cloudflare account, and only you can get in.
 - **Readable anywhere.** The hub and every report work on a phone as well as a desktop, in light or dark mode.
 - **A push notification when a report lands**, sent to your phone through [ntfy](https://ntfy.sh).
 - **Nothing gets lost.** A report is never overwritten or deleted. Publishing it again creates a new version, and the old ones stay readable. Old work is archived, not removed.
-- **Sorted for you.** Each report gets a kind (investigation, plan, review and so on) and can belong to a stream, a running thread of related reports. If Claude isn't sure where a report belongs, it files the report with its best guess and adds it to a triage inbox for you to confirm.
+- **Sorted for you.** Each report is one of eight kinds (investigation, architecture, audit, benchmark, decision, postmortem, status, changelog) and can belong to a stream, a running thread of related reports. The report files itself: its kind, project and stream are meta tags in its own page, written once. Reports from unattended runs land in a triage inbox for you to confirm.
 - **Safe by default.** Before anything is uploaded, Roost checks the report for broken links, oversized files and anything that looks like a password or API key. If a report might contain a secret, the publish stops and asks first. In an unattended run, the report is quarantined until you review it.
-- **A consistent look.** Reports use a shared design system, so they all read the same way.
+- **A consistent look.** Reports are built by the report-builder skill (Roost's copy is `skill/roost-report/`) from one component library, and Roost shows each one under its own bar. The heading and code fonts are served by the hub, never embedded.
 
 ## How it works
 
@@ -22,7 +22,7 @@ There are three parts:
 
 1. **The hub**: a Cloudflare Worker that stores reports and serves them, with Cloudflare Access in front so only your email can sign in.
 2. **The `roost` command**: a small command-line tool that checks a report, uploads it and sends the notification.
-3. **The Claude Code skill**: it teaches Claude how to write a report in the house style and publish it with `roost`. Ask Claude for "a report", "a write-up" or "send it to Roost" and it takes care of the rest.
+3. **The Claude Code skill** (`skill/roost-report/`, Roost's copy of report-builder): it teaches Claude how to write, file and check a report and publish it with `roost`. Ask Claude for "a report", "a write-up" or "send it to Roost" and it takes care of the rest.
 
 ```
 Claude Code ──> roost CLI ──> Cloudflare Access ──> Roost Worker ──> your reports
@@ -80,7 +80,8 @@ The installer finishes by running `roost doctor`, which checks your setup end to
 
 ```sh
 node scripts/seed.mjs        # creates the hub's settings
-node scripts/upload-ds.mjs   # uploads the design system that reports use
+node scripts/upload-ds.mjs   # uploads the lynx-reports design system that reports from before 2026-11 use
+sh skill/roost-report/scripts/build-fonts.sh && node skill/roost-report/scripts/upload-fonts.mjs   # the report fonts (needs the licensed MonoLisa files)
 roost project add --id my-app --title "My App" --remote github.com/me/my-app
 ```
 
@@ -94,7 +95,7 @@ When you want to do it by hand:
 
 | Command | What it does |
 | --- | --- |
-| `roost publish <folder>` | Check a report folder and publish it |
+| `roost publish <folder>` | Check a report folder and publish it, filed by the report's own `report:` meta tags |
 | `roost project add / edit / archive / list` | Manage your projects |
 | `roost stream create / rename / merge / done` | Organise related reports into streams |
 | `roost export <project> <folder>` | Download a whole project, every version included |
@@ -105,7 +106,8 @@ Add `--json` to most commands for machine-readable output.
 ## Working on Roost
 
 ```sh
-npm run dev         # run the Worker locally
+npm run dev         # run the Worker locally (npm run build:web first: it serves web/dist)
+npm --prefix web run dev   # the hub app with hot reload, against the local Worker
 npm test            # Worker tests and CLI tests
 npm run typecheck
 ```
@@ -117,4 +119,5 @@ After changing `cli/roost.mjs`, run `node scripts/build-skill.mjs` to copy it in
 - [`docs/SPEC.md`](docs/SPEC.md): what Roost does and why, in full.
 - [`docs/PLAN.md`](docs/PLAN.md): how it's built, including the API and the setup steps.
 - [`skill/roost-report/SKILL.md`](skill/roost-report/SKILL.md): how Claude writes and files a report.
-- [`docs/design-system/`](docs/design-system/): the lynx-reports design system.
+- [`web/`](web/): the hub app (roost-web): its screens, the report bar, and the Roost design system in `web/ui/`.
+- [`docs/design-system/`](docs/design-system/): the lynx-reports design system, still served for reports published before 2026-11.

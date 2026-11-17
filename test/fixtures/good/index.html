@@ -3,16 +3,29 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Why refresh tokens expire early</title>
-<link rel="stylesheet" href="/_ds/lynx-reports/v1/tokens.css">
-<link rel="stylesheet" href="/_ds/lynx-reports/v1/components/reports.css">
+<title>Token expiry</title>
+<meta name="report:kind" content="investigation">
+<meta name="report:project" content="alpha">
+<meta name="report:date" content="2026-11-17">
+<link rel="stylesheet" href="/_fonts/v1/report-type.css">
+<style>/* themes/nord.css */
+:root { --canvas: light-dark(#eceff4, #2e3440); }</style>
+<style>/* report.css */
+:root[data-host] [data-slot="host-bar"] { display: none; }</style>
 </head>
-<body class="lr-report">
-<main class="lr-main"><h1 class="lr-title">Why refresh tokens expire early</h1>
-<img src="assets/chart.svg" alt="">
-<a href="/p/payments-api/r/2026-10-01-auth-plan/">Plan</a>
-<a href="https://github.com/me/payments-api/commit/a1b2c3d">a1b2c3d</a>
-<svg viewBox="0 0 10 10"><rect data-series="1" width="5" height="5" fill="currentColor"></rect></svg>
-</main>
+<body>
+<div class="topbar" data-slot="host-bar"><div class="wrap">
+  <span class="wordmark">Token expiry</span>
+  <span class="meta"><button class="theme-toggle" type="button">Theme: System</button></span>
+</div></div>
+<header class="hero"><div class="wrap">
+  <div class="hero-copy">
+    <span class="eyebrow">Auth</span>
+    <h1>Refresh tokens expire <em>early</em> &amp; silently</h1>
+    <p class="lead">Tokens die after 50&nbsp;minutes, not 60, because the clock skew is subtracted twice.</p>
+    <p class="hero-meta">payments-api · 17 November 2026</p>
+  </div>
+</div></header>
+<main><img src="assets/chart.svg" alt=""><a href="/p/payments-api/r/2026-10-01-auth-plan/">Plan</a></main>
 </body>
 </html>

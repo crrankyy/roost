@@ -1,7 +1,9 @@
 import { env } from 'cloudflare:test';
 import { beforeAll, describe, expect, it } from 'vitest';
 import type { Manifest, RecentIndex } from '../../src/model';
-import { browser, call, service, setupAccess } from './helpers';
+import { browser, call, publishPage, service, setupAccess } from './helpers';
+// @ts-expect-error: a plain .mjs fixture, shared with the CLI tests
+import { expected, page } from '../fixtures/filing.mjs';
 
 const R2 = (env as any).REPORTS as R2Bucket;
 let svc = '';
@@ -22,18 +24,9 @@ async function addProjects(...ids: string[]) {
   expect(r.status).toBe(200);
 }
 
-/** Full begin → put → commit, the way the CLI does it. */
-async function publish(project: string, id: string, html: string, extra: Record<string, unknown> = {}, files: Record<string, string> = {}) {
-  const all = { 'index.html': html, ...files };
-  const decl = await Promise.all(Object.entries(all).map(async ([path, s]) => ({ path, size: new TextEncoder().encode(s).length, sha256: await sha(s) })));
-  const b = await api('/api/publish', 'POST', { project, id, kind: 'research', title: `T ${id}`, summary: 's', files: decl, classification: { why: 'test', confirmed: true }, ...extra });
-  if (b.status !== 201) return b;
-  for (const [path, s] of Object.entries(all)) {
-    const r = await call(`${b.body.put_base}${path}`, { jwt: svc, method: 'PUT', body: s, headers: { 'content-type': path.endsWith('.html') ? 'text/html; charset=utf-8' : 'text/plain' } });
-    expect(r.status, await r.clone().text()).toBe(200);
-  }
-  return api(`${b.body.put_base}commit`, 'POST', {});
-}
+/** A report-builder page with `content` in its body, published and committed. */
+const publish = (project: string, id: string, content: string, body: Record<string, unknown> = {}, o: Parameters<typeof publishPage>[3] = {}) =>
+  publishPage(svc, project, id, { content, body, ...o });
 
 const manifest = async (p: string) => (await (await R2.get(`p/${p}/manifest.json`))!.json()) as Manifest;
 const index = async () => (await (await R2.get('index/recent.json'))!.json()) as RecentIndex;
@@ -46,10 +39,10 @@ beforeAll(async () => {
 
 describe('publish', () => {
   it('publishes v1, then v2; both serve and v1 keeps its bytes', async () => {
-    const one = await publish('alpha', '2026-10-29-first', '<html><body>one</body></html>');
+    const one = await publish('alpha', '2026-10-29-first', 'one');
     expect(one.status).toBe(200);
     expect(one.body).toMatchObject({ version: 1, state: 'live', url: '/p/alpha/r/2026-10-29-first/', index_stale: false });
-    const two = await publish('alpha', '2026-10-29-first', '<html><body>two</body></html>', { change_note: 'second' });
+    const two = await publish('alpha', '2026-10-29-first', 'two', { change_note: 'second' });
     expect(two.body.version).toBe(2);
     const jwt = await browser();
     expect(await (await call('/p/alpha/r/2026-10-29-first/', { jwt })).text()).toContain('two');
@@ -60,8 +53,8 @@ describe('publish', () => {
   });
 
   it('concurrent publishes to one project all land with distinct versions', async () => {
-    const same = Array.from({ length: 4 }, (_, i) => publish('beta', '2026-10-29-race', `<html>race ${i}</html>`));
-    const other = Array.from({ length: 3 }, (_, i) => publish('beta', `2026-10-29-other-${i}`, `<html>o ${i}</html>`));
+    const same = Array.from({ length: 4 }, (_, i) => publish('beta', '2026-10-29-race', `race ${i}`));
+    const other = Array.from({ length: 3 }, (_, i) => publish('beta', `2026-10-29-other-${i}`, `o ${i}`));
     const results = await Promise.all([...same, ...other]);
     for (const r of results) expect(r.status, JSON.stringify(r.body)).toBe(200);
     expect(results.slice(0, 4).map((r) => r.body.version).sort()).toEqual([1, 2, 3, 4]);
@@ -77,7 +70,7 @@ describe('publish', () => {
 
   it('quarantines unattended publishes with findings and does not serve them', async () => {
     const findings = [{ file: 'index.html', line: 3, kind: 'aws-access-key', masked: '••••MPLE' }];
-    const r = await publish('alpha', '2026-10-29-leak', '<html>AKIA…</html>', { unattended: true, findings });
+    const r = await publish('alpha', '2026-10-29-leak', 'AKIA…', { unattended: true, findings });
     expect(r.body).toMatchObject({ state: 'quarantined', triage: true });
     expect((await call('/p/alpha/r/2026-10-29-leak/v1/', { jwt: await browser() })).status).toBe(404);
     const t = (await index()).triage.find((x) => x.id === '2026-10-29-leak')!;
@@ -88,34 +81,63 @@ describe('publish', () => {
   it('refuses attended findings without allow_secrets, unknown kinds and streams, bad paths', async () => {
     const f = [{ path: 'index.html', size: 1, sha256: await sha('x') }];
     const base = { project: 'alpha', id: '2026-10-29-x', title: 't', files: f };
-    expect((await api('/api/publish', 'POST', { ...base, kind: 'research', findings: [{ file: 'a', line: 1, kind: 'k', masked: 'm' }] })).body.error.code).toBe('secrets_unacknowledged');
+    expect((await api('/api/publish', 'POST', { ...base, kind: 'audit', findings: [{ file: 'a', line: 1, kind: 'k', masked: 'm' }] })).body.error.code).toBe('secrets_unacknowledged');
     expect((await api('/api/publish', 'POST', { ...base, kind: 'gossip' })).body.error.code).toBe('unknown_kind');
-    expect((await api('/api/publish', 'POST', { ...base, kind: 'research', stream: 'nope' })).body.error.code).toBe('unknown_stream');
-    expect((await api('/api/publish', 'POST', { ...base, kind: 'research', files: [{ ...f[0], path: '../x' }] })).body.error.code).toBe('bad_path');
-    expect((await api('/api/publish', 'POST', { ...base, kind: 'research', project: 'ghost' })).status).toBe(404);
+    expect((await api('/api/publish', 'POST', { ...base, kind: 'research' })).body.error.code).toBe('unknown_kind'); // one of the old 13
+    expect((await api('/api/publish', 'POST', { ...base, kind: 'audit', stream: 'nope' })).body.error.code).toBe('unknown_stream');
+    expect((await api('/api/publish', 'POST', { ...base, kind: 'audit', files: [{ ...f[0], path: '../x' }] })).body.error.code).toBe('bad_path');
+    expect((await api('/api/publish', 'POST', { ...base, kind: 'audit', project: 'ghost' })).status).toBe(404);
   });
 
   it('rejects a file whose bytes do not match the declared sha256, and commit with missing files', async () => {
-    const b = await api('/api/publish', 'POST', { project: 'alpha', id: '2026-10-29-sha', kind: 'research', title: 't', files: [{ path: 'index.html', size: 3, sha256: await sha('abc') }] });
-    expect((await call(`${b.body.put_base}index.html`, { jwt: svc, method: 'PUT', body: 'xyz' })).status).toBe(422);
+    const abc = page({ project: 'alpha', title: 't' });
+    const b = await api('/api/publish', 'POST', { project: 'alpha', id: '2026-10-29-sha', kind: 'investigation', title: 't', files: [{ path: 'index.html', size: abc.length, sha256: await sha(abc) }] });
+    expect((await call(`${b.body.put_base}index.html`, { jwt: svc, method: 'PUT', body: abc.replace('Token', 'Tokem') })).status).toBe(422);
     expect((await api(`${b.body.put_base}commit`, 'POST', {})).body.error.code).toBe('missing_files');
-    expect((await call(`${b.body.put_base}index.html`, { jwt: svc, method: 'PUT', body: 'abc' })).status).toBe(200);
+    expect((await call(`${b.body.put_base}index.html`, { jwt: svc, method: 'PUT', body: abc })).status).toBe(200);
     expect((await api(`${b.body.put_base}commit`, 'POST', {})).body.state).toBe('live');
     expect((await api(`${b.body.put_base}commit`, 'POST', {})).body.state).toBe('live'); // idempotent
-    expect((await call(`${b.body.put_base}index.html`, { jwt: svc, method: 'PUT', body: 'abc' })).status).toBe(409);
+    expect((await call(`${b.body.put_base}index.html`, { jwt: svc, method: 'PUT', body: abc })).status).toBe(409);
   });
 
   it('new streams: created when attended, only proposed when unattended', async () => {
-    const a = await publish('alpha', '2026-10-29-s1', '<html>s</html>', { new_stream: { id: 'auth', title: 'Auth', description: 'auth work' } });
+    const a = await publish('alpha', '2026-10-29-s1', 's', { new_stream: { id: 'auth', title: 'Auth', description: 'auth work' } });
     expect(a.status).toBe(200);
     expect((await manifest('alpha')).reports.find((r) => r.id === '2026-10-29-s1')!.stream).toBe('auth');
-    const u = await publish('alpha', '2026-10-29-s2', '<html>s</html>', { unattended: true, new_stream: { id: 'billing', title: 'Billing' } });
+    const u = await publish('alpha', '2026-10-29-s2', 's', { unattended: true, new_stream: { id: 'billing', title: 'Billing' } });
     const e = (await manifest('alpha')).reports.find((r) => r.id === '2026-10-29-s2')!;
     expect(u.body.triage).toBe(true);
     expect(e.stream).toBeNull();
     expect(e.classification.proposed_stream).toEqual({ id: 'billing', title: 'Billing' });
     expect((await manifest('alpha')).streams.map((s) => s.id)).toEqual(['auth']);
     expect((await index()).streams.map((s) => s.id)).toContain('auth');
+  });
+
+  it('takes the filing from the page: title, claim and lead from it, format recorded; nothing else is accepted', async () => {
+    const ok = await publish('alpha', '2026-11-17-filed', '', { title: 'Token expiry', summary: 'what the CLI said' });
+    expect(ok.status, JSON.stringify(ok.body)).toBe(200);
+    const e = (await manifest('alpha')).reports.find((r) => r.id === '2026-11-17-filed')!;
+    expect(e).toMatchObject({ kind: 'investigation', title: expected.title, summary: expected.lead, claim: expected.claim, palette: 'nord', date: '2026-11-17' });
+    expect(e.versions[0].format).toBe('report-builder');
+    const legacy = await publish('alpha', '2026-11-17-legacy', '', {}, { html: '<html><head><title>Old</title></head><body>lynx</body></html>' });
+    expect(legacy.body.error).toMatchObject({ code: 'bad_filing', message: expect.stringContaining('no report:kind') });
+    const wrongKind = await publish('alpha', '2026-11-17-mis', '', { kind: 'audit' }, { page: { kind: 'benchmark' } });
+    expect(wrongKind.body.error).toMatchObject({ code: 'filing_mismatch', message: expect.stringContaining('kind "benchmark"') });
+    const wrongProject = await publish('alpha', '2026-11-17-mis2', '', {}, { page: { project: 'beta' } });
+    expect(wrongProject.body.error.code).toBe('filing_mismatch');
+    const oldKind = await publish('alpha', '2026-11-17-old', '', {}, { page: { kind: 'research' } });
+    expect(oldKind.body.error).toMatchObject({ code: 'bad_filing', message: expect.stringContaining('report:kind is "research"') });
+    // nothing failed lands: the version stays pending and is never served
+    expect((await manifest('alpha')).reports.find((r) => r.id === '2026-11-17-mis')!.versions[0].state).toBe('pending');
+  });
+
+  it('refile moves a report to one of the eight kinds, and only those', async () => {
+    await R2.put('p/alpha/manifest.json', JSON.stringify({ ...(await manifest('alpha')), reports: [...(await manifest('alpha')).reports, { ...(await manifest('alpha')).reports[0], id: '2026-10-01-old', kind: 'explainer' }] }));
+    expect((await api('/api/refile/alpha/2026-10-01-old', 'POST', { kind: 'research' })).body.error.code).toBe('unknown_kind');
+    expect((await api('/api/refile/alpha/2026-10-01-old', 'POST', { kind: 'architecture' })).body).toEqual({ id: '2026-10-01-old', kind: 'architecture' });
+    expect((await manifest('alpha')).reports.find((r) => r.id === '2026-10-01-old')!.kind).toBe('architecture');
+    expect((await api('/api/refile/alpha/2026-10-01-ghost', 'POST', { kind: 'audit' })).status).toBe(404);
+    expect((await call('/api/refile/alpha/2026-10-01-old', { jwt: await browser(), method: 'POST', body: '{"kind":"audit"}' })).status).toBe(403);
   });
 
   it('browser identity cannot publish', async () => {
@@ -137,9 +159,9 @@ describe('registry and streams', () => {
   it('rename keeps the old id as an alias; merge moves reports', async () => {
     await api('/api/stream/beta/one', 'POST', { op: 'create', title: 'One' });
     await api('/api/stream/beta/two', 'POST', { op: 'create', title: 'Two' });
-    await publish('beta', '2026-10-29-in-one', '<html>1</html>', { stream: 'one' });
+    await publish('beta', '2026-10-29-in-one', '1', { stream: 'one' });
     expect((await api('/api/stream/beta/one', 'POST', { op: 'rename', to: 'uno' })).body.aliases).toEqual(['one']);
-    const viaAlias = await publish('beta', '2026-10-29-alias', '<html>a</html>', { stream: 'one' });
+    const viaAlias = await publish('beta', '2026-10-29-alias', 'a', { stream: 'one' });
     expect(viaAlias.status).toBe(200);
     expect((await manifest('beta')).reports.find((r) => r.id === '2026-10-29-alias')!.stream).toBe('uno');
     const merged = await api('/api/stream/beta/uno', 'POST', { op: 'merge', to: 'two' });

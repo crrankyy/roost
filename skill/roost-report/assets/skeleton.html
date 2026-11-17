@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>REPORT NAME</title>
+<!-- Filing: how Roost lists and colours this report. kind: investigation, architecture, audit, benchmark, decision,
+     postmortem, status or changelog. project: the repository's slug. stream: the line of work inside it (perf, releases);
+     delete that tag when there is none. date: the day the report describes, YYYY-MM-DD. -->
+<meta name="report:kind" content="KIND">
+<meta name="report:project" content="PROJECT">
+<meta name="report:stream" content="STREAM">
+<meta name="report:date" content="YYYY-MM-DD">
+<link rel="stylesheet" href="/_fonts/v1/report-type.css">
+<link rel="stylesheet" href="/_fonts/v1/report-mono.css">
+<link rel="stylesheet" href="themes/catppuccin.css"> <!-- the theme: catppuccin (default), everforest, github, rosepine, dracula or nord -->
+<link rel="stylesheet" href="report.css">
+<link rel="stylesheet" href="charts.css">
+</head>
+<body>
+
+<div class="topbar" data-slot="host-bar"><div class="wrap">
+  <span class="wordmark">REPORT NAME</span>
+  <span class="meta"><button class="theme-toggle" type="button">Theme: System</button></span>
+</div></div>
+
+<header class="hero"><div class="wrap">
+  <div class="hero-copy">
+    <span class="eyebrow">LABEL</span>
+    <h1>HEADLINE: THE CLAIM</h1>
+    <p class="lead">ONE OR TWO SENTENCES.</p>
+    <p class="hero-meta">SCOPE · DATE</p>
+  </div>
+</div></header>
+
+<div class="layout"><div class="wrap">
+  <nav class="toc" aria-label="Contents">
+    <span class="cap">Contents</span>
+    <ol>
+      <li><a href="#s1">SECTION ONE</a></li>
+    </ol>
+  </nav>
+  <main>
+    <div class="findings">
+      <span class="cap">Key findings</span>
+      <ol>
+        <li><b>BOLD CLAIM.</b> ONE SENTENCE; see <a href="#s1">SECTION ONE</a>.</li>
+      </ol>
+    </div>
+    <section id="s1">
+      <header>
+        <span class="kicker">TOPIC</span>
+        <h2>SECTION CLAIM</h2>
+        <p class="lead">INTRO.</p>
+      </header>
+      <p>CONTENT.</p>
+    </section>
+  </main>
+</div></div>
+
+<footer class="site"><div class="wrap">
+  <span class="wordmark">REPORT NAME</span>
+  <p>Built on DATE from SOURCES. CAVEATS.</p>
+</div></footer>
+
+<script src="report.js"></script>
+<script src="charts.js"></script>
+<script src="prism.js"></script>
+</body>
+</html>

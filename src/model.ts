@@ -1,11 +1,19 @@
 // Storage schemas (PLAN 3.2) and the pure transforms the API applies to them inside casUpdate().
 import { ApiError } from './store';
 
-export const KINDS = [
-  'investigation', 'incident', 'review', 'audit', 'architecture', 'plan', 'analysis',
-  'benchmark', 'experiment', 'research', 'explainer', 'runbook', 'summary',
-] as const;
+/** The report-builder skill's eight report types: Roost's only kinds. */
+export const KINDS = ['investigation', 'architecture', 'audit', 'benchmark', 'decision', 'postmortem', 'status', 'changelog'] as const;
 export type Kind = (typeof KINDS)[number];
+/** The 13 kinds Roost used before 2026-11-17. Old filter URLs (/kind/<old>/) redirect through this; stored reports were refiled one by one. */
+export const LEGACY_KIND_URL: Record<string, Kind> = {
+  incident: 'postmortem', review: 'audit', plan: 'decision', analysis: 'investigation', experiment: 'benchmark',
+  research: 'decision', explainer: 'architecture', runbook: 'architecture', summary: 'status',
+};
+/** The report-builder palettes a report or the hub can use. */
+export const PALETTES = ['catppuccin', 'everforest', 'github', 'rosepine', 'dracula', 'nord'] as const;
+
+/** What a report-builder report says about itself (its head and hero). Read from index.html at commit. */
+export interface Filing { kind: string; project: string; stream: string; date: string; title: string; claim: string; lead: string; palette: string }
 
 export interface Project {
   id: string; title: string; description: string;
@@ -33,10 +41,12 @@ export interface VersionEntry {
   allow_secrets: boolean;
   source: { branch?: string; commit?: string; session?: string; unattended: boolean };
   pending_meta?: PublishMeta; // classification to apply at commit; removed once committed
+  format?: 'report-builder'; // absent: a legacy (lynx-reports era) page, served with the legacy chrome
 }
 
 export interface ReportEntry {
   id: string; title: string; summary: string; kind: Kind; stream: string | null; tags: string[];
+  claim?: string; palette?: string; date?: string; // from the report's own page (report-builder versions)
   status: 'draft' | 'final' | 'superseded';
   typed: Record<string, string | number | boolean>;
   archived: string | null;
@@ -68,11 +78,13 @@ export const RECENT_LIMIT = 100;
 
 export interface PublishMeta {
   title: string; summary: string; kind: Kind; stream: string | null; tags: string[];
+  claim?: string; palette?: string; date?: string;
   status: 'draft' | 'final'; typed: Record<string, string | number | boolean>;
   change_note: string; supersedes: string | null;
   classification: { why: string; triage: boolean; confirmed: boolean };
   proposed_stream?: { id: string; title: string };
   new_stream?: { id: string; title: string; description: string };
+  stream_alias?: string; // the stream as the publish named it, when that was an alias of meta.stream
 }
 
 export interface BeginInput extends PublishMeta {
@@ -99,6 +111,7 @@ export function begin(cur: Manifest | null, project: string, input: BeginInput, 
   } else if (meta.stream) {
     const s = findStream(m, meta.stream);
     if (!s) throw new ApiError(422, 'unknown_stream', `No stream ${meta.stream} in ${project}`, 'stream');
+    if (s.id !== meta.stream) meta.stream_alias = meta.stream;
     meta.stream = s.id;
   }
   if (meta.supersedes && !m.reports.some((r) => r.id === meta.supersedes)) {
@@ -130,8 +143,42 @@ function pickMeta(i: PublishMeta): PublishMeta {
   return { title, summary, kind, stream, tags, status, typed, change_note, supersedes, classification, proposed_stream, new_stream };
 }
 
+const ENTITIES: Record<string, string> = { amp: '&', lt: '<', gt: '>', quot: '"', '#39': "'", apos: "'", nbsp: ' ', rsquo: '’', lsquo: '‘', ldquo: '“', rdquo: '”', mdash: '—', ndash: '–', middot: '·', hellip: '…' };
+const text = (s: string) => s.replace(/<[^>]*>/g, '').replace(/&(#x[0-9a-f]+|#\d+|[a-z0-9]+);/gi, (m, e: string) =>
+  e[0] === '#' ? String.fromCodePoint(e[1].toLowerCase() === 'x' ? parseInt(e.slice(2), 16) : +e.slice(1)) : ENTITIES[e.toLowerCase()] ?? m).replace(/\s+/g, ' ').trim();
+
+/**
+ * Reads a report-builder report's filing from its HTML. The CLI has the same reader (cli/roost.mjs, readFiling);
+ * test/fixtures/filing.html keeps the two in step. ponytail: regexes over the text, fine for the skill's own markup.
+ */
+export function readFiling(html: string): Filing | null {
+  const meta = (n: string) => {
+    const tag = html.match(new RegExp(`<meta\\b[^>]*\\bname\\s*=\\s*["']report:${n}["'][^>]*>`, 'i'))?.[0];
+    return tag ? text(tag.match(/\bcontent\s*=\s*"([^"]*)"|\bcontent\s*=\s*'([^']*)'/i)?.slice(1).find((x) => x !== undefined) ?? '') : '';
+  };
+  if (!/<meta\b[^>]*\bname\s*=\s*["']report:kind["']/i.test(html)) return null;
+  const first = (re: RegExp) => text(html.match(re)?.[1] ?? '');
+  return {
+    kind: meta('kind'), project: meta('project'), stream: meta('stream'), date: meta('date'),
+    title: first(/<title[^>]*>([\s\S]*?)<\/title>/i), claim: first(/<h1\b[^>]*>([\s\S]*?)<\/h1>/i),
+    lead: first(/<p\b[^>]*\bclass\s*=\s*["'][^"']*\blead\b[^"']*["'][^>]*>([\s\S]*?)<\/p>/i),
+    palette: html.match(/\/\* themes\/([a-z]+)\.css \*\//)?.[1] ?? 'catppuccin',
+  };
+}
+
+/** Why a filing is not one Roost can take, or '' when it is fine. */
+export function filingProblem(f: Filing | null): string {
+  if (!f) return 'index.html has no report:kind meta tag; build it with the roost-report skill';
+  if (!(KINDS as readonly string[]).includes(f.kind)) return `report:kind is "${f.kind}", not one of ${KINDS.join(', ')}`;
+  if (!ID_RE.test(f.project)) return `report:project is "${f.project}", not a project id`;
+  if (f.stream && !ID_RE.test(f.stream)) return `report:stream is "${f.stream}", not a stream id`;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(f.date)) return `report:date is "${f.date}", not YYYY-MM-DD`;
+  if (!f.title) return 'the page has no <title>';
+  return '';
+}
+
 /** Makes a pending version live (or quarantined) and applies its classification. Idempotent. */
-export function commit(cur: Manifest | null, id: string, n: number, upload: string, now: string) {
+export function commit(cur: Manifest | null, id: string, n: number, upload: string, now: string, filing?: Filing) {
   const m = cur;
   const entry = m?.reports.find((r) => r.id === id);
   const v = entry?.versions.find((x) => x.n === n);
@@ -139,6 +186,10 @@ export function commit(cur: Manifest | null, id: string, n: number, upload: stri
   if (v.state !== 'pending') return { doc: m, result: { state: v.state, entry } };
   const meta = v.pending_meta!;
   delete v.pending_meta;
+  if (filing) { // the page's own words win: it is the one place a report is described
+    Object.assign(meta, { title: filing.title, summary: filing.lead.slice(0, 500), claim: filing.claim, palette: filing.palette, date: filing.date });
+    v.format = 'report-builder';
+  }
   const quarantined = isQuarantine(v);
   v.state = quarantined ? 'quarantined' : 'live';
   v.published = now;
@@ -148,6 +199,7 @@ export function commit(cur: Manifest | null, id: string, n: number, upload: stri
   }
   Object.assign(entry, {
     title: meta.title, summary: meta.summary, kind: meta.kind, stream: meta.stream, tags: meta.tags,
+    ...(meta.claim !== undefined ? { claim: meta.claim, palette: meta.palette, date: meta.date } : {}),
     status: entry.status === 'superseded' ? 'superseded' : meta.status, typed: meta.typed,
     supersedes: meta.supersedes ?? entry.supersedes,
     classification: {

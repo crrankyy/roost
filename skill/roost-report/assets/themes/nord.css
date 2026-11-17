@@ -1,0 +1,90 @@
+/* Theme: Nord (nordtheme/nord src/nord.css, nord0 to nord15). Nord is a dark scheme; light uses its Snow Storm
+   colours as the page and Polar Night as text, the way Nord's own light ports do. Code windows are Polar Night
+   in both themes.
+   Every colour the report uses, as light-dark(light, dark). Checked with the dataviz skill's validator and WCAG:
+   - Text: light ink nord0 9.25+, muted nord3 5.46+; dark ink nord6 7.49+, muted nord4 6.39+.
+   - Links: frost nord10 is 3.50 on Snow Storm, so light links are text-coloured and underlined; dark links
+     are nord8 (4.31 on cards, 5.03+ elsewhere), also underlined for one rule in both.
+   - Accent fill: nord8 with nord0 text (6.24). The focus ring uses nord10 in light (3.50; nord8 is 1.74).
+   - Status text: nord0 on green and yellow (6.13 / 8.00); pure black on orange and red (7.38 / 5.13), since no
+     Nord colour reaches 4.5 there.
+   - Charts: one set for both themes (Nord has no light accents). frost8, orange, frost10, green, red, frost9,
+     yellow, purple passes (worst adjacent CVD dE 12.4, normal 17.8; first three all-pairs pass). Three of the
+     slots are frost blues: when a chart has more than 5 series, check it in the table view.
+   - Status: green, yellow, orange, red (normal dE 10): every status carries its word.
+   - Syntax: Nord's roles, except comments use nord4 italic (9.25) instead of nord3-bright #616e88 (2.43). */
+:root {
+  /* page */
+  --canvas: light-dark(#eceff4, #2e3440);
+  --surface-soft: light-dark(#e5e9f0, #3b4252);
+  --surface-card: light-dark(#d8dee9, #434c5e);
+  --surface-cream-strong: light-dark(#d8dee9, #4c566a);
+  --hairline: light-dark(#d8dee9, #434c5e);
+  --hairline-soft: light-dark(#e5e9f0, #3b4252);
+  --border: light-dark(#d8dee9, #4c566a);
+  /* heading levels: h1, h2, h3 (and "Key findings"), chart and table titles; each its own palette hue, darkened
+     or lightened only as far as its floor needs (3:1 for large headings, 4.5:1 for titles) */
+  --h1: light-dark(#5e81ac, #88c0d0); /* frost8/10; light 3.50, dark 6.24 */
+  --h2: light-dark(#6f8aa6, #81a1c1); /* frost9; light 14% darker, 3.11, dark 4.64 */
+  --h3: light-dark(#a07e9a, #b48ead); /* purple; light 11% darker, 3.06, dark 4.41 */
+  --title: light-dark(#925f4e, #d18b74); /* orange; light 30% darker, 4.59, dark 3% lighter, 4.55 */
+  /* text */
+  --ink: light-dark(#2e3440, #eceff4);
+  --body-strong: light-dark(#2e3440, #eceff4);
+  --body: light-dark(#3b4252, #e5e9f0);
+  --muted: light-dark(#4c566a, #d8dee9);
+  --muted-soft: light-dark(#4c566a, #4c566a);
+  /* accent */
+  --primary: #88c0d0;
+  --primary-active: #88c0d0;
+  --on-primary: #2e3440;
+  --primary-disabled: light-dark(#d8dee9, #4c566a);
+  --focus-color: light-dark(#5e81ac, #88c0d0);
+  --link: light-dark(#2e3440, #88c0d0);
+  --link-decoration: underline;
+  --accent-teal: light-dark(#5e81ac, #8fbcbb);
+  --accent-amber: light-dark(#d08770, #ebcb8b);
+  --error: light-dark(#bf616a, #bf616a);
+  /* dark blocks: code windows, footer, tooltips */
+  --surface-dark: light-dark(#2e3440, #3b4252);
+  --surface-dark-elevated: #434c5e;
+  --surface-dark-soft: light-dark(#2e3440, #3b4252);
+  --on-dark: #eceff4;
+  --on-dark-soft: #d8dee9;
+  /* text on a status fill (callouts) */
+  --on-status: #2e3440;
+  --on-serious: #000000;
+  --on-critical: #000000;
+  /* syntax, on the dark code window */
+  --syn-comment: #d8dee9;
+  --syn-punctuation: #eceff4;
+  --syn-keyword: #81a1c1;
+  --syn-string: #a3be8c;
+  --syn-regex: #ebcb8b;
+  --syn-number: #b48ead;
+  --syn-operator: #81a1c1;
+  --syn-function: #88c0d0;
+  --syn-type: #8fbcbb;
+  --syn-builtin: #88c0d0;
+  --syn-property: #8fbcbb;
+  --syn-variable: #d8dee9;
+  --syn-macro: #5e81ac;
+  /* charts */
+  --chart-1: #88c0d0; /* frost nord8 */
+  --chart-2: #d08770; /* orange nord12 */
+  --chart-3: #5e81ac; /* frost nord10 */
+  --chart-4: #a3be8c; /* green nord14 */
+  --chart-5: #bf616a; /* red nord11 */
+  --chart-6: #81a1c1; /* frost nord9 */
+  --chart-7: #ebcb8b; /* yellow nord13 */
+  --chart-8: #b48ead; /* purple nord15 */
+  --chart-other: #4c566a; /* nord3 */
+  --chart-axis: light-dark(#4c566a, #4c566a);
+  --chart-div-neg: #5e81ac;
+  --chart-div-pos: #bf616a;
+  --chart-div-mid: light-dark(#d8dee9, #4c566a);
+  --status-good: #a3be8c;
+  --status-warning: #ebcb8b;
+  --status-serious: #d08770;
+  --status-critical: #bf616a;
+}

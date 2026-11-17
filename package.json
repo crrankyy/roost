@@ -4,12 +4,13 @@
   "type": "module",
   "scripts": {
     "dev": "wrangler dev",
-    "deploy": "wrangler deploy",
+    "deploy": "npm run build:web && wrangler deploy",
     "test": "vitest run && node --test test/unit/*.test.mjs",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && npm --prefix web run typecheck",
     "gen": "node scripts/gen-lynx.mjs",
     "seed:local": "node test/visual/seed.mjs",
-    "shots": "node test/visual/shoot.mjs"
+    "shots": "node test/visual/shoot.mjs",
+    "build:web": "npm --prefix web run build"
   },
   "devDependencies": {
     "@cloudflare/vitest-plugin": "^1.4.10",

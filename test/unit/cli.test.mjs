@@ -4,8 +4,9 @@ import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { homedir } from 'node:os';
 import {
-  KINDS, globToRegex, lint, listFiles, mask, normaliseRemote, parseArgs, resolveProject, scanSecrets, slugify,
+  KINDS, filingProblem, globToRegex, lint, listFiles, mask, normaliseRemote, parseArgs, readFiling, resolveProject, scanSecrets, slugify,
 } from '../../cli/roost.mjs';
+import { expected, page } from '../fixtures/filing.mjs';
 
 const fx = (name) => listFiles(join('test/fixtures', name));
 const rules = (list) => [...new Set(list.map((x) => x.rule))].sort();
@@ -53,28 +54,44 @@ test('slugify', () => {
   assert.ok(slugify('x'.repeat(80)).length <= 60);
 });
 
+test('filing: read from the page, the same way the Worker reads it', () => {
+  assert.deepEqual(readFiling(page()), expected);
+  assert.equal(readFiling(page({ stream: 'perf' })).stream, 'perf');
+  assert.equal(readFiling('<html><title>x</title></html>'), null);
+  assert.equal(filingProblem(readFiling(page())), '');
+  assert.match(filingProblem(readFiling(page({ kind: 'research' }))), /report:kind is "research"/);
+  assert.match(filingProblem(readFiling(page({ project: 'Payments API' }))), /not a project id/);
+  assert.match(filingProblem(readFiling(page({ date: '17 Nov' }))), /YYYY-MM-DD/);
+  assert.match(filingProblem(null), /no report:kind/);
+});
+
 test('lint: a good report has no errors or warnings', () => {
-  const r = lint(fx('good'), { kind: 'investigation', title: 'Why refresh tokens expire early', summary: 's' });
+  const r = lint(fx('good'));
   assert.deepEqual(r.errors, []);
   assert.deepEqual(r.warnings, []);
 });
 
 test('lint: blocking rules', () => {
-  const r = lint(fx('bad'), { kind: 'gossip', stream: 'nope', streams: [{ id: 'auth', aliases: ['old'] }], title: 'Bad', summary: '' });
-  assert.deepEqual(rules(r.errors), ['local-path', 'reserved-rh', 'unknown-kind', 'unknown-stream']);
+  const r = lint(fx('bad'));
+  assert.deepEqual(rules(r.errors), ['filing', 'host-slot', 'local-path', 'reserved-rh']);
   assert.equal(r.errors.filter((e) => e.rule === 'local-path').length, 4);
-  assert.deepEqual(rules(r.warnings), ['external-fetch', 'no-summary', 'no-viewport', 'raw-colour-svg']);
-  assert.equal(lint(fx('good'), { stream: 'old', streams: [{ id: 'auth', aliases: ['old'] }], summary: 's' }).errors.length, 0, 'aliases resolve');
-  assert.deepEqual(rules(lint([], {}).errors), ['missing-index']);
+  assert.deepEqual(rules(r.warnings), ['external-fetch', 'no-viewport', 'raw-colour-svg']);
+  assert.deepEqual(rules(lint([]).errors), ['missing-index']);
 });
 
-test('lint: size limits and title mismatch', () => {
+test('lint: an embedded font blocks the publish; the served fonts are allowed', () => {
+  const files = [{ path: 'index.html', abs: 'test/fixtures/embedded-font/index.html', size: 1 }];
+  assert.deepEqual(rules(lint(files).errors), ['embedded-font']);
+  assert.deepEqual(lint(fx('good')).errors, [], '/_fonts/v1/ links pass');
+});
+
+test('lint: size limits', () => {
   const files = [{ path: 'index.html', abs: 'test/fixtures/good/index.html', size: 100 }, { path: 'assets/big.bin', abs: '', size: 3 * 1024 * 1024 }, { path: 'assets/huge.bin', abs: '', size: 11 * 1024 * 1024 }];
-  const r = lint(files, { title: 'Other', summary: 's' });
+  const r = lint(files);
   assert.deepEqual(rules(r.errors), ['size']);
-  assert.deepEqual(rules(r.warnings), ['big-file', 'title-mismatch']);
+  assert.deepEqual(rules(r.warnings), ['big-file']);
   const total = Array.from({ length: 3 }, (_, i) => ({ path: `a${i}.bin`, abs: '', size: 9 * 1024 * 1024 }));
-  assert.ok(lint([files[0], ...total], { summary: 's' }).errors.some((e) => e.rule === 'size' && e.file === ''));
+  assert.ok(lint([files[0], ...total]).errors.some((e) => e.rule === 'size' && e.file === ''));
 });
 
 test('secrets: finds and masks, skips allowed emails', () => {
@@ -95,8 +112,8 @@ test('secrets: no false positives on the design system or the reference report',
   assert.deepEqual(found.map((x) => `${x.abs ?? ''}${x.file}:${x.line} ${x.kind} ${x.masked}`), []);
 });
 
-test('lint: the reference report has no blocking errors', () => {
-  const r = lint([{ path: 'index.html', abs: 'docs/reference/memory-research.html', size: 76081 }], { kind: 'research', summary: 's' });
+test('lint: the skill\'s samples, built, have no blocking errors', () => {
+  const r = lint([{ path: 'index.html', abs: 'test/fixtures/built-sample/index.html', size: 1 }]);
   assert.deepEqual(r.errors, []);
 });
 

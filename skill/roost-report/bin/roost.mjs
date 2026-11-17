@@ -7,10 +7,9 @@ import { homedir } from 'node:os';
 import { dirname, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-export const KINDS = [
-  'investigation', 'incident', 'review', 'audit', 'architecture', 'plan', 'analysis',
-  'benchmark', 'experiment', 'research', 'explainer', 'runbook', 'summary',
-];
+/** The report-builder skill's eight report types: Roost's only kinds. */
+export const KINDS = ['investigation', 'architecture', 'audit', 'benchmark', 'decision', 'postmortem', 'status', 'changelog'];
+const ID_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const MB = 1024 * 1024;
 const TEXT_EXT = /\.(html?|css|m?js|json|md|txt|csv|svg|xml|ts|ya?ml|env)$/i;
 const CT = {
@@ -166,18 +165,49 @@ function badLink(v) {
   if (/^(https?:)?\/\/(localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\])([:/]|$)/i.test(s)) return 'localhost link';
   if (/^[a-z]:[\\/]/i.test(s)) return 'Windows absolute path';
   if (/^\/(Users|home)\//.test(s)) return 'local absolute path';
-  if (s.startsWith('/') && !s.startsWith('//') && !s.startsWith('/_ds/lynx-reports/v1/') && !/^\/p\/[a-z0-9-]+\/r\//.test(s)) return 'absolute path outside /_ds/ and /p/';
+  if (s.startsWith('/') && !s.startsWith('//') && !s.startsWith('/_ds/lynx-reports/v1/') && !s.startsWith('/_fonts/v1/') && !/^\/p\/[a-z0-9-]+\/r\//.test(s)) return 'absolute path outside /_fonts/, /_ds/ and /p/';
+  return '';
+}
+
+const text = (s) => decodeEntities(s.replace(/<[^>]*>/g, '')).replace(/\s+/g, ' ').trim();
+
+/**
+ * Reads a report-builder report's filing from its HTML: the report:kind, project, stream and date meta tags, the
+ * <title> (name), the first <h1> (claim), the hero's .lead (summary) and its theme. The Worker has the same reader
+ * (src/model.ts, readFiling) and checks it again at commit. ponytail: regexes, fine for the skill's own markup.
+ */
+export function readFiling(html) {
+  if (!/<meta\b[^>]*\bname\s*=\s*["']report:kind["']/i.test(html)) return null;
+  const meta = (n) => {
+    const tag = html.match(new RegExp(`<meta\\b[^>]*\\bname\\s*=\\s*["']report:${n}["'][^>]*>`, 'i'))?.[0];
+    return tag ? text(tag.match(/\bcontent\s*=\s*"([^"]*)"|\bcontent\s*=\s*'([^']*)'/i)?.slice(1).find((x) => x !== undefined) ?? '') : '';
+  };
+  const first = (re) => text(html.match(re)?.[1] ?? '');
+  return {
+    kind: meta('kind'), project: meta('project'), stream: meta('stream'), date: meta('date'),
+    title: first(/<title[^>]*>([\s\S]*?)<\/title>/i), claim: first(/<h1\b[^>]*>([\s\S]*?)<\/h1>/i),
+    lead: first(/<p\b[^>]*\bclass\s*=\s*["'][^"']*\blead\b[^"']*["'][^>]*>([\s\S]*?)<\/p>/i),
+    palette: html.match(/\/\* themes\/([a-z]+)\.css \*\//)?.[1] ?? 'catppuccin',
+  };
+}
+
+/** Why a filing is not one Roost can take, or '' (the Worker's filingProblem, word for word). */
+export function filingProblem(f) {
+  if (!f) return 'index.html has no report:kind meta tag; build it with the roost-report skill';
+  if (!KINDS.includes(f.kind)) return `report:kind is "${f.kind}", not one of ${KINDS.join(', ')}`;
+  if (!ID_RE.test(f.project)) return `report:project is "${f.project}", not a project id`;
+  if (f.stream && !ID_RE.test(f.stream)) return `report:stream is "${f.stream}", not a stream id`;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(f.date)) return `report:date is "${f.date}", not YYYY-MM-DD`;
+  if (!f.title) return 'the page has no <title>';
   return '';
 }
 
 /** SPEC 7 lint. ponytail: regexes over the text, not a parser; misses exotic markup, fine for our own reports. */
-export function lint(files, { kind, stream, streams = [], title, summary } = {}) {
+export function lint(files) {
   const errors = [];
   const warnings = [];
   const add = (list, rule, file, line, message) => list.push({ rule, file, line, message });
   if (!files.some((f) => f.path === 'index.html')) add(errors, 'missing-index', '', 0, 'index.html is required');
-  if (kind !== undefined && !KINDS.includes(kind)) add(errors, 'unknown-kind', '', 0, `Kind "${kind}" is not one of: ${KINDS.join(', ')}`);
-  if (stream && !streams.some((s) => s.id === stream || s.aliases?.includes(stream))) add(errors, 'unknown-stream', '', 0, `No stream "${stream}" in this project (use --new-stream to propose one)`);
   const total = files.reduce((a, f) => a + f.size, 0);
   if (total > 25 * MB) add(errors, 'size', '', 0, `Folder is ${(total / MB).toFixed(1)} MB; the limit is 25 MB`);
   for (const f of files) {
@@ -208,13 +238,18 @@ export function lint(files, { kind, stream, streams = [], title, summary } = {})
         for (const c of svg.matchAll(re)) add(warnings, 'raw-colour-svg', f.path, lineOf(text, m.index + c.index), `Raw colour in inline SVG (${c[1]}: ${c[2]}); use data-series or tokens`);
       }
     }
+    if (/\.(html?|css)$/i.test(f.path)) {
+      for (const m of text.matchAll(/url\(\s*["']?data:(?:font\/|application\/(?:x-)?font)/gi)) add(errors, 'embedded-font', f.path, lineOf(text, m.index), 'An embedded font: link /_fonts/v1/report-type.css and report-mono.css instead (Roost serves the fonts)');
+    }
     if (f.path === 'index.html') {
       if (!/<meta\b[^>]*name\s*=\s*["']viewport["']/i.test(text)) add(warnings, 'no-viewport', f.path, 0, 'Missing <meta name="viewport">');
-      const t = text.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]?.trim();
-      if (title && decodeEntities(t ?? '') !== title) add(warnings, 'title-mismatch', f.path, 0, `<title> "${t ?? ''}" differs from the classified title "${title}"`);
+      const filing = readFiling(text);
+      const problem = filingProblem(filing);
+      if (problem) add(errors, 'filing', f.path, 0, problem);
+      if (!/<div\b[^>]*\bclass\s*=\s*["']topbar["'][^>]*\bdata-slot\s*=\s*["']host-bar["']/i.test(text)) add(errors, 'host-slot', f.path, 0, 'The top bar has no data-slot="host-bar"; Roost puts its own bar there');
+      if (filing && !filing.lead) add(warnings, 'no-summary', f.path, 0, 'No .lead in the hero; the hub shows it under the title');
     }
   }
-  if (!summary) add(warnings, 'no-summary', '', 0, 'No summary; the hub shows one line under the title');
   return { errors, warnings };
 }
 
@@ -335,70 +370,64 @@ async function notifyPublish(cfg, n, log) {
 async function cmdPublish({ pos, flags }, cfg, log) {
   const dir = pos[0] ? resolve(pos[0]) : '';
   if (!dir || !existsSync(dir) || !statSync(dir).isDirectory()) throw new CliError('Usage: roost publish <dir> [flags]', EXIT.invalid);
-  const req = client(cfg);
+  for (const gone of ['kind', 'project', 'stream', 'new-stream', 'title', 'summary', 'typed', 'why']) {
+    if (flags[gone] !== undefined) throw new CliError(`--${gone} is gone: a report files itself with the report: meta tags in its head (roost-report skill)`, EXIT.invalid);
+  }
   const unattended = !!flags.unattended;
   const confirmed = !!flags.confirmed && !unattended;
   const files = listFiles(dir);
-  const indexHtml = files.find((f) => f.path === 'index.html');
-  const htmlTitle = indexHtml ? decodeEntities(readFileSync(indexHtml.abs, 'utf8').match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]?.trim() ?? '') : '';
-  const title = typeof flags.title === 'string' ? flags.title : htmlTitle;
-  if (!title) throw new CliError('A title is required: --title or a <title> in index.html', EXIT.invalid);
-  if (flags.stream && flags['new-stream']) throw new CliError('Use --stream or --new-stream, not both', EXIT.invalid);
-  const kind = flags.kind;
-  if (typeof kind !== 'string') throw new CliError('--kind is required', EXIT.invalid);
-
+  const { errors, warnings } = lint(files);
+  if (errors.length) {
+    for (const w of warnings) log(`warning [${w.rule}] ${w.file}${w.line ? `:${w.line}` : ''} ${w.message}`);
+    for (const e of errors) log(`error [${e.rule}] ${e.file}${e.line ? `:${e.line}` : ''} ${e.message}`);
+    return { code: EXIT.invalid, out: { ok: false, errors, warnings } };
+  }
+  // The filing is the page's: kind, project, stream, title (name), claim (h1), lead (summary).
+  const filing = readFiling(readFileSync(join(dir, 'index.html'), 'utf8'));
+  const { kind, project, title, lead: summary } = filing;
+  const req = client(cfg);
   const registry = (await req('/api/registry')).data;
   const cwd = process.cwd();
   const resolved = resolveProject(registry, cwd);
-  let project = typeof flags.project === 'string' ? flags.project : resolved.project;
-  const decisive = !!resolved.project && project === resolved.project;
-  const needs = [];
-  if (!project) {
-    if (unattended) throw new CliError('No project matched and none was given; unattended runs cannot ask.', EXIT.invalid);
-    return { code: EXIT.confirm, out: { ok: false, needs: ['project'], match: resolved.match, candidates: registry.projects.filter((p) => p.status === 'active').map(({ id, title, description, match }) => ({ id, title, description, keywords: match.keywords })) } };
+  const projectRec = registry.projects.find((p) => p.id === project && p.status === 'active');
+  if (!projectRec) {
+    return { code: EXIT.invalid, out: { ok: false, errors: [{ rule: 'filing', file: 'index.html', line: 0, message: `report:project "${project}" is not an active Roost project. Ask the user, then fix the tag (or \`roost project add\` once they confirm).` }], needs: ['project'],
+      candidates: registry.projects.filter((p) => p.status === 'active').map(({ id, title: t, description, match }) => ({ id, title: t, description, keywords: match.keywords })), match: resolved.match } };
   }
-  const projectRec = registry.projects.find((p) => p.id === project);
-  if (!projectRec) throw new CliError(`Unknown project "${project}". Ask the user, then \`roost project add\`.`, EXIT.invalid, { needs: ['project'] });
-  if (!decisive) needs.push('project');
+  const decisive = resolved.project === project;
+  const needs = decisive ? [] : ['project'];
   const manifest = (await req(`/api/manifest/${project}`)).data;
+  const known = filing.stream ? manifest.streams.find((s) => s.id === filing.stream || s.aliases?.includes(filing.stream)) : null;
+  const stream = known ? filing.stream : null;
+  const newStream = filing.stream && !known ? filing.stream : '';
+  if (newStream) needs.push('stream');
 
   const slug = typeof flags.slug === 'string' ? slugify(flags.slug) : slugify(title);
   if (!slug) throw new CliError('Could not make a slug; pass --slug', EXIT.invalid);
   const existing = manifest.reports.filter((r) => r.id.slice(11) === slug).sort((a, b) => b.created.localeCompare(a.created))[0];
   const id = existing?.id ?? `${localDate()}-${slug}`;
-  const newStream = typeof flags['new-stream'] === 'string' ? slugify(flags['new-stream']) : '';
-  if (newStream) needs.push('stream');
-  const stream = typeof flags.stream === 'string' ? flags.stream : null;
-
-  const summary = typeof flags.summary === 'string' ? flags.summary : '';
-  const { errors, warnings } = lint(files, { kind, stream, streams: manifest.streams, title, summary });
   const findings = scanSecrets(files, cfg);
   if (findings.length) warnings.push(...findings.map((f) => ({ rule: 'secrets', file: f.file, line: f.line, message: `Possible ${f.kind}: ${f.masked}` })));
   for (const w of warnings) log(`warning [${w.rule}] ${w.file}${w.line ? `:${w.line}` : ''} ${w.message}`);
-  if (errors.length) {
-    for (const e of errors) log(`error [${e.rule}] ${e.file}${e.line ? `:${e.line}` : ''} ${e.message}`);
-    return { code: EXIT.invalid, out: { ok: false, errors, warnings } };
-  }
 
-  let typed = {};
-  if (typeof flags.typed === 'string') {
-    try { typed = JSON.parse(flags.typed); } catch { throw new CliError('--typed must be JSON', EXIT.invalid); }
-  }
-  const proposal = { project, project_title: projectRec.title, stream: newStream || stream, new_stream: !!newStream, kind, title, summary, id, republish: !!existing };
+  const proposal = {
+    project, project_title: projectRec.title, stream: newStream || stream, new_stream: !!newStream, kind, title, summary, id, republish: !!existing,
+    resolved_project: resolved.project, streams: manifest.streams.filter((s) => s.status !== 'archived').map(({ id: sid, title: t, description }) => ({ id: sid, title: t, description })),
+  };
   if (needs.length && !confirmed && !unattended) {
     return { code: EXIT.confirm, out: { ok: false, needs, match: resolved.match, proposal, warnings } };
   }
   if (findings.length && !unattended && !flags['allow-secrets']) {
     return { code: EXIT.secrets, out: { ok: false, findings, proposal, warnings } };
   }
-  const why = typeof flags.why === 'string' ? flags.why : decisive ? resolved.why : 'chosen by Claude';
+  const why = decisive ? `${resolved.why}; filed in the report` : 'filed in the report';
   const triage = unattended; // SPEC 5.4: every unattended publish lands in triage
   const body = {
-    project, id, kind, title, summary, stream, typed, status: flags.status === 'draft' ? 'draft' : 'final',
+    project, id, kind, title, summary: summary.slice(0, 500), stream, typed: {}, status: flags.status === 'draft' ? 'draft' : 'final',
     tags: typeof flags.tags === 'string' ? flags.tags.split(',').map((t) => slugify(t)).filter(Boolean) : [],
     change_note: typeof flags['change-note'] === 'string' ? flags['change-note'] : existing ? '' : 'First version.',
     supersedes: typeof flags.supersedes === 'string' ? flags.supersedes : null,
-    ...(newStream ? { new_stream: { id: newStream, title: flags['new-stream'], description: '' } } : {}),
+    ...(newStream ? { new_stream: { id: newStream, title: newStream, description: '' } } : {}),
     classification: { why, triage, confirmed: confirmed || (decisive && !needs.length) },
     unattended, allow_secrets: !!flags['allow-secrets'], findings,
     source: { unattended, branch: git(['rev-parse', '--abbrev-ref', 'HEAD'], cwd) || undefined, commit: git(['rev-parse', '--short', 'HEAD'], cwd) || undefined, session: process.env.CLAUDE_SESSION_ID },
@@ -539,9 +568,9 @@ async function cmdDoctor(_args, cfg, log) {
   return { code: ok ? EXIT.ok : EXIT.failure, out: { ok, checks } };
 }
 
-const USAGE = `roost publish <dir> [--project P] [--kind K] [--stream S | --new-stream S] [--slug X] [--title T]
-      [--summary S] [--tags a,b] [--status draft|final] [--typed '{json}'] [--change-note "…"]
-      [--supersedes ID] [--why "…"] [--confirmed] [--unattended] [--allow-secrets] [--dry-run] [--json]
+const USAGE = `roost publish <dir> [--slug X] [--change-note "…"] [--tags a,b] [--status draft|final] [--supersedes ID]
+      [--confirmed] [--unattended] [--allow-secrets] [--dry-run] [--json]
+      (kind, project, stream and title come from the report's own report: meta tags and <title>)
 roost project add|edit|archive|list [--id ID --title T --description D --remote R --path GLOB --keyword K] [--json]
 roost stream create|rename|merge|done|archive|unarchive <project> <stream> [--to S] [--title T]
 roost export <project> <out-dir>

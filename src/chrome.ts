@@ -1,12 +1,29 @@
 // Report chrome (SPEC 6.4): ReportPill and ReportBanner injected into a served report with HTMLRewriter, theme set
 // on <html> before first paint. No iframe, so anchors and full-screen charts keep working.
 import { assetUrl } from './assets';
+import { reportView } from './hub';
 import { cls, icons, tpl } from './generated/lynx';
 import type { Manifest, Project, ReportEntry } from './model';
-import { kindLabel, shortDate, type Viewer } from './pages/data';
-import { fill, html, jsonScript, raw } from './pages/html';
-import { SYSTEM_THEME_SCRIPT, themeAttrs } from './pages/layout';
-import { icon, svg } from './pages/parts';
+import { kindLabel, shortDate, type Prefs, type Viewer } from './pages/data';
+import { fill, html, jsonScript, raw, type Raw } from './pages/html';
+
+/** Attributes on <html>, plus the inline script that resolves "system" before paint. Shared with report chrome. */
+function themeAttrs(p: Prefs) {
+  const theme = p.theme === 'system' ? 'light' : p.theme;
+  return { theme, palette: p.palette, hub: p.theme };
+}
+const SYSTEM_THEME_SCRIPT = `<script>(function(){var r=document.documentElement;if(r.getAttribute('data-hub-theme')!=='system')return;var d=matchMedia('(prefers-color-scheme: dark)').matches;r.setAttribute('data-theme',d?'dark':'light');r.classList.toggle('dark',d)})()</script>`;
+
+// Lucide icons the bundle does not export, copied from the artboards.
+const svg = {
+  pin: raw('<path d="M12 17v5"></path><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"></path>'),
+  archive: raw('<rect width="20" height="5" x="2" y="3" rx="1"></rect><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"></path><path d="M10 12h4"></path>'),
+  history: raw('<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l4 2"></path>'),
+  back: raw('<path d="m12 19-7-7 7-7"></path><path d="M19 12H5"></path>'),
+};
+const icon = (paths: Raw, klass = 'i', extra = 'aria-hidden="true"') =>
+  raw(`<svg class="${klass}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ${extra}>${paths}</svg>`);
+
 
 const DS = '/_ds/lynx-reports/v1';
 
@@ -91,6 +108,34 @@ export function injectChrome(res: Response, c: ChromeCtx): Response {
         el.setAttribute('class', [...classes].join(' '));
         el.prepend(`${sawHead ? '' : headStart + headEnd}${banner(c).toString()}`, { html: true });
         el.append(tail, { html: true });
+      },
+    })
+    .transform(res);
+}
+
+/**
+ * Hosted mode (report-builder versions): the report's own page, untouched, inside Roost's bar. The page gets
+ * data-host="roost" before its scripts run, so its report.css hides its top bar and its report.js leaves light/dark
+ * to Roost; web/src/report-bar.tsx renders the bar into #roost-bar. No lynx-reports CSS is added.
+ */
+export function injectHost(res: Response, c: ChromeCtx): Response {
+  const ref = `${c.m.project}/${c.e.id}`;
+  const data = { report: reportView(c.m, c.e, c.v.pins, () => false), version: c.n, project: { id: c.p.id, name: c.p.title }, prefs: c.v.prefs };
+  return new HTMLRewriter()
+    .on('html', {
+      element(el) {
+        el.setAttribute('data-host', 'roost');
+        if (c.v.prefs.theme !== 'system') el.setAttribute('data-theme', c.v.prefs.theme);
+        el.setAttribute('class', `${el.getAttribute('class') ?? ''} roost-hosted`.trim());
+        const style = el.getAttribute('style');
+        el.setAttribute('style', `${style ? `${style.replace(/;?\s*$/, ';')} ` : ''}--sticky-top: calc(var(--roost-bar-h) + 16px)`);
+      },
+    })
+    .on('head', { element(el) { el.append('<link rel="stylesheet" href="/_app/report-bar.css">', { html: true }); } })
+    .on('body', {
+      element(el) {
+        el.prepend('<div id="roost-bar" class="hub roost-report-bar"></div><div id="roost-note" class="hub roost-report-note"></div>', { html: true });
+        el.append(`<script type="application/json" id="roost-data">${jsonScript({ ...data, ref }).s}</script><script type="module" src="/_app/report-bar.js"></script>`, { html: true });
       },
     })
     .transform(res);

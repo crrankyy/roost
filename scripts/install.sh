@@ -5,8 +5,13 @@ here=$(cd "$(dirname "$0")/.." && pwd)
 dest="$HOME/.claude/skills/roost-report"
 node "$here/scripts/build-skill.mjs" >/dev/null 2>&1 || true   # refresh from the repo when run inside it
 mkdir -p "$HOME/.claude/skills" "$HOME/.local/bin" "$HOME/.roost/drafts"
+# The previous install is moved aside, not deleted, so files the skill no longer ships don't linger in it.
+if [ -d "$dest" ]; then mv "$dest" "$HOME/.claude/skills/.roost-report.bak-$(date +%Y%m%d-%H%M%S)"; fi
 mkdir -p "$dest"
-cp -R "$here/skill/roost-report/." "$dest/"   # overwrite in place; this script never removes files
+# fonts-dist/ and built samples stay in the repo: they are build output (MonoLisa is licensed).
+(cd "$here/skill/roost-report" && find . -type f ! -path './fonts-dist/*' ! -name '.DS_Store' | while read -r f; do
+  case "$f" in ./samples/*.html) case "$f" in *.src.html) ;; *) continue ;; esac ;; esac
+  mkdir -p "$dest/$(dirname "$f")"; cp "$f" "$dest/$f"; done)
 chmod +x "$dest/bin/roost.mjs"
 ln -sf "$dest/bin/roost.mjs" "$HOME/.local/bin/roost"
 echo "Installed the skill at $dest and roost at ~/.local/bin/roost"

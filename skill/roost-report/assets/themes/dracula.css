@@ -1,0 +1,85 @@
+/* Theme: Dracula (draculatheme.com/spec). Light is Alucard, Dracula's official light variant; dark is
+   Dracula; code windows use Dracula in both themes.
+   Every colour the report uses, as light-dark(light, dark). Checked with the dataviz skill's validator and WCAG:
+   - Text: Alucard fg 11.97+, comment 4.75+ on page and soft surfaces (4.19 on cards). Dracula fg 11.06+;
+     its comment colour is 3.03, so dark muted text is fg (hierarchy from size and weight).
+   - Accent: purple, 4.53+ light and 4.89+ dark on every surface; also the link colour.
+   - Fills: background text on purple (6.02 / 5.90); status text 4.53+ in both themes.
+   - Charts: 6 of the 7 hues separate in both themes (red drops out): pink, yellow, cyan, green, purple,
+     orange, each mode its own colours (worst adjacent CVD dE 10.2, normal 19.1; first three all-pairs pass).
+     Slots 7 and 8 fall back to "Other" grey.
+   - Status: green, yellow, orange, red; close in light (normal dE 8.5): every status carries its word.
+   - Syntax: Dracula's spec, including its comment colour #6272a4, which is 3.36 on the code background:
+     comments read dim on purpose. */
+:root {
+  /* page */
+  --canvas: light-dark(#fffbeb, #282a36);
+  --surface-soft: light-dark(#ece9df, #21222c);
+  --surface-card: light-dark(#dedccf, #343746);
+  --surface-cream-strong: light-dark(#ceccc0, #424450);
+  --hairline: light-dark(#dedccf, #44475a);
+  --hairline-soft: light-dark(#ece9df, #343746);
+  --border: light-dark(#bcbab3, #44475a);
+  /* heading levels: h1, h2, h3 (and "Key findings"), chart and table titles; each its own palette hue, darkened
+     or lightened only as far as its floor needs (3:1 for large headings, 4.5:1 for titles) */
+  --h1: light-dark(#644ac9, #bd93f9); /* purple; light 6.02, dark 5.90 */
+  --h2: light-dark(#a3144d, #ff79c6); /* pink; light 7.33, dark 5.97 */
+  --h3: light-dark(#036a96, #8be9fd); /* cyan; light 5.78, dark 10.29 */
+  --title: light-dark(#a34d14, #ffb86c); /* orange; light 5.58, dark 8.36 */
+  /* text */
+  --ink: light-dark(#1f1f1f, #f8f8f2);
+  --body-strong: light-dark(#1f1f1f, #f8f8f2);
+  --body: light-dark(#1f1f1f, #f8f8f2);
+  --muted: light-dark(#6c664b, #f8f8f2);
+  --muted-soft: light-dark(#bcbab3, #6272a4);
+  /* accent */
+  --primary: light-dark(#644ac9, #bd93f9);
+  --primary-active: light-dark(#644ac9, #bd93f9);
+  --on-primary: light-dark(#fffbeb, #282a36);
+  --primary-disabled: light-dark(#bcbab3, #44475a);
+  --link: var(--primary-active);
+  --link-decoration: none;
+  --accent-teal: light-dark(#036a96, #8be9fd);
+  --accent-amber: light-dark(#846e15, #f1fa8c);
+  --error: light-dark(#cb3a2a, #ff5555);
+  /* dark blocks: code windows, footer, tooltips */
+  --surface-dark: light-dark(#282a36, #191a21);
+  --surface-dark-elevated: #343746;
+  --surface-dark-soft: #21222c;
+  --on-dark: #f8f8f2;
+  --on-dark-soft: #bcbab3;
+  /* text on a status fill (callouts) */
+  --on-status: light-dark(#fffbeb, #282a36);
+  /* syntax, on the dark code window */
+  --syn-comment: #6272a4;
+  --syn-punctuation: #f8f8f2;
+  --syn-keyword: #ff79c6;
+  --syn-string: #f1fa8c;
+  --syn-regex: #ff5555;
+  --syn-number: #bd93f9;
+  --syn-operator: #ff79c6;
+  --syn-function: #50fa7b;
+  --syn-type: #8be9fd;
+  --syn-builtin: #8be9fd;
+  --syn-property: #8be9fd;
+  --syn-variable: #ffb86c;
+  --syn-macro: #50fa7b;
+  /* charts */
+  --chart-1: light-dark(#a3144d, #ff79c6); /* pink */
+  --chart-2: light-dark(#846e15, #f1fa8c); /* yellow */
+  --chart-3: light-dark(#036a96, #8be9fd); /* cyan */
+  --chart-4: light-dark(#14710a, #50fa7b); /* green */
+  --chart-5: light-dark(#644ac9, #bd93f9); /* purple */
+  --chart-6: light-dark(#a34d14, #ffb86c); /* orange */
+  --chart-7: var(--chart-other); /* Dracula separates 6 hues */
+  --chart-8: var(--chart-other);
+  --chart-other: light-dark(#bcbab3, #6272a4);
+  --chart-axis: light-dark(#bcbab3, #44475a);
+  --chart-div-neg: light-dark(#036a96, #8be9fd);
+  --chart-div-pos: light-dark(#cb3a2a, #ff5555);
+  --chart-div-mid: light-dark(#dedccf, #44475a);
+  --status-good: light-dark(#14710a, #50fa7b);
+  --status-warning: light-dark(#846e15, #f1fa8c);
+  --status-serious: light-dark(#a34d14, #ffb86c);
+  --status-critical: light-dark(#cb3a2a, #ff5555);
+}

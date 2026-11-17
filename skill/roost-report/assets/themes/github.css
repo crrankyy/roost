@@ -1,0 +1,83 @@
+/* Theme: GitHub (Primer, @primer/primitives 9.1.2: light and dark functional tokens, data-vis colours, and the
+   "prettylights" syntax colours of GitHub's dark theme). Code windows use GitHub dark in both themes.
+   Every colour the report uses, as light-dark(light, dark). Checked with the dataviz skill's validator and WCAG:
+   - Text: ink 15.8 / 17.39, muted 5.44+ / 5.11+ on every surface. Links (accent blue) 4.62+ / 4.8+.
+   - Fills: white on the light accent and status fills (4.87+), #0d1117 on the dark ones (5.61+).
+   - Charts: Primer's data-vis "emphasis" colours, each mode its own. Order blue, green, pink, orange, teal,
+     yellow, purple, auburn passes in both (worst adjacent CVD dE 9.9, normal 16.7; first three all-pairs 9.9).
+     Red is left out (8 slots). Light slots under 3:1 lean on the table view.
+   - Status: success, attention, severe, danger; attention and severe sit close (normal dE 7.8 light):
+     every status carries its word.
+   - Syntax: GitHub dark's own colours, all 6.5+ on the code background. */
+:root {
+  /* page */
+  --canvas: light-dark(#ffffff, #0d1117);
+  --surface-soft: light-dark(#f6f8fa, #151b23);
+  --surface-card: light-dark(#eff2f5, #212830);
+  --surface-cream-strong: light-dark(#e6eaef, #2a313c);
+  --hairline: light-dark(#d1d9e0, #3d444d);
+  --hairline-soft: light-dark(#e6eaef, #262c36);
+  --border: light-dark(#d1d9e0, #3d444d);
+  /* heading levels: h1, h2, h3 (and "Key findings"), chart and table titles; each its own palette hue, darkened
+     or lightened only as far as its floor needs (3:1 for large headings, 4.5:1 for titles) */
+  --h1: light-dark(#0969da, #4493f8); /* blue; light 5.19, dark 6.11 */
+  --h2: light-dark(#8250df, #ab7df8); /* purple; light 5.05, dark 6.33 */
+  --h3: light-dark(#1a7f37, #3fb950); /* green; light 5.08, dark 7.45 */
+  --title: light-dark(#bc4c00, #db6d28); /* orange; light 5.03, dark 5.61 */
+  /* text */
+  --ink: light-dark(#1f2328, #f0f6fc);
+  --body-strong: light-dark(#1f2328, #f0f6fc);
+  --body: light-dark(#1f2328, #f0f6fc);
+  --muted: light-dark(#59636e, #9198a1);
+  --muted-soft: light-dark(#818b98, #656c76);
+  /* accent */
+  --primary: light-dark(#0969da, #4493f8);
+  --primary-active: light-dark(#0969da, #4493f8);
+  --on-primary: light-dark(#ffffff, #0d1117);
+  --primary-disabled: light-dark(#d1d9e0, #3d444d);
+  --link: var(--primary-active);
+  --link-decoration: none;
+  --accent-teal: light-dark(#1a7f37, #3fb950);
+  --accent-amber: light-dark(#9a6700, #d29922);
+  --error: light-dark(#d1242f, #f85149);
+  /* dark blocks: code windows, footer, tooltips */
+  --surface-dark: light-dark(#25292e, #010409);
+  --surface-dark-elevated: #212830;
+  --surface-dark-soft: light-dark(#0d1117, #010409);
+  --on-dark: #f0f6fc;
+  --on-dark-soft: #9198a1;
+  /* text on a status fill (callouts) */
+  --on-status: light-dark(#ffffff, #0d1117);
+  /* syntax, on the dark code window */
+  --syn-comment: #9198a1;
+  --syn-punctuation: #f0f6fc;
+  --syn-keyword: #ff7b72;
+  --syn-string: #a5d6ff;
+  --syn-regex: #7ee787;
+  --syn-number: #79c0ff;
+  --syn-operator: #ff7b72;
+  --syn-function: #d2a8ff;
+  --syn-type: #ffa657;
+  --syn-builtin: #79c0ff;
+  --syn-property: #79c0ff;
+  --syn-variable: #ffa657;
+  --syn-macro: #d2a8ff;
+  /* charts */
+  --chart-1: light-dark(#006edb, #0576ff); /* blue */
+  --chart-2: light-dark(#30a147, #2f6f37); /* green */
+  --chart-3: light-dark(#ce2c85, #d34591); /* pink */
+  --chart-4: light-dark(#eb670f, #984b10); /* orange */
+  --chart-5: light-dark(#179b9b, #106c70); /* teal */
+  --chart-6: light-dark(#b88700, #895906); /* yellow */
+  --chart-7: light-dark(#894ceb, #975bf1); /* purple */
+  --chart-8: light-dark(#9d615c, #a86f6b); /* auburn */
+  --chart-other: light-dark(#808fa3, #576270);
+  --chart-axis: light-dark(#818b98, #656c76);
+  --chart-div-neg: light-dark(#006edb, #0576ff);
+  --chart-div-pos: light-dark(#df0c24, #eb3342);
+  --chart-div-mid: light-dark(#e6eaef, #2a313c);
+  --status-good: light-dark(#1a7f37, #3fb950);
+  --status-warning: light-dark(#9a6700, #d29922);
+  --status-serious: light-dark(#bc4c00, #db6d28);
+  --status-critical: light-dark(#d1242f, #f85149);
+}

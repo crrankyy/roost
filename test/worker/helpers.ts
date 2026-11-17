@@ -1,6 +1,8 @@
 import { env, createExecutionContext, waitOnExecutionContext } from 'cloudflare:test';
 import { vi } from 'vitest';
 import worker, { type Env } from '../../src/index';
+// @ts-expect-error: a plain .mjs fixture, shared with the CLI tests
+import { page } from '../fixtures/filing.mjs';
 
 export const TEAM = 'test.cloudflareaccess.com';
 export const AUD = 'test-aud';
@@ -48,4 +50,31 @@ export async function call(path: string, opts: { jwt?: string; method?: string; 
   const res = await worker.fetch(req, testEnv(), ctx);
   await waitOnExecutionContext(ctx);
   return res;
+}
+
+export const sha = async (s: string) =>
+  [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)))].map((b) => b.toString(16).padStart(2, '0')).join('');
+
+/**
+ * Full begin → put → commit, the way the CLI does it, of a report-builder page filed as the publish says
+ * (kind, project, stream). `page` overrides the filing written into the page itself; `html` replaces the page.
+ */
+export async function publishPage(jwt: string, project: string, id: string, o: {
+  body?: Record<string, unknown>; page?: Record<string, string>; html?: string; content?: string; files?: Record<string, string>;
+} = {}) {
+  const b0: Record<string, unknown> = { kind: 'investigation', title: `T ${id}`, summary: 's', classification: { why: 'test', confirmed: true }, ...o.body };
+  const stream = (b0.stream as string) ?? (b0.new_stream as any)?.id ?? (b0.proposed_stream as any)?.id ?? '';
+  const html = o.html ?? page({ kind: b0.kind as string, project, stream, title: b0.title as string, body: o.content ?? '', ...o.page });
+  const all = { 'index.html': html, ...o.files };
+  const files = await Promise.all(Object.entries(all).map(async ([path, s]) => ({ path, size: new TextEncoder().encode(s).length, sha256: await sha(s) })));
+  const api = (path: string, method: string, body: unknown) => call(path, { jwt, method, body: JSON.stringify(body), headers: { 'content-type': 'application/json' } });
+  const b = await api('/api/publish', 'POST', { project, id, files, ...b0 });
+  const begun = (await b.json()) as any;
+  if (b.status !== 201) return { status: b.status, body: begun };
+  for (const [path, s] of Object.entries(all)) {
+    const r = await call(`${begun.put_base}${path}`, { jwt, method: 'PUT', body: s, headers: { 'content-type': path.endsWith('.html') ? 'text/html; charset=utf-8' : 'text/plain' } });
+    if (r.status !== 200) throw new Error(`PUT ${path}: ${r.status} ${await r.text()}`);
+  }
+  const c = await api(`${begun.put_base}commit`, 'POST', {});
+  return { status: c.status, body: (await c.json()) as any, put_base: begun.put_base as string };
 }

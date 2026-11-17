@@ -1,0 +1,1512 @@
+/* Roost bundle.css: palettes, then the report-builder's report.css and charts.css unchanged, then the Roost hub layer. */
+/* ==== Palettes: the report-builder theme files, unchanged except their selector. catppuccin is also :root. ==== */
+/* ---- themes/catppuccin.css ---- */
+/* Theme: Catppuccin. Light is Latte, dark is Mocha; code windows are Mocha in both.
+   Every colour the report uses, as light-dark(light, dark). report.css switches color-scheme for the theme button.
+   Checked with the dataviz skill's validator and WCAG contrast:
+   - Text: ink/body 7.06 on Latte base; muted is subtext1 (5.53; subtext0 is 4.37). Mocha text 11.34, subtext0 7.37.
+   - Accent: mauve, 4.79 on Latte base, 8.07 on Mocha. Peach would be closer to a warm accent but is 2.64.
+   - Charts: Latte accents in both themes (Mocha's pastels fail as series). Order blue, sapphire, peach, mauve,
+     green, pink, yellow, red: worst adjacent CVD dE 16.7, normal 19.7; first three pass all-pairs (18.1).
+     Status-like hues come late so kind tag 1 isn't a severity colour. Teal reads grey: not used.
+   - Status: green, yellow, peach, red. No Catppuccin set passes normal-vision 15 (best: 9.7 Latte, 11 Mocha);
+     every status carries its word. */
+:root, .roost-scope[data-palette="catppuccin"] {
+  /* page */
+  --canvas: light-dark(#eff1f5, #1e1e2e);
+  --surface-soft: light-dark(#e6e9ef, #181825);
+  --surface-card: light-dark(#dce0e8, #313244);
+  --surface-cream-strong: light-dark(#ccd0da, #45475a);
+  --hairline: light-dark(#ccd0da, #313244);
+  --hairline-soft: light-dark(#dce0e8, #313244);
+  --border: light-dark(#bcc0cc, #45475a);
+  /* heading levels: h1, h2, h3 (and "Key findings"), chart and table titles; each its own palette hue, darkened
+     or lightened only as far as its floor needs (3:1 for large headings, 4.5:1 for titles) */
+  --h1: light-dark(#8839ef, #cba6f7); /* mauve; light 4.79, dark 8.07 */
+  --h2: light-dark(#1e66f5, #89b4fa); /* blue; light 4.34, dark 7.79 */
+  --h3: light-dark(#179299, #94e2d5); /* teal; light 3.31, dark 11.01 */
+  --title: light-dark(#b94908, #fab387); /* peach; light 27% darker, 4.62, dark 9.27 */
+  /* text */
+  --ink: light-dark(#4c4f69, #cdd6f4);
+  --body-strong: light-dark(#4c4f69, #cdd6f4);
+  --body: light-dark(#4c4f69, #bac2de);
+  --muted: light-dark(#5c5f77, #a6adc8);
+  --muted-soft: light-dark(#8c8fa1, #7f849c);
+  /* accent */
+  --primary: light-dark(#8839ef, #cba6f7);
+  --primary-active: light-dark(#8839ef, #cba6f7);
+  --on-primary: light-dark(#eff1f5, #11111b);
+  --primary-disabled: light-dark(#bcc0cc, #45475a);
+  --link: var(--primary-active);
+  --link-decoration: none;
+  --accent-teal: light-dark(#179299, #94e2d5);
+  --accent-amber: light-dark(#df8e1d, #f9e2af);
+  --error: light-dark(#d20f39, #f38ba8);
+  /* dark blocks: code windows, footer, tooltips (Mocha in both themes) */
+  --surface-dark: light-dark(#1e1e2e, #11111b);
+  --surface-dark-elevated: #313244;
+  --surface-dark-soft: #181825;
+  --on-dark: #cdd6f4;
+  --on-dark-soft: #a6adc8;
+  /* text on a status fill (callouts): dark on all, except light text on Latte red */
+  --on-status: #11111b;
+  --on-critical: light-dark(#eff1f5, #11111b);
+  /* syntax, on the dark code window */
+  --syn-comment: #9399b2;
+  --syn-punctuation: #9399b2;
+  --syn-keyword: #cba6f7;
+  --syn-string: #a6e3a1;
+  --syn-regex: #f5c2e7;
+  --syn-number: #fab387;
+  --syn-operator: #89dceb;
+  --syn-function: #89b4fa;
+  --syn-type: #f9e2af;
+  --syn-builtin: #f38ba8;
+  --syn-property: #b4befe;
+  --syn-variable: #eba0ac;
+  --syn-macro: #94e2d5;
+  /* charts */
+  --chart-1: #1e66f5; /* blue */
+  --chart-2: #209fb5; /* sapphire */
+  --chart-3: #fe640b; /* peach */
+  --chart-4: #8839ef; /* mauve */
+  --chart-5: #40a02b; /* green */
+  --chart-6: #ea76cb; /* pink */
+  --chart-7: #df8e1d; /* yellow */
+  --chart-8: #d20f39; /* red */
+  --chart-other: light-dark(#8c8fa1, #6c7086);
+  --chart-axis: light-dark(#acb0be, #585b70);
+  --chart-div-neg: light-dark(#1e66f5, #89b4fa);
+  --chart-div-pos: light-dark(#d20f39, #f38ba8);
+  --chart-div-mid: light-dark(#ccd0da, #45475a);
+  --status-good: light-dark(#40a02b, #a6e3a1);
+  --status-warning: light-dark(#df8e1d, #f9e2af);
+  --status-serious: light-dark(#fe640b, #fab387);
+  --status-critical: light-dark(#d20f39, #f38ba8);
+}
+
+/* ---- themes/everforest.css ---- */
+/* Theme: Everforest, medium contrast (github.com/sainnhe/everforest, palette.md). Light and dark variants;
+   code windows use the dark variant in both themes.
+   Every colour the report uses, as light-dark(light, dark). report.css switches color-scheme for the theme button.
+   Checked with the dataviz skill's validator and WCAG contrast:
+   - Everforest Light is low-contrast by design: only fg (#5C6A72, 5.18 on bg0) passes 4.5 for text. Every accent
+     is 2.1 to 3.1. So all light text is fg (hierarchy comes from size and weight), links are fg and underlined,
+     and the accent (green) is used only as a fill, with #1E2326 text on it. Cards use bg2 (fg 4.66; bg3 is 4.29).
+   - Dark: fg 7.38 on bg0, grey2 5.12; accents 4.55 to 6.84, so the green accent is also the link colour.
+   - Charts: the dark accents fail as series (muted, two read grey), so the light accents are used in both themes:
+     order blue, red, yellow, aqua, orange, purple, green passes on both surfaces (worst adjacent CVD dE 9.0,
+     normal 18.5; first three all-pairs 9.0). Everforest has 7 hues: slot 8 is "Other" grey, so at most 7 series.
+   - Status: green, yellow, orange, red; yellow/orange are close (normal dE 9.1): every status carries its word.
+   - Syntax follows Everforest's tree-sitter semantics; comments use grey2 (5.97) rather than grey1 (4.49). */
+.roost-scope[data-palette="everforest"] {
+  /* page */
+  --canvas: light-dark(#fdf6e3, #2d353b);
+  --surface-soft: light-dark(#f4f0d9, #232a2e);
+  --surface-card: light-dark(#efebd4, #343f44);
+  --surface-cream-strong: light-dark(#e6e2cc, #3d484d);
+  --hairline: light-dark(#e0dcc7, #3d484d);
+  --hairline-soft: light-dark(#e6e2cc, #343f44);
+  --border: light-dark(#bdc3af, #4f585e);
+  /* heading levels: h1, h2, h3 (and "Key findings"), chart and table titles; each its own palette hue, darkened
+     or lightened only as far as its floor needs (3:1 for large headings, 4.5:1 for titles) */
+  --h1: light-dark(#839601, #a7c080); /* green; light 7% darker, 3.08, dark 6.23 */
+  --h2: light-dark(#3a94c5, #7fbbb3); /* blue; light 3.13, dark 5.74 */
+  --h3: light-dark(#d665b3, #d699b6); /* purple; light 4% darker, 3.06, dark 5.40 */
+  --title: light-dark(#ae591b, #e69875); /* orange; light 29% darker, 4.59, dark 5.41 */
+  /* text */
+  --ink: light-dark(#5c6a72, #d3c6aa);
+  --body-strong: light-dark(#5c6a72, #d3c6aa);
+  --body: light-dark(#5c6a72, #d3c6aa);
+  --muted: light-dark(#5c6a72, #9da9a0);
+  --muted-soft: light-dark(#939f91, #7a8478);
+  /* accent */
+  --primary: light-dark(#8da101, #a7c080);
+  --primary-active: light-dark(#8da101, #a7c080);
+  --on-primary: #1e2326;
+  --primary-disabled: light-dark(#bdc3af, #4f585e);
+  --link: light-dark(#5c6a72, #a7c080);
+  --link-decoration: underline;
+  --accent-teal: light-dark(#35a77c, #83c092);
+  --accent-amber: light-dark(#dfa000, #dbbc7f);
+  --error: light-dark(#f85552, #e67e80);
+  /* dark blocks: code windows, footer, tooltips */
+  --surface-dark: light-dark(#2d353b, #1e2326);
+  --surface-dark-elevated: light-dark(#3d484d, #343f44);
+  --surface-dark-soft: #232a2e;
+  --on-dark: #d3c6aa;
+  --on-dark-soft: #9da9a0;
+  /* text on a status fill (callouts) */
+  --on-status: #1e2326;
+  --on-critical: #1e2326;
+  /* syntax, on the dark code window */
+  --syn-comment: #9da9a0;
+  --syn-punctuation: #859289;
+  --syn-keyword: #e67e80;
+  --syn-string: #83c092;
+  --syn-regex: #a7c080;
+  --syn-number: #d699b6;
+  --syn-operator: #e69875;
+  --syn-function: #a7c080;
+  --syn-type: #dbbc7f;
+  --syn-builtin: #a7c080;
+  --syn-property: #7fbbb3;
+  --syn-variable: #d3c6aa;
+  --syn-macro: #83c092;
+  /* charts */
+  --chart-1: #3a94c5; /* blue */
+  --chart-2: #f85552; /* red */
+  --chart-3: #dfa000; /* yellow */
+  --chart-4: #35a77c; /* aqua */
+  --chart-5: #f57d26; /* orange */
+  --chart-6: #df69ba; /* purple */
+  --chart-7: #8da101; /* green */
+  --chart-8: var(--chart-other); /* Everforest has 7 hues */
+  --chart-other: light-dark(#939f91, #7a8478);
+  --chart-axis: light-dark(#bdc3af, #4f585e);
+  --chart-div-neg: light-dark(#3a94c5, #7fbbb3);
+  --chart-div-pos: light-dark(#f85552, #e67e80);
+  --chart-div-mid: light-dark(#e6e2cc, #3d484d);
+  /* table tints: light text is only 5.1:1 on the page, so light tints stay faint (12%) */
+  --heat-max: light-dark(#e6eadf, #315367);
+  --tint-up: light-dark(#fce4d3, #524449);
+  --tint-down: light-dark(#e6eadf, #3d5053);
+  --status-good: #8da101;
+  --status-warning: #dfa000;
+  --status-serious: #f57d26;
+  --status-critical: #f85552;
+}
+
+/* ---- themes/github.css ---- */
+/* Theme: GitHub (Primer, @primer/primitives 9.1.2: light and dark functional tokens, data-vis colours, and the
+   "prettylights" syntax colours of GitHub's dark theme). Code windows use GitHub dark in both themes.
+   Every colour the report uses, as light-dark(light, dark). Checked with the dataviz skill's validator and WCAG:
+   - Text: ink 15.8 / 17.39, muted 5.44+ / 5.11+ on every surface. Links (accent blue) 4.62+ / 4.8+.
+   - Fills: white on the light accent and status fills (4.87+), #0d1117 on the dark ones (5.61+).
+   - Charts: Primer's data-vis "emphasis" colours, each mode its own. Order blue, green, pink, orange, teal,
+     yellow, purple, auburn passes in both (worst adjacent CVD dE 9.9, normal 16.7; first three all-pairs 9.9).
+     Red is left out (8 slots). Light slots under 3:1 lean on the table view.
+   - Status: success, attention, severe, danger; attention and severe sit close (normal dE 7.8 light):
+     every status carries its word.
+   - Syntax: GitHub dark's own colours, all 6.5+ on the code background. */
+.roost-scope[data-palette="github"] {
+  /* page */
+  --canvas: light-dark(#ffffff, #0d1117);
+  --surface-soft: light-dark(#f6f8fa, #151b23);
+  --surface-card: light-dark(#eff2f5, #212830);
+  --surface-cream-strong: light-dark(#e6eaef, #2a313c);
+  --hairline: light-dark(#d1d9e0, #3d444d);
+  --hairline-soft: light-dark(#e6eaef, #262c36);
+  --border: light-dark(#d1d9e0, #3d444d);
+  /* heading levels: h1, h2, h3 (and "Key findings"), chart and table titles; each its own palette hue, darkened
+     or lightened only as far as its floor needs (3:1 for large headings, 4.5:1 for titles) */
+  --h1: light-dark(#0969da, #4493f8); /* blue; light 5.19, dark 6.11 */
+  --h2: light-dark(#8250df, #ab7df8); /* purple; light 5.05, dark 6.33 */
+  --h3: light-dark(#1a7f37, #3fb950); /* green; light 5.08, dark 7.45 */
+  --title: light-dark(#bc4c00, #db6d28); /* orange; light 5.03, dark 5.61 */
+  /* text */
+  --ink: light-dark(#1f2328, #f0f6fc);
+  --body-strong: light-dark(#1f2328, #f0f6fc);
+  --body: light-dark(#1f2328, #f0f6fc);
+  --muted: light-dark(#59636e, #9198a1);
+  --muted-soft: light-dark(#818b98, #656c76);
+  /* accent */
+  --primary: light-dark(#0969da, #4493f8);
+  --primary-active: light-dark(#0969da, #4493f8);
+  --on-primary: light-dark(#ffffff, #0d1117);
+  --primary-disabled: light-dark(#d1d9e0, #3d444d);
+  --link: var(--primary-active);
+  --link-decoration: none;
+  --accent-teal: light-dark(#1a7f37, #3fb950);
+  --accent-amber: light-dark(#9a6700, #d29922);
+  --error: light-dark(#d1242f, #f85149);
+  /* dark blocks: code windows, footer, tooltips */
+  --surface-dark: light-dark(#25292e, #010409);
+  --surface-dark-elevated: #212830;
+  --surface-dark-soft: light-dark(#0d1117, #010409);
+  --on-dark: #f0f6fc;
+  --on-dark-soft: #9198a1;
+  /* text on a status fill (callouts) */
+  --on-status: light-dark(#ffffff, #0d1117);
+  /* syntax, on the dark code window */
+  --syn-comment: #9198a1;
+  --syn-punctuation: #f0f6fc;
+  --syn-keyword: #ff7b72;
+  --syn-string: #a5d6ff;
+  --syn-regex: #7ee787;
+  --syn-number: #79c0ff;
+  --syn-operator: #ff7b72;
+  --syn-function: #d2a8ff;
+  --syn-type: #ffa657;
+  --syn-builtin: #79c0ff;
+  --syn-property: #79c0ff;
+  --syn-variable: #ffa657;
+  --syn-macro: #d2a8ff;
+  /* charts */
+  --chart-1: light-dark(#006edb, #0576ff); /* blue */
+  --chart-2: light-dark(#30a147, #2f6f37); /* green */
+  --chart-3: light-dark(#ce2c85, #d34591); /* pink */
+  --chart-4: light-dark(#eb670f, #984b10); /* orange */
+  --chart-5: light-dark(#179b9b, #106c70); /* teal */
+  --chart-6: light-dark(#b88700, #895906); /* yellow */
+  --chart-7: light-dark(#894ceb, #975bf1); /* purple */
+  --chart-8: light-dark(#9d615c, #a86f6b); /* auburn */
+  --chart-other: light-dark(#808fa3, #576270);
+  --chart-axis: light-dark(#818b98, #656c76);
+  --chart-div-neg: light-dark(#006edb, #0576ff);
+  --chart-div-pos: light-dark(#df0c24, #eb3342);
+  --chart-div-mid: light-dark(#e6eaef, #2a313c);
+  --status-good: light-dark(#1a7f37, #3fb950);
+  --status-warning: light-dark(#9a6700, #d29922);
+  --status-serious: light-dark(#bc4c00, #db6d28);
+  --status-critical: light-dark(#d1242f, #f85149);
+}
+
+/* ---- themes/rosepine.css ---- */
+/* Theme: Rosé Pine (github.com/rose-pine/palette and rose-pine/neovim palette.lua). Light is Dawn, dark is
+   the main variant; code windows use the main variant in both themes.
+   Every colour the report uses, as light-dark(light, dark). Checked with the dataviz skill's validator and WCAG:
+   - Text: Dawn text 7.92+ on every surface; Dawn "subtle" is 4.02, so light muted text is text too
+     (hierarchy from size and weight). Dark: text 11.51+, subtle 4.71+.
+   - Accent: pine (light, 5.09+) and foam (dark, 8.91+), the same teal family; it is also the link colour.
+   - Fills: base on pine, dark base on foam (5.59 / 10.37). Status text: dark base on gold and rose; light base
+     on light pine (5.59); pure black on light love (5.01), since no Rosé Pine colour reaches 4.5 there.
+   - Charts: only 5 of the 6 hues separate (love and rose are too close): foam, gold, iris, pine, rose, each
+     mode its own colours (worst adjacent CVD dE 9.5, normal 15.5). The first three are not all-pairs distinct:
+     scatter plots should use two series at most. Slots 6 to 8 fall back to "Other" grey.
+   - Status: Rosé Pine has no green, so good is pine/foam; warning gold, serious rose, critical love.
+     Normal-vision dE 10.4 light, 8.9 dark: every status carries its word.
+   - Syntax: Rosé Pine's roles, except keywords are iris (pine is 3.16 on the code background) and comments
+     are subtle (5.12) rather than muted. */
+.roost-scope[data-palette="rosepine"] {
+  /* page */
+  --canvas: light-dark(#faf4ed, #191724);
+  --surface-soft: light-dark(#fffaf3, #1f1d2e);
+  --surface-card: light-dark(#f2e9e1, #26233a);
+  --surface-cream-strong: light-dark(#dfdad9, #403d52);
+  --hairline: light-dark(#dfdad9, #403d52);
+  --hairline-soft: light-dark(#f4ede8, #21202e);
+  --border: light-dark(#cecacd, #524f67);
+  /* heading levels: h1, h2, h3 (and "Key findings"), chart and table titles; each its own palette hue, darkened
+     or lightened only as far as its floor needs (3:1 for large headings, 4.5:1 for titles) */
+  --h1: light-dark(#286983, #9ccfd8); /* pine/foam; light 5.59, dark 10.37 */
+  --h2: light-dark(#907aa9, #c4a7e7); /* iris; light 3.47, dark 8.43 */
+  --h3: light-dark(#b4637a, #eb6f92); /* love; light 3.84, dark 6.07 */
+  --title: light-dark(#966421, #f6c177); /* gold; light 36% darker, 4.64, dark 10.77 */
+  /* text */
+  --ink: light-dark(#464261, #e0def4);
+  --body-strong: light-dark(#464261, #e0def4);
+  --body: light-dark(#464261, #e0def4);
+  --muted: light-dark(#464261, #908caa);
+  --muted-soft: light-dark(#9893a5, #6e6a86);
+  /* accent */
+  --primary: light-dark(#286983, #9ccfd8);
+  --primary-active: light-dark(#286983, #9ccfd8);
+  --on-primary: light-dark(#faf4ed, #191724);
+  --primary-disabled: light-dark(#cecacd, #524f67);
+  --link: var(--primary-active);
+  --link-decoration: none;
+  --accent-teal: light-dark(#56949f, #9ccfd8);
+  --accent-amber: light-dark(#ea9d34, #f6c177);
+  --error: light-dark(#b4637a, #eb6f92);
+  /* dark blocks: code windows, footer, tooltips */
+  --surface-dark: light-dark(#191724, #1f1d2e);
+  --surface-dark-elevated: #26233a;
+  --surface-dark-soft: #1f1d2e;
+  --on-dark: #e0def4;
+  --on-dark-soft: #908caa;
+  /* text on a status fill (callouts) */
+  --on-status: #191724;
+  --on-good: light-dark(#faf4ed, #191724);
+  --on-critical: light-dark(#000000, #191724);
+  /* syntax, on the dark code window */
+  --syn-comment: #908caa;
+  --syn-punctuation: #908caa;
+  --syn-keyword: #c4a7e7;
+  --syn-string: #f6c177;
+  --syn-regex: #ebbcba;
+  --syn-number: #f6c177;
+  --syn-operator: #908caa;
+  --syn-function: #ebbcba;
+  --syn-type: #9ccfd8;
+  --syn-builtin: #eb6f92;
+  --syn-property: #9ccfd8;
+  --syn-variable: #e0def4;
+  --syn-macro: #c4a7e7;
+  /* charts */
+  --chart-1: light-dark(#56949f, #9ccfd8); /* foam */
+  --chart-2: light-dark(#ea9d34, #f6c177); /* gold */
+  --chart-3: light-dark(#907aa9, #c4a7e7); /* iris */
+  --chart-4: light-dark(#286983, #31748f); /* pine */
+  --chart-5: light-dark(#d7827e, #ebbcba); /* rose */
+  --chart-6: var(--chart-other); /* Rosé Pine separates 5 hues */
+  --chart-7: var(--chart-other);
+  --chart-8: var(--chart-other);
+  --chart-other: light-dark(#9893a5, #6e6a86);
+  --chart-axis: light-dark(#cecacd, #524f67);
+  --chart-div-neg: light-dark(#286983, #9ccfd8);
+  --chart-div-pos: light-dark(#b4637a, #eb6f92);
+  --chart-div-mid: light-dark(#dfdad9, #403d52);
+  --status-good: light-dark(#286983, #9ccfd8);
+  --status-warning: light-dark(#ea9d34, #f6c177);
+  --status-serious: light-dark(#d7827e, #ebbcba);
+  --status-critical: light-dark(#b4637a, #eb6f92);
+}
+
+/* ---- themes/dracula.css ---- */
+/* Theme: Dracula (draculatheme.com/spec). Light is Alucard, Dracula's official light variant; dark is
+   Dracula; code windows use Dracula in both themes.
+   Every colour the report uses, as light-dark(light, dark). Checked with the dataviz skill's validator and WCAG:
+   - Text: Alucard fg 11.97+, comment 4.75+ on page and soft surfaces (4.19 on cards). Dracula fg 11.06+;
+     its comment colour is 3.03, so dark muted text is fg (hierarchy from size and weight).
+   - Accent: purple, 4.53+ light and 4.89+ dark on every surface; also the link colour.
+   - Fills: background text on purple (6.02 / 5.90); status text 4.53+ in both themes.
+   - Charts: 6 of the 7 hues separate in both themes (red drops out): pink, yellow, cyan, green, purple,
+     orange, each mode its own colours (worst adjacent CVD dE 10.2, normal 19.1; first three all-pairs pass).
+     Slots 7 and 8 fall back to "Other" grey.
+   - Status: green, yellow, orange, red; close in light (normal dE 8.5): every status carries its word.
+   - Syntax: Dracula's spec, including its comment colour #6272a4, which is 3.36 on the code background:
+     comments read dim on purpose. */
+.roost-scope[data-palette="dracula"] {
+  /* page */
+  --canvas: light-dark(#fffbeb, #282a36);
+  --surface-soft: light-dark(#ece9df, #21222c);
+  --surface-card: light-dark(#dedccf, #343746);
+  --surface-cream-strong: light-dark(#ceccc0, #424450);
+  --hairline: light-dark(#dedccf, #44475a);
+  --hairline-soft: light-dark(#ece9df, #343746);
+  --border: light-dark(#bcbab3, #44475a);
+  /* heading levels: h1, h2, h3 (and "Key findings"), chart and table titles; each its own palette hue, darkened
+     or lightened only as far as its floor needs (3:1 for large headings, 4.5:1 for titles) */
+  --h1: light-dark(#644ac9, #bd93f9); /* purple; light 6.02, dark 5.90 */
+  --h2: light-dark(#a3144d, #ff79c6); /* pink; light 7.33, dark 5.97 */
+  --h3: light-dark(#036a96, #8be9fd); /* cyan; light 5.78, dark 10.29 */
+  --title: light-dark(#a34d14, #ffb86c); /* orange; light 5.58, dark 8.36 */
+  /* text */
+  --ink: light-dark(#1f1f1f, #f8f8f2);
+  --body-strong: light-dark(#1f1f1f, #f8f8f2);
+  --body: light-dark(#1f1f1f, #f8f8f2);
+  --muted: light-dark(#6c664b, #f8f8f2);
+  --muted-soft: light-dark(#bcbab3, #6272a4);
+  /* accent */
+  --primary: light-dark(#644ac9, #bd93f9);
+  --primary-active: light-dark(#644ac9, #bd93f9);
+  --on-primary: light-dark(#fffbeb, #282a36);
+  --primary-disabled: light-dark(#bcbab3, #44475a);
+  --link: var(--primary-active);
+  --link-decoration: none;
+  --accent-teal: light-dark(#036a96, #8be9fd);
+  --accent-amber: light-dark(#846e15, #f1fa8c);
+  --error: light-dark(#cb3a2a, #ff5555);
+  /* dark blocks: code windows, footer, tooltips */
+  --surface-dark: light-dark(#282a36, #191a21);
+  --surface-dark-elevated: #343746;
+  --surface-dark-soft: #21222c;
+  --on-dark: #f8f8f2;
+  --on-dark-soft: #bcbab3;
+  /* text on a status fill (callouts) */
+  --on-status: light-dark(#fffbeb, #282a36);
+  /* syntax, on the dark code window */
+  --syn-comment: #6272a4;
+  --syn-punctuation: #f8f8f2;
+  --syn-keyword: #ff79c6;
+  --syn-string: #f1fa8c;
+  --syn-regex: #ff5555;
+  --syn-number: #bd93f9;
+  --syn-operator: #ff79c6;
+  --syn-function: #50fa7b;
+  --syn-type: #8be9fd;
+  --syn-builtin: #8be9fd;
+  --syn-property: #8be9fd;
+  --syn-variable: #ffb86c;
+  --syn-macro: #50fa7b;
+  /* charts */
+  --chart-1: light-dark(#a3144d, #ff79c6); /* pink */
+  --chart-2: light-dark(#846e15, #f1fa8c); /* yellow */
+  --chart-3: light-dark(#036a96, #8be9fd); /* cyan */
+  --chart-4: light-dark(#14710a, #50fa7b); /* green */
+  --chart-5: light-dark(#644ac9, #bd93f9); /* purple */
+  --chart-6: light-dark(#a34d14, #ffb86c); /* orange */
+  --chart-7: var(--chart-other); /* Dracula separates 6 hues */
+  --chart-8: var(--chart-other);
+  --chart-other: light-dark(#bcbab3, #6272a4);
+  --chart-axis: light-dark(#bcbab3, #44475a);
+  --chart-div-neg: light-dark(#036a96, #8be9fd);
+  --chart-div-pos: light-dark(#cb3a2a, #ff5555);
+  --chart-div-mid: light-dark(#dedccf, #44475a);
+  --status-good: light-dark(#14710a, #50fa7b);
+  --status-warning: light-dark(#846e15, #f1fa8c);
+  --status-serious: light-dark(#a34d14, #ffb86c);
+  --status-critical: light-dark(#cb3a2a, #ff5555);
+}
+
+/* ---- themes/nord.css ---- */
+/* Theme: Nord (nordtheme/nord src/nord.css, nord0 to nord15). Nord is a dark scheme; light uses its Snow Storm
+   colours as the page and Polar Night as text, the way Nord's own light ports do. Code windows are Polar Night
+   in both themes.
+   Every colour the report uses, as light-dark(light, dark). Checked with the dataviz skill's validator and WCAG:
+   - Text: light ink nord0 9.25+, muted nord3 5.46+; dark ink nord6 7.49+, muted nord4 6.39+.
+   - Links: frost nord10 is 3.50 on Snow Storm, so light links are text-coloured and underlined; dark links
+     are nord8 (4.31 on cards, 5.03+ elsewhere), also underlined for one rule in both.
+   - Accent fill: nord8 with nord0 text (6.24). The focus ring uses nord10 in light (3.50; nord8 is 1.74).
+   - Status text: nord0 on green and yellow (6.13 / 8.00); pure black on orange and red (7.38 / 5.13), since no
+     Nord colour reaches 4.5 there.
+   - Charts: one set for both themes (Nord has no light accents). frost8, orange, frost10, green, red, frost9,
+     yellow, purple passes (worst adjacent CVD dE 12.4, normal 17.8; first three all-pairs pass). Three of the
+     slots are frost blues: when a chart has more than 5 series, check it in the table view.
+   - Status: green, yellow, orange, red (normal dE 10): every status carries its word.
+   - Syntax: Nord's roles, except comments use nord4 italic (9.25) instead of nord3-bright #616e88 (2.43). */
+.roost-scope[data-palette="nord"] {
+  /* page */
+  --canvas: light-dark(#eceff4, #2e3440);
+  --surface-soft: light-dark(#e5e9f0, #3b4252);
+  --surface-card: light-dark(#d8dee9, #434c5e);
+  --surface-cream-strong: light-dark(#d8dee9, #4c566a);
+  --hairline: light-dark(#d8dee9, #434c5e);
+  --hairline-soft: light-dark(#e5e9f0, #3b4252);
+  --border: light-dark(#d8dee9, #4c566a);
+  /* heading levels: h1, h2, h3 (and "Key findings"), chart and table titles; each its own palette hue, darkened
+     or lightened only as far as its floor needs (3:1 for large headings, 4.5:1 for titles) */
+  --h1: light-dark(#5e81ac, #88c0d0); /* frost8/10; light 3.50, dark 6.24 */
+  --h2: light-dark(#6f8aa6, #81a1c1); /* frost9; light 14% darker, 3.11, dark 4.64 */
+  --h3: light-dark(#a07e9a, #b48ead); /* purple; light 11% darker, 3.06, dark 4.41 */
+  --title: light-dark(#925f4e, #d18b74); /* orange; light 30% darker, 4.59, dark 3% lighter, 4.55 */
+  /* text */
+  --ink: light-dark(#2e3440, #eceff4);
+  --body-strong: light-dark(#2e3440, #eceff4);
+  --body: light-dark(#3b4252, #e5e9f0);
+  --muted: light-dark(#4c566a, #d8dee9);
+  --muted-soft: light-dark(#4c566a, #4c566a);
+  /* accent */
+  --primary: #88c0d0;
+  --primary-active: #88c0d0;
+  --on-primary: #2e3440;
+  --primary-disabled: light-dark(#d8dee9, #4c566a);
+  --focus-color: light-dark(#5e81ac, #88c0d0);
+  --link: light-dark(#2e3440, #88c0d0);
+  --link-decoration: underline;
+  --accent-teal: light-dark(#5e81ac, #8fbcbb);
+  --accent-amber: light-dark(#d08770, #ebcb8b);
+  --error: light-dark(#bf616a, #bf616a);
+  /* dark blocks: code windows, footer, tooltips */
+  --surface-dark: light-dark(#2e3440, #3b4252);
+  --surface-dark-elevated: #434c5e;
+  --surface-dark-soft: light-dark(#2e3440, #3b4252);
+  --on-dark: #eceff4;
+  --on-dark-soft: #d8dee9;
+  /* text on a status fill (callouts) */
+  --on-status: #2e3440;
+  --on-serious: #000000;
+  --on-critical: #000000;
+  /* syntax, on the dark code window */
+  --syn-comment: #d8dee9;
+  --syn-punctuation: #eceff4;
+  --syn-keyword: #81a1c1;
+  --syn-string: #a3be8c;
+  --syn-regex: #ebcb8b;
+  --syn-number: #b48ead;
+  --syn-operator: #81a1c1;
+  --syn-function: #88c0d0;
+  --syn-type: #8fbcbb;
+  --syn-builtin: #88c0d0;
+  --syn-property: #8fbcbb;
+  --syn-variable: #d8dee9;
+  --syn-macro: #5e81ac;
+  /* charts */
+  --chart-1: #88c0d0; /* frost nord8 */
+  --chart-2: #d08770; /* orange nord12 */
+  --chart-3: #5e81ac; /* frost nord10 */
+  --chart-4: #a3be8c; /* green nord14 */
+  --chart-5: #bf616a; /* red nord11 */
+  --chart-6: #81a1c1; /* frost nord9 */
+  --chart-7: #ebcb8b; /* yellow nord13 */
+  --chart-8: #b48ead; /* purple nord15 */
+  --chart-other: #4c566a; /* nord3 */
+  --chart-axis: light-dark(#4c566a, #4c566a);
+  --chart-div-neg: #5e81ac;
+  --chart-div-pos: #bf616a;
+  --chart-div-mid: light-dark(#d8dee9, #4c566a);
+  --status-good: #a3be8c;
+  --status-warning: #ebcb8b;
+  --status-serious: #d08770;
+  --status-critical: #bf616a;
+}
+
+/* ==== report-builder assets/report.css ==== */
+/* Report stylesheet: tokens (light + dark), the page shell and the report components.
+   Pairs with a theme (themes/*.css: every colour), charts.css and the fonts. Class names match the gallery.
+   Copy this file into a report as-is; never edit it per report. */
+
+/* ---------- tokens ---------- */
+/* Colours live in a theme file (themes/*.css), linked before this one; this file holds no colour values.
+   Themes write each colour as light-dark(light, dark), so the scheme below picks the variant:
+   the viewer's system setting, unless the theme button set data-theme. */
+:root {
+  /* Headings: Black Chancery, embedded (fonts/report-type.css). Code: MonoLisa, embedded (fonts/report-mono.css).
+     Body: Coolvetica, used only when installed (its licence forbids embedding); other machines get the system sans.
+     Glyphs a face lacks (arrows, check marks) come from the next font in its stack. Bold is synthesized. */
+  --font-mono: "Report Mono", "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-display: "Report Display", "Report Mono", serif;
+  --font-sans: Coolvetica, -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --space-xxs: 4px; --space-xs: 8px; --space-sm: 12px; --space-md: 16px; --space-lg: 24px;
+  --space-xl: 32px; --space-xxl: 48px; --space-section: 96px;
+  --radius-xs: 4px; --radius-md: 8px; --radius-lg: 12px; --radius-xl: 16px; --radius-pill: 9999px;
+  --measure: 68ch;
+  --focus-ring: 0 0 0 2px var(--canvas), 0 0 0 4px var(--focus-color, var(--primary-active));
+  color-scheme: light dark;
+  --chart-dark: 0; /* charts.js reads this to flip the sequential ramp */
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --chart-dark: 1; } }
+:root[data-theme="light"] { color-scheme: light; }
+:root[data-theme="dark"] { color-scheme: dark; --chart-dark: 1; }
+
+/* ---------- base ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body { margin: 0; background: var(--canvas); color: var(--body); font: 400 16px/1.55 var(--font-sans); -webkit-font-smoothing: antialiased; }
+img, svg { max-width: 100%; }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 400; margin: 0; text-wrap: balance; }
+/* Each level its own colour (theme tokens --h1, --h2, --h3, --title); the accent if a theme sets none. */
+h1 { color: var(--h1, var(--primary-active)); } h2 { color: var(--h2, var(--primary-active)); } h3 { color: var(--h3, var(--primary-active)); }
+h1 { font-size: 64px; line-height: 1.1; }
+h2 { font-size: 48px; line-height: 1.15; }
+h3 { font-size: 28px; line-height: 1.25; }
+p { margin: 0; max-width: var(--measure); }
+ul, ol { margin: 0; padding-left: 1.3em; max-width: var(--measure); display: grid; gap: var(--space-xs); }
+li::marker { color: var(--muted); }
+strong, b { font-weight: 700; color: var(--ink); }
+a { color: var(--link); text-decoration: var(--link-decoration, none); text-underline-offset: 3px; border-radius: 2px; }
+a:hover { text-decoration: underline; text-underline-offset: 3px; }
+:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+code, kbd { font-family: var(--font-mono); font-size: 0.875em; font-variant-ligatures: none; color: var(--ink); background: var(--surface-card); border-radius: var(--radius-xs); padding: 1px 5px; overflow-wrap: anywhere; }
+kbd { border: 1px solid var(--border); border-bottom-width: 2px; }
+.lead { font-size: 18px; line-height: 1.5; color: var(--body-strong); }
+.muted { color: var(--muted); }
+.eyebrow, .kicker, .cap { font: 500 12px/1.4 var(--font-sans); letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); }
+.prose > * + * { margin-top: var(--space-md); }
+/* Source line under any block (table, figure, list): sits close to the block it belongs to. */
+.source { margin: var(--space-xs) 0 0; font-size: 13px; color: var(--muted); max-width: none; } /* one short line: spans the block above, not the prose measure */
+section > .source { margin-top: calc(var(--space-xs) - var(--space-lg)); } /* blocks sit 24px apart; this pulls it to 8px */
+.sub > .source { margin-top: calc(var(--space-xs) - var(--space-md)); }
+/* Identifiers and dates that must not break at their hyphens: BUG-0012, 2026-11-01. */
+.nowrap { white-space: nowrap; }
+
+/* ---------- 1. top bar ---------- */
+.wrap { max-width: 1200px; margin-inline: auto; padding-inline: max(16px, env(safe-area-inset-left, 0px)) max(16px, env(safe-area-inset-right, 0px)); }
+.topbar { border-bottom: 1px solid var(--hairline); }
+.topbar > .wrap { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-xs) var(--space-md); padding-block: var(--space-md); }
+.wordmark { font: 500 18px/1.4 var(--font-sans); color: var(--ink); }
+.topbar .meta { font-size: 14px; color: var(--muted); display: inline-flex; align-items: center; gap: var(--space-md); }
+.theme-toggle { font: 500 13px var(--font-sans); color: var(--ink); background: var(--surface-card); border: 0; border-radius: var(--radius-md); padding: 4px 10px; cursor: pointer; }
+
+/* ---------- 2. hero: solo (default), with media, with stats ---------- */
+.hero > .wrap { padding-block: var(--space-section) var(--space-xxl); display: grid; gap: var(--space-xxl); }
+.hero-copy { display: grid; gap: var(--space-lg); min-width: 0; max-width: 760px; }
+.hero-copy .lead { font-size: 20px; }
+.hero.media > .wrap { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; }
+.hero.media .hero-copy { max-width: none; }
+.hero-media { min-width: 0; }
+.facts { display: flex; flex-wrap: wrap; gap: var(--space-xs); }
+@media (max-width: 1023px) { .hero.media > .wrap { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 767px) {
+  h1 { font-size: 40px; } h2 { font-size: 34px; } h3 { font-size: 24px; }
+  .hero > .wrap { padding-block: var(--space-xxl) var(--space-xl); gap: var(--space-xl); }
+}
+
+/* ---------- 3. contents rail + reading column ---------- */
+.layout > .wrap { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: var(--space-xxl); padding-block: var(--space-xl) var(--space-section); }
+.layout.no-toc > .wrap { grid-template-columns: minmax(0, 1fr); max-width: 960px; }
+.toc { position: sticky; top: var(--space-lg); align-self: start; max-height: calc(100vh - 48px); overflow-y: auto; font-size: 14px; }
+.toc { scrollbar-width: none; } .toc::-webkit-scrollbar { display: none; } /* scrolls (report.js keeps the current entry in view) without a visible bar */
+.toc ol { list-style: none; padding: 0; margin: var(--space-sm) 0 0; gap: 2px; counter-reset: toc; }
+.toc li { counter-increment: toc; }
+.toc a { display: flex; gap: var(--space-xs); color: var(--muted); padding: 5px var(--space-xs); border-radius: var(--radius-md); font-weight: 500; line-height: 1.35; text-decoration: none; }
+.toc a::before { content: counter(toc, decimal-leading-zero); font: 12px var(--font-mono); color: var(--muted); padding-top: 1px; }
+.toc a:hover { text-decoration: none; color: var(--ink); background: var(--surface-soft); }
+.toc a.active { color: var(--ink); background: var(--surface-card); }
+main { min-width: 0; display: grid; gap: var(--space-section); align-content: start; }
+@media (max-width: 1023px) {
+  .layout > .wrap { grid-template-columns: minmax(0, 1fr); gap: var(--space-xl); }
+  .toc { position: static; max-height: none; background: var(--surface-soft); border-radius: var(--radius-lg); padding: var(--space-md); }
+  .toc ol { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 767px) { .toc ol { grid-template-columns: minmax(0, 1fr); } main { gap: 72px; } }
+
+/* ---------- 4. section and 5. sub-section ---------- */
+section { display: grid; gap: var(--space-lg); min-width: 0; scroll-margin-top: var(--space-lg); }
+section > header { display: grid; gap: var(--space-sm); padding-top: var(--space-xl); border-top: 1px solid var(--hairline); }
+section > header p { margin-top: var(--space-xs); }
+main { counter-reset: section; }
+main > section { counter-increment: section; }
+main > section > header > .kicker:not(.manual)::before { content: counter(section, decimal-leading-zero) " · "; }
+.sub { display: grid; gap: var(--space-md); min-width: 0; margin-top: var(--space-md); }
+
+/* ---------- 6. footer ---------- */
+footer.site { background: var(--surface-dark); color: var(--on-dark-soft); font-size: 14px; }
+footer.site > .wrap { padding-block: var(--space-xxl); display: grid; gap: var(--space-sm); }
+footer.site .wordmark { color: var(--on-dark); }
+footer.site p { max-width: 80ch; }
+footer.site a { color: var(--on-dark); }
+footer.site code { background: var(--surface-dark-elevated); color: var(--on-dark); }
+
+/* ---------- 8. numbered steps ---------- */
+ol.steps { list-style: none; padding: 0; gap: var(--space-md); counter-reset: step; max-width: none; }
+ol.steps > li { counter-increment: step; position: relative; padding-left: 44px; display: grid; gap: 2px; min-width: 0; } /* works with or without an inner <div> */
+ol.steps > li::before { content: counter(step); position: absolute; left: 0; top: 0; font: 400 22px/1.2 var(--font-display); color: var(--link); }
+ol.steps > li > div { display: grid; gap: 2px; min-width: 0; }
+ol.steps .step-title { font-weight: 500; color: var(--ink); font-size: 17px; }
+
+/* ---------- 9. quote ---------- */
+.quote { margin: 0; padding: 4px 0 4px 20px; border-left: 2px solid var(--muted-soft); color: var(--body-strong); font-size: 15px; max-width: 78ch; overflow-wrap: anywhere; }
+.quote .cap { display: block; margin-bottom: var(--space-xs); }
+.quote.machine { font: 13.5px/1.6 var(--font-mono); font-variant-ligatures: none; } /* line breaks: <br> */
+.quote.machine .cap { font-family: var(--font-sans); }
+
+/* ---------- 10. definition list ---------- */
+dl.deflist { margin: 0; display: grid; grid-template-columns: minmax(120px, 200px) minmax(0, 1fr); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; font-size: 15px; }
+dl.deflist dt, dl.deflist dd { margin: 0; padding: 12px 16px; border-top: 1px solid var(--hairline-soft); }
+dl.deflist dt { background: var(--surface-soft); color: var(--ink); font-weight: 500; }
+dl.deflist dt:first-of-type, dl.deflist dt:first-of-type + dd { border-top: 0; }
+@media (max-width: 600px) { dl.deflist { grid-template-columns: minmax(0, 1fr); } dl.deflist dd { border-top: 0; padding-top: 0; background: var(--surface-soft); } }
+
+/* ---------- 11. stat row ---------- */
+.stats { margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); border-block: 1px solid var(--hairline); }
+@media (max-width: 600px) { .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } } /* 2 + 2, never 3 + 1 */
+.stats > div { padding: 20px 16px; min-width: 0; display: grid; gap: 4px; align-content: start; justify-items: center; text-align: center; } /* each stat centred in its column */
+.stats dt { font: 500 13px/1.4 var(--font-sans); color: var(--muted); } /* wraps on narrow screens rather than cutting off */
+.stats dd { margin: 0; font: 400 32px/1.15 var(--font-display); color: var(--ink); }
+.stats dd.delta { font: 400 13px/1.4 var(--font-sans); letter-spacing: 0; color: var(--muted); display: flex; align-items: center; justify-content: center; gap: 8px; }
+
+/* ---------- 12. key findings ---------- */
+.findings { display: grid; gap: var(--space-sm); }
+main > .findings + section { margin-top: calc(var(--space-xxl) - var(--space-section)); } /* the section's own rule follows at 48px; no second rule */
+.findings > .cap { font: 400 28px/1.25 var(--font-display); letter-spacing: 0; text-transform: none; color: var(--h3, var(--primary-active)); } /* h3 size: it heads the page's summary */
+.findings ol { gap: var(--space-sm); }
+.findings li { padding-left: 4px; }
+
+/* ---------- 13. verdict ---------- */
+.verdict { border: 1px solid var(--ink); border-radius: var(--radius-lg); padding: var(--space-lg) var(--space-xl); display: grid; gap: var(--space-sm); }
+.verdict-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-xs) var(--space-md); }
+.verdict-call { font: 400 28px/1.2 var(--font-display); color: var(--ink); display: inline-flex; align-items: center; gap: 10px; }
+.verdict-call::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--c, var(--muted)); flex: none; }
+.verdict .confidence { font-size: 14px; color: var(--muted); }
+
+/* ---------- 14. callout (one per report) ---------- */
+/* Severity: .good / .warning / .serious / .critical fill with the status colour; no class = the accent.
+   Text colour per fill is the one that passes 4.5:1 (Latte red needs light text; everything else dark). */
+.callout { --c: var(--primary-active); --on-c: var(--on-primary); background: var(--c); color: var(--on-c); border-radius: var(--radius-lg); padding: var(--space-lg); display: grid; gap: var(--space-xs); }
+.callout.good { --c: var(--status-good); --on-c: var(--on-good, var(--on-status)); }
+.callout.warning { --c: var(--status-warning); --on-c: var(--on-warning, var(--on-status)); }
+.callout.serious { --c: var(--status-serious); --on-c: var(--on-serious, var(--on-status)); }
+.callout.critical { --c: var(--status-critical); --on-c: var(--on-critical, var(--on-status)); }
+.callout h3, .callout p, .callout b, .callout strong { color: var(--on-c); }
+.callout p { max-width: 64ch; }
+.callout code { background: color-mix(in oklab, var(--on-c) 15%, transparent); color: var(--on-c); }
+
+/* ---------- 15. note and 16. status aside ---------- */
+.note { background: var(--surface-soft); border-radius: var(--radius-lg); padding: var(--space-lg); display: grid; gap: var(--space-xs); }
+.aside { border-left: 3px solid var(--c, var(--muted-soft)); padding: 4px 0 4px 20px; display: grid; gap: var(--space-xs); }
+.note .note-title, .aside .aside-title { font-weight: 500; color: var(--ink); font-size: 17px; }
+.note p, .note li, .aside p, .aside li { font-size: 15px; }
+.aside .aside-title { display: flex; align-items: center; gap: 10px; }
+
+/* ---------- 17. illustration box ---------- */
+.illustration { border: 1px dashed var(--muted-soft); border-radius: var(--radius-lg); padding: var(--space-xl); display: grid; gap: var(--space-md); }
+.illustration > .cap:first-child { color: var(--link); }
+
+/* ---------- 18. card grid ---------- */
+.grid { display: grid; gap: var(--space-lg); grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.card { background: var(--surface-card); border-radius: var(--radius-lg); padding: var(--space-xl); display: grid; gap: var(--space-sm); align-content: start; min-width: 0; }
+.card.outline { background: var(--canvas); border: 1px solid var(--border); }
+.card .card-title { font: 500 18px/1.4 var(--font-sans); color: var(--ink); }
+.card .card-tag { font: 13px var(--font-mono); color: var(--body); }
+.card p, .card li { font-size: 15px; }
+@media (max-width: 1023px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 767px) { .grid, .grid.two { grid-template-columns: minmax(0, 1fr); } .card { padding: var(--space-lg); } }
+
+/* ---------- 19. stage cards ---------- */
+.stages { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-md); grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); max-width: none; }
+@media (max-width: 600px) { .stages { grid-template-columns: minmax(0, 1fr); } } /* never 2 + 1 */
+.stages > li { background: var(--surface-card); border-radius: var(--radius-lg); padding: var(--space-lg); display: grid; gap: var(--space-xs); align-content: start; }
+.stages .stage-k { font: 12px var(--font-mono); color: var(--body); }
+.stages .stage-title { font: 500 18px/1.35 var(--font-sans); color: var(--ink); }
+.stages p { font-size: 15px; }
+
+/* ---------- 20. option comparison ---------- */
+.options { display: grid; gap: var(--space-lg); grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.option { border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--space-xl); display: grid; gap: var(--space-sm); align-content: start; background: var(--canvas); }
+.option.recommended { border-color: var(--ink); }
+.option > .pill { justify-self: start; }
+.option-name { font: 400 24px/1.2 var(--font-display); color: var(--ink); }
+.option ul { list-style: none; padding: 0; gap: 6px; font-size: 15px; }
+.option li { display: grid; grid-template-columns: 16px minmax(0, 1fr); gap: 6px; }
+.option li::before { content: "✓"; color: var(--ink); }
+.option li.con::before { content: "–"; color: var(--muted); }
+
+/* ---------- 21. finding card ---------- */
+.finding { border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--space-xl); display: grid; gap: var(--space-sm); background: var(--canvas); }
+.finding-head { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-xs) var(--space-sm); }
+.finding-title { font: 500 18px/1.4 var(--font-sans); color: var(--ink); }
+.finding .where { font: 13px var(--font-mono); color: var(--muted); }
+.finding .label { font: 500 12px/1.4 var(--font-sans); letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-top: var(--space-xs); }
+
+/* ---------- 22. detail card ---------- */
+.detail { background: var(--surface-soft); border-radius: var(--radius-lg); padding: 36px; display: grid; gap: var(--space-md); scroll-margin-top: var(--space-md); min-width: 0; }
+.detail > header { display: grid; gap: var(--space-sm); justify-items: start; }
+.detail .label { font: 500 16px/1.4 var(--font-sans); color: var(--ink); margin: var(--space-sm) 0 calc(var(--space-xxs) - var(--space-md)); } /* 28px above, 4px to its own text */
+dl.facts { margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-md) var(--space-lg); padding: 18px 0; border-block: 1px solid var(--surface-cream-strong); }
+dl.facts dt { font: 500 13px/1.4 var(--font-sans); color: var(--muted); }
+dl.facts dd { margin: 2px 0 0; color: var(--ink); font-size: 15px; font-variant-numeric: tabular-nums; }
+@media (max-width: 600px) { .detail { padding: var(--space-lg) 20px; } }
+
+/* ---------- inline pieces: pill, tag, since ---------- */
+.pill { display: inline-flex; align-items: center; gap: 6px; font: 500 13px/1.4 var(--font-sans); color: var(--ink); background: var(--surface-card); border-radius: var(--radius-pill); padding: 4px 12px; white-space: nowrap; }
+.pill.dark { background: var(--surface-dark); color: var(--on-dark); }
+.pill.label { background: var(--surface-cream-strong); color: var(--ink); text-transform: uppercase; letter-spacing: 1px; font-size: 12px; } /* identity: "Run 2", "Incident 4" */
+.pill.accent { background: var(--primary-active); color: var(--on-primary); text-transform: uppercase; letter-spacing: 1px; font-size: 12px; } /* highlight: at most one per card */
+.since { display: inline-block; vertical-align: 2px; font: 500 11px/1.4 var(--font-sans); letter-spacing: 1px; text-transform: uppercase; color: var(--ink); background: var(--surface-cream-strong); border-radius: var(--radius-pill); padding: 1px 8px; white-space: nowrap; }
+
+/* ---------- 23. table ---------- */
+.table-wrap { overflow-x: auto; border-radius: var(--radius-lg); background: var(--canvas); width: fit-content; max-width: 100%; margin-inline: auto; } /* as wide as its content, up to the column, centred */
+/* A table card has a title (<caption>), a footer (<p class="source"> inside .table-wrap, after the table), or both. */
+.table-wrap caption { padding: 16px 16px 12px; font: 600 17px/1.35 var(--font-sans); color: var(--title, var(--primary-active)); text-align: center; }
+.table-wrap > .source { contain: inline-size; margin: 0; padding: 10px 16px; border-top: 1px solid var(--hairline); } /* contain: never widens the card */
+.table-wrap table { border-collapse: collapse; width: 100%; font-size: 14px; line-height: 1.5; }
+.table-wrap th { text-align: left; font-weight: 500; color: var(--ink); background: var(--surface-soft); padding: 12px 16px; border-bottom: 1px solid var(--hairline); vertical-align: bottom; }
+.table-wrap td { padding: 12px 16px; border-bottom: 1px solid var(--hairline-soft); vertical-align: middle; }
+.table-wrap tbody tr:last-child td { border-bottom: 0; }
+.table-wrap td:first-child { color: var(--ink); }
+.table-wrap .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.table-wrap tfoot td { border-top: 1px solid var(--hairline); border-bottom: 0; font-weight: 500; color: var(--ink); background: var(--surface-soft); }
+.table-wrap td code { white-space: nowrap; }
+.table-wrap .wide { min-width: 640px; }
+/* Table colour. Heat cells: <th class="num heat"> tints that column's cells by value (report.js sets --v, one
+   scale across every heat column of the table). Changes: <span class="change">+22%</span> gets an arrow and a
+   pill, anywhere. Series keys: <th data-slot="1"> shows chart colour 1 beside the header, to match a chart.
+   The tint endpoints keep ink at 4.5:1; a theme overrides them when its text is too light for the defaults. */
+.table-wrap td.heat { background: color-mix(in srgb, var(--heat-max, color-mix(in srgb, var(--chart-1) 32%, var(--canvas))) calc(var(--v, 0) * 100%), var(--canvas)); color: var(--ink); }
+.change { display: inline-flex; align-items: baseline; gap: 4px; padding: 1px 8px; border-radius: 999px; color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.change.up { background: var(--tint-up, color-mix(in srgb, var(--chart-div-pos) 20%, var(--canvas))); }
+.change.down { background: var(--tint-down, color-mix(in srgb, var(--chart-div-neg) 20%, var(--canvas))); }
+.change.up::before, .change.down::before { font-size: 0.7em; }
+.change.up::before { content: "▲"; color: var(--chart-div-pos); }
+.change.down::before { content: "▼"; color: var(--chart-div-neg); }
+th[data-slot]::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 8px; background: var(--slot); }
+[data-slot="1"] { --slot: var(--chart-1); } [data-slot="2"] { --slot: var(--chart-2); } [data-slot="3"] { --slot: var(--chart-3); } [data-slot="4"] { --slot: var(--chart-4); }
+[data-slot="5"] { --slot: var(--chart-5); } [data-slot="6"] { --slot: var(--chart-6); } [data-slot="7"] { --slot: var(--chart-7); } [data-slot="8"] { --slot: var(--chart-8); }
+
+/* ---------- 24. status dot + word ---------- */
+.status { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.status::before { content: ""; width: 8px; height: 8px; border-radius: 50%; flex: none; background: var(--c, var(--muted-soft)); }
+.status.good, .verdict.good, .aside.good { --c: var(--status-good); }
+.status.warning, .verdict.warning, .aside.warning { --c: var(--status-warning); }
+.status.serious, .verdict.serious, .aside.serious { --c: var(--status-serious); }
+.status.critical, .verdict.critical, .aside.critical { --c: var(--status-critical); }
+
+/* ---------- 25. kind tag: six muted kinds, assigned in order ---------- */
+.tag { display: inline-flex; align-items: center; gap: 6px; font: 500 13px/1.4 var(--font-sans); color: var(--ink); background: color-mix(in oklab, var(--c, var(--muted-soft)) 14%, var(--canvas)); border-radius: var(--radius-pill); padding: 2px 10px; white-space: nowrap; }
+.tag::before { content: ""; width: 7px; height: 7px; border-radius: 2px; /* square: a kind, never a status (round dot) */ background: var(--c, var(--muted-soft)); flex: none; }
+.tag.k1 { --c: var(--chart-1); } .tag.k2 { --c: var(--chart-2); } .tag.k3 { --c: var(--chart-3); }
+.tag.k4 { --c: var(--chart-4); } .tag.k5 { --c: var(--chart-5); } .tag.k6 { --c: var(--chart-6); }
+.tag-legend { display: flex; flex-wrap: wrap; gap: var(--space-xs) var(--space-sm); align-items: center; font-size: 13px; color: var(--muted); }
+
+/* ---------- 27. timeline log ---------- */
+.log { display: grid; gap: var(--space-lg); }
+.log-entry { display: grid; grid-template-columns: 160px minmax(0, 1fr); gap: var(--space-lg); padding-top: var(--space-lg); border-top: 1px solid var(--hairline); }
+.log-entry:first-child { border-top: 0; padding-top: 0; }
+.log-when { display: grid; gap: 2px; align-content: start; }
+.log-when .big { font: 400 24px/1.2 var(--font-display); color: var(--ink); }
+.log-when .small { font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.log-entry > div:last-child { display: grid; gap: var(--space-sm); min-width: 0; }
+@media (max-width: 600px) { .log-entry { grid-template-columns: minmax(0, 1fr); gap: var(--space-xs); } }
+
+/* ---------- 28. code window (scrolls), 29. record window (wraps), 30. diff window ---------- */
+.window { background: var(--surface-dark); color: var(--on-dark); border: 1px solid var(--surface-dark-elevated); border-radius: var(--radius-lg); overflow: hidden; min-width: 0; } /* the border keeps it apart from a dark card */
+.window-bar { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px var(--space-md); background: var(--surface-dark-elevated); color: var(--on-dark-soft); font: 13px var(--font-sans); padding: 10px var(--space-md); list-style: none; }
+.window-bar .file { font-family: var(--font-mono); color: var(--on-dark); }
+.window pre { margin: 0; padding: 20px var(--space-lg); background: var(--surface-dark-soft); color: var(--on-dark); font: 14px/1.6 var(--font-mono); font-variant-ligatures: none; overflow-x: auto; tab-size: 2; }
+/* Code windows are dark in both themes; their tints come from the theme's --syn-* colours. */
+.window pre .c { color: var(--syn-comment); } .window pre .k { color: var(--syn-keyword); } .window pre .s { color: var(--syn-string); }
+/* Prism tokens (prism.js, <code class="language-xxx">), coloured by the theme. */
+.window .token.comment, .window .token.prolog, .window .token.doctype, .window .token.cdata { color: var(--syn-comment); font-style: italic; }
+.window .token.punctuation { color: var(--syn-punctuation); }
+.window .token.keyword, .window .token.important, .window .token.rule, .window .token.atrule { color: var(--syn-keyword); }
+.window .token.string, .window .token.char, .window .token.attr-value, .window .token.template-string, .window .token.inserted { color: var(--syn-string); }
+.window .token.regex, .window .token.escape, .window .token.lifetime { color: var(--syn-regex); }
+.window .token.number, .window .token.boolean, .window .token.constant, .window .token.symbol { color: var(--syn-number); }
+.window .token.operator, .window .token.entity, .window .token.url { color: var(--syn-operator); }
+.window .token.function, .window .token.tag { color: var(--syn-function); }
+.window .token.class-name, .window .token.attr-name, .window .token.table { color: var(--syn-type); }
+.window .token.builtin, .window .token.deleted, .window .token.title { color: var(--syn-builtin); }
+.window .token.property, .window .token.key { color: var(--syn-property); }
+.window .token.variable, .window .token.parameter { color: var(--syn-variable); }
+.window .token.macro, .window .token.attribute { color: var(--syn-macro); }
+.window .token.bold, .window .token.title { font-weight: 700; } .window .token.italic { font-style: italic; }
+.window code, .record code { background: none; padding: 0; font-size: inherit; color: inherit; }
+details.window > summary, details.record > summary { cursor: pointer; }
+details.window > summary::-webkit-details-marker, details.record > summary::-webkit-details-marker { display: none; }
+details > summary.window-bar::before { content: "Show"; order: 2; font: 500 12px var(--font-sans); color: var(--on-dark); background: var(--surface-dark-soft); border-radius: var(--radius-pill); padding: 1px 10px; }
+details[open] > summary.window-bar::before { content: "Hide"; }
+details > summary.window-bar > :last-child { order: 1; margin-left: auto; }
+
+.record { border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; background: var(--surface-soft); min-width: 0; }
+.record .window-bar { background: var(--surface-card); color: var(--muted); }
+.record .window-bar .file { color: var(--ink); }
+.record > summary.window-bar::before { color: var(--ink); background: var(--canvas); }
+.record pre { margin: 0; padding: 18px var(--space-lg); font: 13.5px/1.6 var(--font-mono); font-variant-ligatures: none; color: var(--ink); white-space: pre-wrap; overflow-wrap: anywhere; } /* no inner scroll: long records start closed instead */
+/* Lines as .ln spans: the source may put each on its own line; only the text inside a span keeps its spacing. */
+.record pre:has(.ln), .diff pre { white-space: normal; }
+.record .ln, .diff .ln { display: block; position: relative; padding-left: 18px; margin-left: -18px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.ln:empty::after { content: "\200b"; } /* an empty line keeps its height */
+.record .ln.new { background: color-mix(in oklab, var(--accent-teal) 16%, transparent); }
+.record .ln.new::before { content: ""; position: absolute; left: 5px; top: 0.62em; width: 6px; height: 6px; border-radius: 50%; background: var(--accent-teal); }
+
+/* Diffs never wrap, like code: they scroll sideways, and each line's tint spans the full scroll width. */
+.diff pre { padding-inline: 0; overflow-x: auto; }
+.diff .ln { margin: 0; padding: 0 var(--space-lg) 0 40px; white-space: pre; overflow-wrap: normal; width: max-content; min-width: 100%; }
+.diff .ln::before { content: " "; position: absolute; left: 16px; color: var(--on-dark-soft); }
+.diff .ln.add { background: color-mix(in oklab, var(--status-good) 10%, transparent); }
+.diff .ln.add::before { content: "+"; color: var(--status-good); }
+.diff .ln.del { background: color-mix(in oklab, var(--status-critical) 12%, transparent); }
+.diff .ln.del::before { content: "−"; color: var(--status-critical); }
+
+/* ---------- 31. side-by-side pair ---------- */
+.pair { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--space-md); align-items: start; }
+.pair > * { min-width: 0; }
+@media (max-width: 899px) { .pair { grid-template-columns: minmax(0, 1fr); } }
+
+/* ---------- 32. state strip ---------- */
+.states { list-style: none; padding: 0; margin: 0; display: flex; gap: 0; max-width: none; }
+.states > li { flex: 1 1 0; display: grid; gap: var(--space-xs); align-content: start; position: relative; padding-right: 28px; min-width: 0; }
+.states > li:last-child { padding-right: 0; }
+/* The arrow fills the 28px gap at the pill's height (30px), centred both ways. */
+.states > li:not(:last-child)::after { content: "→"; position: absolute; right: 0; top: 0; width: 28px; height: 30px; display: grid; place-items: center; line-height: 1; color: var(--muted); font-size: 14px; }
+.state { font: 500 13px/18px var(--font-mono); color: var(--ink); background: var(--surface-card); border-radius: var(--radius-pill); padding: 6px var(--space-sm); text-align: center; overflow-wrap: anywhere; }
+.state.end { background: var(--surface-dark); color: var(--on-dark); }
+.states .state-note { font-size: 13px; color: var(--muted); line-height: 1.45; }
+.side-states { display: flex; flex-wrap: wrap; gap: var(--space-xs); align-items: center; font-size: 14px; color: var(--muted); }
+@media (max-width: 767px) {
+  .states { flex-direction: column; gap: var(--space-md); }
+  .states > li { padding-right: 0; grid-template-columns: 130px minmax(0, 1fr); align-items: start; }
+  .states > li:not(:last-child)::after { content: "↓"; right: auto; left: 57px; top: auto; bottom: -19px; width: 16px; height: 16px; }
+}
+
+/* ---------- 33. flow ---------- */
+.flow { list-style: none; margin: 0; padding: var(--space-lg); border: 1px solid var(--border); border-radius: var(--radius-lg); display: flex; align-items: stretch; gap: var(--space-md) 36px; max-width: none; } /* one row: a wrapped row leaves an arrow pointing nowhere */
+.flow > li { position: relative; flex: 1 1 0; display: grid; gap: 4px; align-content: start; background: var(--surface-card); border-radius: var(--radius-md); padding: var(--space-sm) var(--space-md); min-width: 0; }
+.flow > li:not(:last-child)::after { content: "→"; position: absolute; right: -26px; top: 50%; transform: translateY(-50%); color: var(--muted); }
+.flow .flow-title { font-weight: 500; color: var(--ink); font-size: 15px; }
+.flow .flow-note { font-size: 13px; color: var(--muted); line-height: 1.45; }
+.flow > li.store { background: var(--surface-dark); }
+.flow > li.store .flow-title { color: var(--on-dark); } .flow > li.store .flow-note { color: var(--on-dark-soft); }
+@media (max-width: 767px) {
+  .flow { flex-direction: column; gap: 28px; }
+  .flow > li { flex: none; }
+  .flow > li:not(:last-child)::after { content: "↓"; right: auto; left: 50%; top: auto; bottom: -24px; transform: none; }
+}
+
+/* ---------- 34. figure ---------- */
+.figure { margin: 0; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--space-lg); display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-sm); background: var(--canvas); overflow-x: auto; }
+.figure svg { display: block; width: 100%; height: auto; min-width: var(--figure-min, 560px); } /* below this the labels get too small: scroll instead */
+.figure svg text { fill: var(--body); font: 13px var(--font-sans); }
+.figure svg .box { fill: var(--surface-card); }
+.figure svg .box-dark { fill: var(--surface-dark); }
+.figure svg .on-dark { fill: var(--on-dark); }
+.figure svg .edge { stroke: var(--muted); stroke-width: 1.5; fill: none; }
+.figure svg .edge.dashed { stroke-dasharray: 5 4; } /* async, optional or later */
+.figure svg text.muted { fill: var(--muted); font-size: 12px; } /* secondary labels: lanes, notes */
+.figure svg .arrow { fill: var(--muted); }
+@supports (fill: context-stroke) { .figure svg .arrow { fill: context-stroke; } } /* an arrowhead takes its edge's colour */
+
+/* Kind colours in diagrams: the tag slots .k1–.k6 on a figure .box or .edge, a .flow step, a .state or a .stages card.
+   One colour per kind of thing, the same kind the same colour across the report. The 12% tint keeps text at 4.5:1
+   in every theme; the outline, top edge or line carries the hue. */
+.k1 { --k: var(--chart-1); } .k2 { --k: var(--chart-2); } .k3 { --k: var(--chart-3); }
+.k4 { --k: var(--chart-4); } .k5 { --k: var(--chart-5); } .k6 { --k: var(--chart-6); }
+.figure svg .box:is(.k1, .k2, .k3, .k4, .k5, .k6) { fill: color-mix(in srgb, var(--k) 12%, var(--canvas)); stroke: var(--k); stroke-width: 1.5; }
+.figure svg .edge:is(.k1, .k2, .k3, .k4, .k5, .k6) { stroke: var(--k); }
+.flow > li:is(.k1, .k2, .k3, .k4, .k5, .k6), .stages > li:is(.k1, .k2, .k3, .k4, .k5, .k6) { background: color-mix(in srgb, var(--k) 12%, var(--canvas)); box-shadow: inset 0 3px 0 var(--k); }
+.state:is(.k1, .k2, .k3, .k4, .k5, .k6) { background: color-mix(in srgb, var(--k) 12%, var(--canvas)); box-shadow: inset 0 0 0 1.5px var(--k); }
+.flow > li.store:is(.k1, .k2, .k3, .k4, .k5, .k6), .state.end:is(.k1, .k2, .k3, .k4, .k5, .k6) { background: var(--surface-dark); } /* stays dark under light text; the edge or outline carries the kind */
+.figure figcaption { font-size: 13px; color: var(--muted); }
+/* Screenshot or image: the same frame around an <img>, no padding inside so the edges stay clean. */
+.figure.shot { padding: 0; gap: 0; overflow: hidden; }
+.figure.shot > img { display: block; width: 100%; height: auto; }
+.figure.shot > figcaption { padding: var(--space-sm) var(--space-lg); border-top: 1px solid var(--hairline); }
+
+/* ---------- print ---------- */
+@media print {
+  .toc, .theme-toggle { display: none; }
+  .layout > .wrap { grid-template-columns: minmax(0, 1fr); }
+  section { break-inside: auto; } .card, .finding, .window, .record, .callout { break-inside: avoid; }
+}
+
+/* ==== report-builder assets/charts.css ==== */
+/* Report charts: chart chrome. Every colour (--chart-1..8, --chart-other, --chart-axis, --chart-div-*,
+   --status-*) comes from the theme file (themes/*.css), where each theme records how its order was validated. */
+:root { --chart-grid: var(--hairline-soft); --chart-surface: var(--canvas); }
+
+/* A chart is a card: head (title, subtitle, legend), axis titles, plot, foot (source, table view). */
+.chart { margin: 0; display: grid; gap: 12px; min-width: 0; padding: 20px 24px 16px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--chart-surface); }
+@media (max-width: 600px) { .chart { padding: 16px 16px 12px; } }
+.chart.fit { margin-inline: auto; width: 100%; } /* charts.js sets max-width to the content: few columns, a narrow centred card */
+.chart p { max-width: none; } /* the card sets the width, not the prose measure */
+/* Head: title and subtitle centred; under them one row with the y-axis title on the left and the legend on the right. */
+.chart-titles { display: grid; gap: 2px; min-width: 0; text-align: center; margin-bottom: 4px; }
+.chart-guide { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 6px 24px; margin-bottom: -4px; }
+.chart-guide > .chart-legend:only-child { margin-left: auto; }
+.chart-title { margin: 0; font: 600 17px/1.35 var(--font-sans); color: var(--title, var(--primary-active)); }
+.chart-sub { margin: 0; font-size: 14px; color: var(--muted); }
+.chart-legend { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: var(--body); max-width: 100%; }
+.chart-legend li { display: inline-flex; align-items: center; gap: 6px; }
+.chart-key { display: inline-block; width: 10px; height: 10px; border-radius: 3px; background: var(--c); }
+.chart-key.line { width: 14px; height: 2px; border-radius: 1px; }
+.chart-key.dot { width: 8px; height: 8px; border-radius: 50%; }
+.chart-axis-title { margin: 0; font-size: 12px; font-weight: 500; color: var(--body-strong); }
+.chart-axis-title.x { text-align: right; margin: -4px 0 0; }
+.chart-plot { min-width: 0; }
+.chart-plot > svg { display: block; width: 100%; height: auto; overflow: visible; font: 12px var(--font-sans); }
+.chart text { fill: var(--muted); font-variant-numeric: tabular-nums; }
+.chart text.lbl { fill: var(--body); }
+.chart text.val { fill: var(--ink); font-weight: 500; }
+.chart .val-bg { fill: var(--chart-surface); } /* drawn by charts.js behind each value label */
+.chart .grid { stroke: var(--chart-grid); stroke-width: 1; shape-rendering: crispEdges; }
+.chart .axis { stroke: var(--chart-axis); stroke-width: 1; shape-rendering: crispEdges; }
+.chart .line { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.chart .area { fill-opacity: 0.1; stroke: none; }
+.chart .dot { stroke: var(--chart-surface); stroke-width: 2; }
+.chart .ref { stroke: var(--ink); stroke-width: 1.5; stroke-dasharray: 5 4; pointer-events: none; }
+.chart-key.ref { width: 14px; height: 0; border-radius: 0; background: none; border-top: 2px dashed var(--c); }
+.chart .cross { stroke: var(--chart-axis); stroke-width: 1; shape-rendering: crispEdges; pointer-events: none; }
+.chart .hit { fill: transparent; }
+.chart .cell.empty { fill: var(--surface-soft); }
+.chart .mark { cursor: default; outline: none; }
+.chart .mark:hover .fill, .chart .mark:focus-visible .fill, .chart .mark:hover .cell, .chart .mark:focus-visible .cell { filter: brightness(1.12); }
+.chart .mark:focus-visible .hit { stroke: var(--primary-active, #a9583e); stroke-width: 2; }
+.chart rect.hit:focus-visible { stroke: var(--primary-active, #a9583e); stroke-width: 1; }
+
+/* Meter list: name, bar, figure per row; the bar drops under the name when narrow. */
+.chart-meters { display: grid; grid-template-columns: minmax(0, 12em) minmax(0, 1fr) auto; gap: 12px 16px; align-items: center; font-size: 14px; }
+.chart-meter { display: contents; } /* rows share the list's columns, so every bar lines up */
+.chart-meter-name { color: var(--body); overflow-wrap: anywhere; }
+.chart-meter-track { position: relative; height: 8px; border-radius: 9999px; background: color-mix(in oklab, var(--c) 18%, var(--chart-surface)); }
+.chart-meter-track.mark:focus-visible { outline: 2px solid var(--primary-active, #a9583e); outline-offset: 4px; }
+.chart-meter-fill { position: absolute; inset: 0 auto 0 0; border-radius: 9999px; background: var(--c); }
+.chart-meter-target { position: absolute; top: -4px; bottom: -4px; width: 2px; margin-left: -1px; background: var(--ink); border-radius: 1px; }
+.chart-meter-figure { color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; display: inline-flex; gap: 8px; align-items: center; }
+.chart-meter-status { display: inline-flex; align-items: center; gap: 6px; color: var(--body); font-size: 13px; }
+.chart-meter-status::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--c); }
+@media (max-width: 560px) {
+  .chart-meters { grid-template-columns: minmax(0, 1fr); }
+  .chart-meter { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 16px; align-items: center; }
+  .chart-meter-track { grid-column: 1 / -1; grid-row: 2; }
+}
+
+/* Segmented bar: tall 28px blocks with values, or thin 8px with no text. */
+.chart-seg { display: flex; gap: 2px; height: 28px; }
+.chart-seg-part { min-width: 2px; border-radius: 4px; background: var(--c); display: flex; align-items: center; padding-left: 8px; overflow: hidden; }
+.chart-seg-label { font: 500 13px/1 var(--font-sans); color: #fff; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.chart-seg.thin { height: 8px; }
+.chart-seg.thin .chart-seg-part { border-radius: 9999px; padding: 0; }
+.chart-seg .mark:hover, .chart-seg .mark:focus-visible { filter: brightness(1.12); }
+.chart-seg .mark:focus-visible { outline: 2px solid var(--primary-active, #a9583e); outline-offset: 2px; }
+
+/* Sparkline, inline in text, tables and stat rows. */
+.spark { display: inline-block; width: 80px; height: 20px; vertical-align: middle; }
+.spark-svg { display: block; overflow: visible; }
+.spark-line { fill: none; stroke: var(--chart-other); stroke-width: 1.5; stroke-linejoin: round; stroke-linecap: round; }
+.spark-dot { fill: var(--chart-1); }
+
+.chart-foot { display: grid; gap: 6px; margin-top: 4px; padding-top: 12px; border-top: 1px solid var(--hairline-soft); }
+.chart-source { margin: 0; font-size: 13px; color: var(--muted); }
+.chart-data summary { cursor: pointer; font-size: 13px; color: var(--muted); width: fit-content; border-radius: 4px; }
+.chart-data summary:focus-visible { outline: 2px solid var(--primary-active, #a9583e); outline-offset: 2px; }
+.chart-foot > * { min-width: 0; } /* lets a wide data table scroll inside its box, not widen the card */
+.chart-data > .table-wrap { margin-top: 8px; } /* the report table component (report.css) */
+.chart-error { margin: 0; padding: 12px 16px; border: 1px solid var(--error, #c64545); border-radius: 8px; color: var(--error, #c64545); font-size: 14px; }
+
+.chart-tip { position: fixed; z-index: 100; display: none; pointer-events: none; min-width: 120px; max-width: 280px; padding: 8px 12px; border-radius: 8px; background: var(--surface-dark); color: var(--on-dark); font: 13px/1.45 var(--font-sans); box-shadow: 0 1px 3px rgba(20, 20, 19, 0.2); }
+.chart-tip-head { color: var(--on-dark-soft); margin-bottom: 4px; }
+.chart-tip-row { display: flex; align-items: center; gap: 8px; }
+.chart-tip-row b { font-weight: 600; font-variant-numeric: tabular-nums; }
+.chart-tip-row span:last-child:not(.chart-tip-key) { color: var(--on-dark-soft); }
+.chart-tip-key { width: 12px; height: 2px; border-radius: 1px; background: var(--c); flex: none; }
+
+/* ==========================================================================
+   Roost's own layer, on top of the report-builder's report.css and charts.css and
+   using only their palette tokens (no colour values here).
+   - roost-  the frame, the scope, and the chrome Roost adds to a report (banner, pill).
+   - hub-    the hub's screens: home, project, lists, triage. Their parts follow Report
+             Hub's layout and components, flat: hairlines and fills, no glow, no blur.
+   ========================================================================== */
+
+/* ---------- scope: a palette and a light/dark mode on any element ---------- */
+/* Re-declare the tokens report.css and charts.css set on :root, so a nested palette resolves its own colours. */
+.roost-scope {
+  --focus-ring: 0 0 0 2px var(--canvas), 0 0 0 4px var(--focus-color, var(--primary-active));
+  --chart-grid: var(--hairline-soft); --chart-surface: var(--canvas);
+  --chart-dark: 0;
+  background: var(--canvas); color: var(--body);
+  font: 400 16px/1.55 var(--font-sans); -webkit-font-smoothing: antialiased;
+}
+.roost-scope[data-theme="light"] { color-scheme: light; --chart-dark: 0; }
+.roost-scope[data-theme="dark"] { color-scheme: dark; --chart-dark: 1; }
+@media (prefers-color-scheme: dark) { .roost-scope:not([data-theme="light"]) { --chart-dark: 1; } }
+.roost-scope :focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+/* Kind slots 7 and 8: report.css stops at six tag kinds; Roost has eight report types. */
+.tag.k7 { --c: var(--chart-7); } .tag.k8 { --c: var(--chart-8); }
+.k7 { --k: var(--chart-7); } .k8 { --k: var(--chart-8); }
+
+/* ---------- app frame: fixed top bar, one scrolling page ---------- */
+.roost-app { position: relative; display: flex; flex-direction: column; height: 100%; min-height: 0; overflow: hidden; }
+.roost-scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { .roost-scroll { scroll-behavior: auto; } }
+.roost-stack { display: grid; gap: var(--space-lg); min-width: 0; align-content: start; }
+
+
+/* ==========================================================================
+   hub-: the hub's screens, after Report Hub (layout, panels, rows, badges, forms),
+   without its glow: no tinted page wash, no glowing orb, no coloured shadows, no blur.
+   ========================================================================== */
+.roost-scope, .hub {
+  --hub-bg: var(--surface-soft);
+  --hub-card: var(--canvas);
+  --hub-line: var(--hairline);
+  --hub-line-strong: var(--border);
+  --hub-fg: var(--ink);
+  --hub-muted: var(--muted);
+  --hub-accent: var(--primary-active);
+  --hub-accent-soft: color-mix(in oklab, var(--primary-active) 10%, var(--hub-card));
+  --hub-accent-border: color-mix(in oklab, var(--primary-active) 40%, var(--hub-card));
+  --hub-radius: 16px; --hub-radius-md: 12px; --hub-radius-sm: 10px;
+}
+.hub { background: var(--hub-bg); color: var(--hub-fg); font: 400 14px/20px var(--font-sans); }
+.hub *, .hub *::before, .hub *::after { box-sizing: border-box; }
+/* report.css styles bare elements for reports; on hub screens they are plain. */
+/* :where() keeps these as weak as report.css's element rules, so every hub- class still wins. */
+:where(.hub) h1, :where(.hub) h2, :where(.hub) h3 { font-family: var(--font-sans); font-weight: 500; color: var(--hub-fg); margin: 0; text-wrap: pretty; }
+:where(.hub) p { margin: 0; max-width: none; }
+:where(.hub) ul, :where(.hub) ol { margin: 0; padding: 0; list-style: none; display: block; max-width: none; }
+:where(.hub) main, :where(.hub) section { display: block; gap: 0; }
+:where(.hub) b, :where(.hub) strong { color: inherit; }
+.hub a { color: var(--hub-accent); text-decoration: none; }
+.hub a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.hub :focus-visible { outline: 2px solid var(--focus-color, var(--hub-accent)); outline-offset: 2px; box-shadow: none; }
+.hub .roost-icon { width: 16px; height: 16px; }
+
+/* ---------- page frame ---------- */
+/* The page column uses the reports' own .wrap geometry (1200px, 16px sides), so the HubBar sits on exactly the same
+   line on hub screens and on reports, and lines up with a report's text. */
+.hub-page { max-width: 1200px; margin: 0 auto; padding: 12px max(16px, env(safe-area-inset-left, 0px)) 48px; display: flex; flex-direction: column; gap: 24px; }
+@media (min-width: 760px) { .hub-page { padding: 24px max(16px, env(safe-area-inset-left, 0px)) 64px; gap: 32px; } }
+/* Desktop: two columns whose first section heads (Recent | Active streams) share one line. */
+.hub-cols { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; }
+@media (min-width: 760px) { .hub-cols { grid-template-columns: minmax(0, 1fr) 300px; gap: 24px; align-items: start; } }
+@media (min-width: 1000px) { .hub-cols { grid-template-columns: minmax(0, 1fr) 360px; gap: 32px; } }
+.hub-col { display: flex; flex-direction: column; gap: 24px; min-width: 0; }
+/* Columns as panes (desktop, set by Columns): fixed to the room under the docks; each scrolls on its own once the page
+   has scrolled them up to the docks; a column fades at an edge that has more above or below it. No scrollbars: the fades say there is more. */
+.hub-cols.panes { align-items: stretch; }
+.hub-cols.panes > .hub-col { min-height: 0; overflow: hidden; scrollbar-width: none; padding: 0 3px 8px; margin: 0 -3px; }
+.hub-cols.panes > .hub-col::-webkit-scrollbar { display: none; }
+.hub-cols.panes > .hub-col.scrolls { overflow-y: auto; }
+.hub-cols.panes > .hub-col { --fade-top: 0px; --fade-end: 0px;
+  -webkit-mask-image: linear-gradient(transparent, #000 var(--fade-top), #000 calc(100% - var(--fade-end)), transparent);
+  mask-image: linear-gradient(transparent, #000 var(--fade-top), #000 calc(100% - var(--fade-end)), transparent); }
+.hub-cols.panes > .hub-col.scrolled { --fade-top: 20px; }
+.hub-cols.panes > .hub-col.more { --fade-end: 20px; }
+.hub-page:has(.hub-cols.panes) { padding-bottom: 16px; }
+.hub-phone { display: flex; }
+.hub-desk { display: none !important; }
+@media (min-width: 760px) { .hub-phone { display: none !important; } .hub-desk { display: flex !important; } }
+.hub-wide { display: none !important; }
+.hub-narrow { display: flex; }
+@media (min-width: 1000px) { .hub-wide { display: flex !important; } .hub-narrow { display: none !important; } }
+.hub-foot { padding: 0 4px; font: 400 12px/16px var(--font-sans); color: var(--hub-muted); }
+
+/* ---------- panel: the surface every block sits on ---------- */
+.hub-panel { background: var(--hub-card); border: 1px solid var(--hub-line); border-radius: var(--hub-radius); min-width: 0; }
+.hub-inset { background: var(--hub-bg); border: 1px solid var(--hub-line); border-radius: var(--hub-radius-md); padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+
+/* ---------- header bar ---------- */
+.hub-bar { display: flex; align-items: center; gap: 8px; padding: 8px 8px 8px 12px; }
+.hub-brand { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; font: 500 16px/24px var(--font-sans); color: var(--hub-fg) !important; text-decoration: none !important; background: none; border: 0; padding: 0; cursor: pointer; text-align: left; }
+.hub-brand .hub-mark { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 9999px; background: var(--hub-accent-soft); color: var(--hub-accent); flex: none; }
+.hub-brand .hub-mark svg { width: 18px; height: 18px; }
+/* The bar never scrolls away. Its dock is sticky at the top of the page column, covers the page's top padding with
+   the page fill, and the page fades out under it. (On a report the dock sits in .roost-report-bar, which sticks instead.) */
+.hub-bar-dock { position: sticky; top: 0; z-index: 20; margin-top: -12px; padding-top: 12px; background: var(--hub-bg); }
+@media (min-width: 760px) { .hub-bar-dock { margin-top: -24px; padding-top: 24px; } }
+.hub-bar-dock::after { content: ""; position: absolute; left: 0; right: 0; top: 100%; height: 20px; pointer-events: none;
+  background: linear-gradient(var(--hub-bg), color-mix(in srgb, var(--hub-bg) 0%, transparent)); }
+/* Desktop: while a triage panel is on the page it stays in view, docked under the HubBar (20px below it, on the page
+   fill, the page fading out under it). Phones let it scroll. */
+@media (min-width: 760px) {
+  .hub-triage-dock { position: sticky; top: 78px; z-index: 19; margin-top: -20px; padding-top: 20px; background: var(--hub-bg); }
+  .hub-triage-dock::after { content: ""; position: absolute; left: 0; right: 0; top: 100%; height: 20px; pointer-events: none;
+    background: linear-gradient(var(--hub-bg), color-mix(in srgb, var(--hub-bg) 0%, transparent)); }
+}
+/* Desktop: pinned reports stay in view too, under the HubBar and the triage panel (whose height the panel writes to
+   --hub-triage-h). The "Pinned" title scrolls away; the strip does not. The section opens up (display: contents) so the
+   strip's dock spans the page; its 12px top pad keeps the usual 12px under the title, and 12px under the bar or the
+   triage panel once it sticks (it sits above their fades, z-index 21). */
+@media (min-width: 760px) {
+  .hub-sec.hub-pins-sec { display: contents; }
+  .hub-pins-dock { position: sticky; top: calc(78px + var(--hub-triage-h, 0px)); z-index: 21; margin-top: -32px; padding-top: 12px; background: var(--hub-bg); }
+  .hub-pins-dock::after { content: ""; position: absolute; left: 0; right: 0; top: 100%; height: 20px; pointer-events: none;
+    background: linear-gradient(var(--hub-bg), color-mix(in srgb, var(--hub-bg) 0%, transparent)); }
+}
+.roost-report-bar .hub-bar-dock { position: static; margin-top: 0; padding-top: 0; background: none; }
+.roost-report-bar .hub-bar-dock::after { content: none; }
+.hub-bar-end { display: flex; align-items: center; gap: 8px; flex: none; }
+.hub-bar.has-crumbs .hub-brand { flex: none; }
+.hub-bar .hub-crumbs { flex: 1 1 auto; min-width: 0; flex-wrap: nowrap; overflow: hidden; white-space: nowrap; gap: 8px; margin-left: 2px; }
+.hub-bar .hub-crumbs > * { flex: none; }
+.hub-bar .hub-crumbs [aria-current] { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.hub-bar .hub-crumbs svg { color: var(--hub-muted); }
+@media (max-width: 759px) {
+  .hub-bar.has-crumbs { flex-wrap: wrap; row-gap: 0; }
+  .hub-bar.has-crumbs .hub-brand { flex: 1 1 auto; }
+  .hub-bar .hub-crumbs { order: 3; flex: 1 1 100%; margin: 8px -8px -8px -12px; padding: 9px 12px 10px; border-top: 1px solid var(--hub-line); }
+  .hub-bar .hub-crumbs .lead { display: none; }
+}
+.hub-search { position: relative; display: flex; align-items: center; width: 240px; }
+.hub-search svg { position: absolute; left: 10px; width: 16px; height: 16px; color: var(--hub-muted); pointer-events: none; }
+.hub-search input { width: 100%; height: 36px; font: 400 14px/20px var(--font-sans); color: var(--hub-fg); background: var(--hub-card); border: 1px solid var(--hub-line-strong); border-radius: var(--hub-radius-sm); padding: 0 40px 0 32px; }
+.hub-search input::placeholder { color: var(--hub-muted); }
+.hub-search input:focus { outline: 2px solid var(--hub-accent); outline-offset: 1px; }
+.hub-search kbd { position: absolute; right: 8px; font-size: 11px; color: var(--hub-muted); background: var(--hub-bg); border-color: var(--hub-line); }
+
+/* ---------- headings ---------- */
+.hub-crumbs { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; font: 400 14px/20px var(--font-sans); color: var(--hub-muted); }
+.hub-crumbs button { font: inherit; color: var(--hub-accent); background: none; border: 0; padding: 0; cursor: pointer; }
+.hub-crumbs button:hover { text-decoration: underline; text-underline-offset: 3px; }
+.hub-crumbs [aria-current] { color: var(--hub-fg); font-weight: 500; }
+.hub-crumbs svg { width: 14px; height: 14px; }
+.hub-head { display: flex; flex-direction: column; gap: 12px; padding: 0 4px; }
+.hub-title { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.hub-title > div { display: flex; flex-direction: column; min-width: 0; }
+.hub-h1 { font: 600 24px/30px var(--font-sans) !important; letter-spacing: -0.02em; }
+.hub-sec { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.hub-sec-head { display: flex; align-items: center; gap: 8px 12px; flex-wrap: wrap; padding: 0 4px; min-height: 32px; }
+@media (min-width: 760px) {
+  /* One line, 32px, on desktop, so heads side by side always line up; a long count truncates. */
+  .hub-sec-head { flex-wrap: nowrap; height: 32px; }
+  .hub-sec-head .hub-sec-title { flex-wrap: nowrap; white-space: nowrap; overflow: hidden; }
+  .hub-sec-head .hub-count { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+}
+.hub-sec-title { font: 500 14px/20px var(--font-sans) !important; display: flex; align-items: baseline; gap: 8px; flex: 1; min-width: 0; flex-wrap: wrap; }
+.hub-count, .hub-caption { font: 400 12px/16px var(--font-sans); color: var(--hub-muted); }
+.hub-micro { font: 400 11px/16px var(--font-sans); color: var(--hub-muted); }
+.hub-label { font: 500 14px/20px var(--font-sans); color: var(--hub-fg); }
+.hub-eyebrow { font: 500 11px/16px var(--font-sans); letter-spacing: 0.02em; color: var(--hub-muted); }
+.hub-lead { font: 400 15px/24px var(--font-sans); color: var(--hub-muted); }
+
+/* ---------- tiles: a square icon well ---------- */
+.hub-tile { display: grid; place-items: center; width: 32px; height: 32px; flex: none; border-radius: var(--hub-radius-md);
+  border: 1px solid var(--hub-accent-border); background: var(--hub-accent-soft); color: var(--hub-accent); }
+.hub-tile.lg { width: 40px; height: 40px; }
+.hub-tile.quiet { border-color: var(--hub-line); background: var(--hub-bg); color: var(--hub-muted); }
+.hub-tile svg { width: 16px; height: 16px; }
+
+/* ---------- badges: a pill with a dot; tones and kinds colour the dot, tint and edge ---------- */
+.hub-badge { --h: var(--hub-muted); display: inline-flex; align-items: center; gap: 6px; padding: 1px 9px; border-radius: 9999px;
+  font: 400 12px/18px var(--font-sans); white-space: nowrap; border: 1px solid var(--hub-line-strong); color: var(--hub-muted); background: transparent; }
+.hub-badge::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--h); flex: none; }
+.hub-badge.plain::before { display: none; }
+.hub-badge[data-kind], .hub-badge[data-tone] { border-color: color-mix(in oklab, var(--h) 40%, var(--hub-card)); background: color-mix(in oklab, var(--h) 11%, var(--hub-card)); color: var(--hub-fg); }
+.hub-badge[data-tone="accent"] { --h: var(--hub-accent); }
+.hub-badge[data-tone="good"] { --h: var(--status-good); }
+.hub-badge[data-tone="warning"] { --h: var(--status-warning); }
+.hub-badge[data-tone="serious"] { --h: var(--status-serious); }
+.hub-badge[data-tone="critical"] { --h: var(--status-critical); }
+.hub-badge[data-kind="investigation"] { --h: var(--chart-1); } .hub-badge[data-kind="architecture"] { --h: var(--chart-2); }
+.hub-badge[data-kind="audit"] { --h: var(--chart-3); } .hub-badge[data-kind="benchmark"] { --h: var(--chart-4); }
+.hub-badge[data-kind="decision"] { --h: var(--chart-5); } .hub-badge[data-kind="postmortem"] { --h: var(--chart-6); }
+.hub-badge[data-kind="status"] { --h: var(--chart-7); } .hub-badge[data-kind="changelog"] { --h: var(--chart-8); }
+
+/* ---------- buttons ---------- */
+.hub-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 36px; padding: 0 14px; border-radius: var(--hub-radius-sm);
+  font: 500 14px/20px var(--font-sans); white-space: nowrap; cursor: pointer; text-decoration: none !important;
+  color: var(--hub-fg); background: var(--hub-card); border: 1px solid color-mix(in oklab, var(--hub-fg) 45%, var(--hub-card)); }
+.hub-btn:hover { background: var(--hub-bg); }
+.hub-btn svg { width: 16px; height: 16px; flex: none; }
+.hub-btn.outline { border-color: var(--hub-line-strong); }
+.hub-btn.ghost { border-color: transparent; background: transparent; }
+.hub-btn.ghost:hover { background: var(--hub-accent-soft); }
+.hub-btn.destructive { border-color: color-mix(in oklab, var(--status-critical) 70%, var(--hub-card)); color: var(--status-critical); }
+.hub-btn.destructive:hover { background: color-mix(in oklab, var(--status-critical) 8%, var(--hub-card)); }
+.hub-btn.primary { background: var(--hub-accent); border-color: var(--hub-accent); color: var(--on-primary); }
+.hub-btn.primary:hover { background: color-mix(in oklab, var(--hub-accent) 88%, var(--hub-fg)); }
+.hub-btn.sm { height: 32px; padding: 0 12px; font-size: 13px; }
+.hub-btn.icon { width: 36px; padding: 0; }
+.hub-btn.sm.icon { width: 32px; }
+.hub-btn.block { width: 100%; }
+.hub-btn[aria-pressed="true"] { background: var(--hub-accent-soft); border-color: var(--hub-accent-border); }
+.hub-btn:disabled { opacity: .5; cursor: default; }
+.hub-link { font: 400 12px/16px var(--font-sans); color: var(--hub-accent); background: none; border: 0; padding: 8px 4px; cursor: pointer; white-space: nowrap; }
+.hub-link:hover { text-decoration: underline; text-underline-offset: 3px; }
+.hub-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+
+/* ---------- report rows ---------- */
+.hub-list { display: flex; flex-direction: column; padding: 4px; }
+.hub-row { position: relative; display: flex; flex-direction: column; gap: 6px; padding: 12px; border-radius: var(--hub-radius-md);
+  color: var(--hub-fg); text-decoration: none !important; text-align: left; font: inherit; width: 100%; background: transparent; border: 0; cursor: pointer; }
+/* Dividers drawn by the row itself, so rows wrapped in host elements still separate. */
+.hub-row::before { content: ""; position: absolute; left: 12px; right: 12px; top: 0; border-top: 1px solid var(--hub-line); }
+.hub-list > :first-child .hub-row::before, .hub-list > .hub-row:first-child::before, .hub-row.first::before { display: none; }
+.hub-row:hover, .hub-row[data-selected="true"] { background: var(--hub-accent-soft); }
+.hub-row:hover::before, .hub-row[data-selected="true"]::before { opacity: 0; }
+.hub-row-h { flex-direction: row; align-items: center; gap: 12px; }
+.hub-row-top { display: flex; align-items: flex-start; gap: 8px; }
+.hub-row-title { flex: 1; min-width: 0; font: 500 14px/20px var(--font-sans); color: var(--hub-fg); }
+.hub-time { font: 400 12px/20px var(--font-sans); color: var(--hub-muted); white-space: nowrap; display: flex; align-items: center; gap: 4px; }
+.hub-time svg { width: 12px; height: 12px; }
+.hub-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; font: 400 12px/16px var(--font-sans); color: var(--hub-muted); padding-left: 16px; }
+.hub-sum { font: 400 14px/20px var(--font-sans); color: var(--hub-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-left: 16px; }
+.hub-row.compact .hub-meta, .hub-row.compact .hub-sum { padding-left: 0; }
+.hub-dot { width: 8px; height: 8px; margin-top: 6px; border-radius: 9999px; flex: none; background: var(--hub-accent); }
+.hub-dot[data-on="false"] { visibility: hidden; }
+.hub-path { display: inline-flex; align-items: center; gap: 4px; }
+.hub-path b { font-weight: 500; color: var(--hub-fg); }
+.hub-row-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.hub-chev { color: var(--hub-muted); display: flex; }
+.hub-showmore { display: flex; justify-content: center; padding: 8px 0 4px; }
+.hub-spark { width: 60px; height: 20px; flex: none; overflow: visible; }
+.hub-spark polyline { fill: none; stroke: var(--hub-muted); stroke-width: 1.5; stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.hub-spark circle { fill: var(--hub-accent); stroke: var(--hub-card); stroke-width: 2; vector-effect: non-scaling-stroke; }
+
+/* ---------- triage panel ---------- */
+.hub-triage { border-color: var(--hub-accent-border); }
+.hub-triage-head { display: flex; align-items: center; gap: 12px; padding: 12px 12px 12px 16px; }
+.hub-triage-head > div { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.hub-triage-items { display: grid; grid-template-columns: minmax(0, 1fr); border-top: 1px solid var(--hub-line); }
+.hub-titem { display: flex; flex-direction: column; gap: 8px; padding: 12px 16px 14px; min-width: 0; border-top: 1px solid var(--hub-line); }
+.hub-triage-items > :first-child .hub-titem, .hub-titem.first { border-top: 0; }
+@media (min-width: 760px) {
+  .hub-triage-items { grid-template-columns: repeat(var(--cols, 3), minmax(0, 1fr)); }
+  .hub-titem { border-top: 0; border-left: 1px solid var(--hub-line); }
+  .hub-triage-items > :first-child .hub-titem, .hub-titem.first { border-left: 0; }
+}
+.hub-titem-title { font: 500 14px/20px var(--font-sans); color: var(--hub-fg); background: none; border: 0; padding: 0; text-align: left; cursor: pointer; }
+.hub-titem-title:hover { text-decoration: underline; text-underline-offset: 3px; }
+.hub-proposal { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 6px; font: 400 12px/16px var(--font-sans); color: var(--hub-muted); }
+.hub-titem-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: auto; padding-top: 2px; }
+
+/* ---------- pinned ---------- */
+.hub-pins { display: flex; gap: 8px; overflow-x: auto; padding: 2px 2px 8px; margin: 0 -2px; scrollbar-width: none; }
+.hub-pin { flex: none; display: flex; align-items: center; gap: 10px; padding: 8px 14px 8px 10px; max-width: 320px; cursor: pointer; text-align: left; font: inherit; color: var(--hub-fg); }
+.hub-pin:hover { border-color: var(--hub-accent-border); }
+.hub-pin > svg { width: 16px; height: 16px; color: var(--hub-accent); flex: none; }
+.hub-pin-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.hub-pin-title { font: 500 14px/20px var(--font-sans); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hub-pin .hub-meta { padding-left: 0; flex-wrap: nowrap; }
+
+/* ---------- filters and form controls ---------- */
+.hub-filters { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.hub-filters .hub-spacer { flex: 1; }
+.hub-select { position: relative; display: inline-flex; min-width: 0; }
+.hub-select select { appearance: none; height: 36px; min-width: 0; width: 100%; padding: 0 34px 0 12px; border-radius: var(--hub-radius-sm); border: 1px solid var(--hub-line-strong);
+  background: var(--hub-card); color: var(--hub-fg); font: 400 14px/20px var(--font-sans); cursor: pointer; }
+.hub-select > svg { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: var(--hub-muted); pointer-events: none; }
+.hub-select select:focus-visible { outline: 2px solid var(--hub-accent); outline-offset: 2px; }
+.hub-input { height: 36px; width: 100%; padding: 0 12px; border-radius: var(--hub-radius-sm); border: 1px solid var(--hub-line-strong); background: var(--hub-card); color: var(--hub-fg); font: 400 14px/20px var(--font-sans); }
+.hub-field { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.hub-field > .hub-field-label { font: 400 14px/20px var(--font-sans); color: var(--hub-muted); }
+.hub-choice { display: flex; align-items: center; gap: 10px; min-height: 36px; font: 400 14px/20px var(--font-sans); color: var(--hub-fg); cursor: pointer; }
+.hub-choice .hub-caption { margin-left: 2px; }
+.hub-radio { appearance: none; width: 16px; height: 16px; margin: 0; border-radius: 50%; border: 1.5px solid var(--hub-line-strong); background: var(--hub-card); flex: none; display: grid; place-items: center; cursor: pointer; }
+.hub-radio:checked { border-color: var(--hub-accent); background: radial-gradient(circle, var(--hub-accent) 0 3.5px, var(--hub-card) 4px); }
+.hub-check { appearance: none; width: 16px; height: 16px; margin: 0; border-radius: 4px; border: 1.5px solid var(--hub-line-strong); background: var(--hub-card); flex: none; cursor: pointer; display: grid; place-items: center; }
+.hub-check:checked { border-color: var(--hub-accent); background: var(--hub-accent); }
+.hub-check:checked::after { content: ""; width: 8px; height: 4px; border-left: 2px solid var(--on-primary); border-bottom: 2px solid var(--on-primary); transform: rotate(-45deg) translate(1px, -1px); }
+.hub-switch { display: inline-flex; align-items: center; gap: 8px; font: 400 14px/20px var(--font-sans); color: var(--hub-muted); cursor: pointer; white-space: nowrap; }
+.hub-switch input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.hub-switch .track { position: relative; width: 40px; height: 22px; border-radius: 9999px; background: var(--hub-line-strong); transition: background .15s; flex: none; }
+.hub-switch .track::after { content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: var(--hub-card); transition: transform .15s; }
+.hub-switch input:checked + .track { background: var(--hub-accent); }
+.hub-switch input:checked + .track::after { transform: translateX(18px); }
+.hub-switch input:focus-visible + .track { outline: 2px solid var(--hub-accent); outline-offset: 2px; }
+.hub-toggle { display: inline-flex; gap: 2px; padding: 3px; border-radius: var(--hub-radius-md); border: 1px solid var(--hub-line); background: var(--hub-card); }
+.hub-toggle button { height: 30px; padding: 0 10px; border-radius: 8px; border: 0; background: transparent; font: 500 13px/20px var(--font-sans); color: var(--hub-muted); cursor: pointer; }
+.hub-toggle button[aria-pressed="true"] { background: var(--hub-accent-soft); color: var(--hub-fg); }
+.hub-toggle button { display: inline-flex; align-items: center; gap: 6px; }
+.hub-toggle button svg { width: 14px; height: 14px; flex: none; }
+.hub-menu { position: relative; display: inline-flex; }
+.hub-menu-pop { position: absolute; top: calc(100% + 6px); left: 0; z-index: 30; width: 230px; padding: 6px; background: var(--hub-card); border: 1px solid var(--hub-line-strong); border-radius: var(--hub-radius-md);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--surface-dark) 18%, transparent); display: flex; flex-direction: column; }
+.hub-menu-pop .hub-eyebrow { padding: 6px 8px 4px; }
+.hub-menu-item { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 8px; border: 0; background: transparent; font: inherit; color: var(--hub-fg); cursor: pointer; text-align: left; }
+.hub-menu-item:hover { background: var(--hub-accent-soft); }
+.hub-menu-item .ck { width: 16px; color: var(--hub-accent); display: flex; }
+.hub-menu-item svg { width: 16px; height: 16px; color: var(--hub-muted); flex: none; }
+.hub-menu-pop.end { left: auto; right: 0; width: 320px; max-width: calc(100vw - 24px); }
+.hub-report-menu .hub-btn[aria-expanded="true"] { background: var(--hub-accent-soft); border-color: var(--hub-accent-border); }
+.hub-ver { display: grid; grid-template-columns: 32px minmax(0, 1fr) 16px; gap: 0 8px; align-items: start; padding: 8px; }
+.hub-ver .hub-ver-n { grid-row: span 2; font: 600 14px/20px var(--font-sans); color: var(--hub-fg); }
+.hub-ver .hub-ver-d { font: 500 13px/20px var(--font-sans); color: var(--hub-fg); }
+.hub-ver .hub-ver-note { grid-column: 2; font: 400 12px/16px var(--font-sans); color: var(--hub-muted); }
+.hub-ver .ck { grid-column: 3; grid-row: 1; }
+.hub-ver[aria-checked="true"] { background: var(--hub-accent-soft); }
+.hub-menu-sep { height: 1px; background: var(--hub-line); margin: 4px 0; }
+.hub-num { display: inline-grid; place-items: center; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9999px; background: var(--hub-accent-soft); border: 1px solid var(--hub-accent-border); font: 600 11px/1 var(--font-sans); color: var(--hub-fg); }
+.hub-kinds { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px 12px; }
+
+/* ---------- project page: stream cards, groups, disclosure ---------- */
+.hub-streams { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+@media (min-width: 1000px) { .hub-streams { grid-template-columns: repeat(var(--cols, 3), minmax(0, 1fr)); } }
+.hub-card-head { display: flex; align-items: center; gap: 10px; padding: 12px 12px 4px 14px; }
+.hub-card-head > div { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.hub-card-name { font: 500 14px/20px var(--font-sans); }
+.hub-disclosure { width: 100%; display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: transparent; border: 0; font: inherit; color: var(--hub-fg); cursor: pointer; text-align: left; border-radius: var(--hub-radius); }
+.hub-disclosure svg { width: 16px; height: 16px; color: var(--hub-muted); transition: transform .15s; }
+.hub-disclosure[aria-expanded="true"] svg { transform: rotate(90deg); }
+
+/* ---------- triage page ---------- */
+.hub-split { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; }
+@media (min-width: 1000px) { .hub-split { grid-template-columns: 340px minmax(0, 1fr); align-items: start; } }
+.hub-pager { align-items: center; gap: 8px; padding: 0 4px; }
+.hub-pager .hub-back { display: inline-flex; align-items: center; gap: 6px; font: 400 14px/20px var(--font-sans); padding: 8px 4px; color: var(--hub-muted); background: none; border: 0; cursor: pointer; }
+.hub-pager .hub-caption { flex: 1; text-align: center; }
+.hub-detail { display: flex; flex-direction: column; gap: 20px; padding: 16px; }
+@media (min-width: 760px) { .hub-detail { padding: 24px; } }
+.hub-detail-head { display: flex; flex-direction: column; gap: 12px; align-items: flex-start; }
+.hub-statusline { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 10px; font: 400 12px/16px var(--font-sans); color: var(--hub-muted); }
+.hub-detail-title { font: 600 28px/34px var(--font-sans) !important; letter-spacing: -0.02em; }
+@media (max-width: 759px) { .hub-detail-title { font-size: 24px !important; line-height: 30px !important; } }
+.hub-proposed-line { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 8px; font: 500 15px/24px var(--font-sans); }
+.hub-proposed-line .sep { color: var(--hub-muted); font-weight: 400; }
+.hub-proposed-line .seg { display: inline-flex; align-items: center; gap: 6px; }
+.hub-proposed-line .seg svg { width: 16px; height: 16px; color: var(--hub-muted); }
+.hub-secrets { display: flex; flex-direction: column; gap: 0; }
+.hub-secret { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 12px; padding: 12px 0; border-top: 1px solid var(--hub-line); }
+.hub-secret.first { border-top: 0; }
+.hub-secret > div { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.hub-secret code { font: 500 12px/20px var(--font-mono); color: var(--hub-fg); background: var(--hub-bg); border: 1px solid var(--hub-line); padding: 1px 8px; border-radius: 6px; overflow-wrap: anywhere; }
+.hub-n { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--hub-accent-border); background: var(--hub-accent-soft); color: var(--hub-accent); font: 500 12px/1 var(--font-sans); }
+.hub-alert { display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 2px 10px; padding: 14px 16px; border-radius: var(--hub-radius-md);
+  border: 1px solid color-mix(in oklab, var(--status-critical) 55%, var(--hub-card)); background: color-mix(in oklab, var(--status-critical) 6%, var(--hub-card)); }
+.hub-alert > svg { width: 18px; height: 18px; color: var(--status-critical); margin-top: 1px; grid-row: span 2; }
+.hub-alert-title { font: 500 14px/20px var(--font-sans); color: var(--hub-fg); }
+.hub-alert-text { font: 400 14px/20px var(--font-sans); color: var(--hub-muted); }
+.hub-alert.good { border-color: color-mix(in oklab, var(--status-good) 55%, var(--hub-card)); background: color-mix(in oklab, var(--status-good) 7%, var(--hub-card)); }
+.hub-alert.good > svg { color: var(--status-good); }
+.hub-form { gap: 20px; }
+.hub-newstream { display: flex; flex-direction: column; gap: 6px; padding-left: 26px; max-width: 346px; }
+
+/* ---------- empty state ---------- */
+.hub-empty { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; padding: 20px; }
+
+/* ---------- sheets and dialogs, hub style ---------- */
+.roost-overlay { position: absolute; inset: 0; z-index: 40; display: flex; background: color-mix(in srgb, var(--surface-dark) 40%, transparent); }
+.roost-overlay.right { justify-content: flex-end; padding: 12px; }
+.roost-overlay.bottom { align-items: flex-end; }
+.roost-overlay.center { align-items: center; justify-content: center; padding: 16px; }
+.roost-sheet { background: var(--canvas); color: var(--ink); display: flex; flex-direction: column; min-height: 0; border: 1px solid var(--hairline); font: 400 14px/20px var(--font-sans); }
+.roost-overlay.right .roost-sheet { width: 380px; max-width: 100%; height: 100%; border-radius: 16px; }
+.roost-overlay.bottom .roost-sheet { width: 100%; max-height: 90%; border-radius: 20px 20px 0 0; border-bottom: 0; }
+.roost-overlay.bottom .roost-sheet::before { content: ""; align-self: center; width: 36px; height: 4px; border-radius: 9999px; background: var(--border); margin-top: 8px; }
+.roost-sheet-head, .roost-dialog-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 16px 16px 8px; }
+.roost-overlay.bottom .roost-sheet-head { justify-content: center; text-align: center; }
+.roost-sheet-head h2, .roost-dialog-head h2 { margin: 0; font: 600 16px/24px var(--font-sans); color: var(--ink); }
+.roost-sheet-head p, .roost-dialog-head p { margin: 2px 0 0; font: 400 12px/16px var(--font-sans); color: var(--muted); }
+.roost-sheet-body { flex: 1 1 auto; overflow-y: auto; padding: 8px 16px 16px; display: flex; flex-direction: column; gap: 20px; }
+.roost-sheet-foot, .roost-dialog-foot { display: flex; flex-direction: column; gap: 8px; padding: 12px 16px 16px; border-top: 1px solid var(--hairline); }
+.roost-dialog-foot { flex-direction: row; justify-content: flex-end; }
+.roost-dialog { width: 440px; max-width: 100%; background: var(--canvas); color: var(--ink); border: 1px solid var(--hairline); border-radius: 16px; display: flex; flex-direction: column; font: 400 14px/20px var(--font-sans); }
+.roost-dialog-body { padding: 0 16px 16px; display: flex; flex-direction: column; gap: 8px; color: var(--muted); }
+.roost-dialog-body p { margin: 0; max-width: none; }
+.roost-toast { position: absolute; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 50; display: flex; align-items: center; gap: 12px; background: var(--surface-dark); color: var(--on-dark); border: 1px solid var(--surface-dark-elevated); border-radius: 12px; padding: 8px 8px 8px 16px; font: 400 14px/20px var(--font-sans); max-width: calc(100% - 32px); }
+.roost-toast button { font: 500 13px var(--font-sans); color: var(--on-dark); background: var(--surface-dark-elevated); border: 0; border-radius: 8px; padding: 6px 10px; cursor: pointer; }
+.roost-toast button.x { background: none; color: var(--on-dark-soft); padding: 6px; display: inline-flex; }
+.roost-toast button.x svg { width: 14px; height: 14px; }
+
+/* ---------- banner under the HubBar on a report: why this page is not an ordinary published report ---------- */
+.roost-banner { background: var(--hub-card); border: 1px solid var(--hub-line); border-radius: var(--hub-radius-md); }
+.roost-banner > .wrap { max-width: none; margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; padding: 10px 10px 10px 16px; }
+.roost-banner p { margin: 0; font: 400 14px/20px var(--font-sans); color: var(--hub-fg); flex: 1 1 320px; max-width: none; }
+.roost-banner p b { color: var(--ink); }
+.roost-banner .status { font: 500 13px/20px var(--font-sans); color: var(--ink); }
+.roost-banner.critical { border-color: color-mix(in oklab, var(--status-critical) 40%, var(--hub-card)); background: color-mix(in oklab, var(--status-critical) 9%, var(--hub-card)); }
+.roost-banner.warning { border-color: color-mix(in oklab, var(--status-warning) 45%, var(--hub-card)); background: color-mix(in oklab, var(--status-warning) 11%, var(--hub-card)); }
+
+/* ---------- a report shown inside the hub ---------- */
+.roost-report { position: relative; }
+.roost-report-page { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 0; background: var(--canvas); }
+/* The HubBar replaces the report's own top bar: it stays put above the report, which scrolls under it. */
+/* On a report the HubBar is part of the page: on the report's own canvas, at exactly the spot it holds on hub
+   screens, and it stays there while the report scrolls, as it does on every screen. No band and no rule: the report fades out under it.
+   .roost-report-bar must be a direct child of the scrolling element (the report's body, or .roost-scroll). */
+.roost-report-page, .roost-hosted { --roost-bar-h: 118px; }
+@media (min-width: 760px) { .roost-report-page, .roost-hosted { --roost-bar-h: 90px; } }
+.hub.roost-report-bar { position: sticky; top: 0; z-index: 20; background: var(--canvas); }
+.roost-report-bar > .hub-page { padding-bottom: 12px; }
+.roost-report-bar::after { content: ""; position: absolute; left: 0; right: 0; top: 100%; height: 20px; pointer-events: none;
+  background: linear-gradient(var(--canvas), color-mix(in srgb, var(--canvas) 0%, transparent)); }
+.hub.roost-report-note { background: transparent; }
+.roost-report-note > .hub-page { padding-top: 0; padding-bottom: 0; }
+/* Anchor jumps and the report's sticky contents keep clear of the bar. */
+.roost-report-page .roost-scroll, html.roost-hosted { scroll-padding-top: calc(var(--roost-bar-h) + 8px); }
+@media (min-width: 1024px) {
+  .roost-report-page .toc, .roost-hosted .toc { top: calc(var(--roost-bar-h) + 16px); max-height: calc(100vh - var(--roost-bar-h) - 32px); }
+}
+.roost-report-page .topbar { display: none; }
+.roost-frame { display: block; width: 100%; height: 100%; border: 0; background: var(--canvas); }
+
+.hub-streams.cols-1 { --cols: 1; } .hub-streams.cols-2 { --cols: 2; } .hub-streams.cols-3 { --cols: 3; }
+
+/* ---------- Settings (after Lynx's): a large dialog, tabs, a body that scrolls on its own ---------- */
+.roost-overlay.roost-settings-overlay { padding: 24px; }
+.roost-settings { width: 900px; max-width: 100%; height: min(720px, 100%); display: flex; flex-direction: column; overflow: hidden;
+  background: var(--hub-card); color: var(--hub-fg); border: 1px solid var(--hub-line); border-radius: 16px;
+  box-shadow: 0 24px 48px -12px color-mix(in srgb, var(--surface-dark) 30%, transparent); font: 400 14px/20px var(--font-sans); }
+.roost-settings *, .roost-settings *::before, .roost-settings *::after { box-sizing: border-box; }
+.roost-settings p { max-width: none; }
+.roost-settings-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 24px 24px 16px; }
+.roost-settings-head h2 { margin: 0; font: 600 18px/26px var(--font-sans); color: var(--hub-fg); }
+.roost-settings-head p { margin: 4px 0 0; max-width: none; font: 400 14px/20px var(--font-sans); color: var(--hub-muted); }
+.hub-tabs { display: inline-flex; align-self: flex-start; gap: 2px; margin: 0 24px 16px; padding: 3px; border-radius: 12px; border: 1px solid var(--hub-line); background: var(--hub-bg); }
+.hub-tabs button { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 12px; border: 0; border-radius: 9px; background: transparent; font: 500 14px/20px var(--font-sans); color: var(--hub-muted); cursor: pointer; }
+.hub-tabs button svg { width: 14px; height: 14px; }
+.hub-tabs button[aria-selected="true"] { background: var(--hub-card); color: var(--hub-fg); box-shadow: 0 0 0 1px var(--hub-line); }
+.roost-settings-body { flex: 1; min-height: 0; overflow-y: auto; padding: 0 24px 24px; scrollbar-width: thin; }
+.hub-settings-stack { display: flex; flex-direction: column; gap: 28px; }
+.hub-settings-stack > .hub-field { gap: 10px; }
+.hub-settings-stack .hub-toggle { align-self: flex-start; }
+.hub-settings-stack p.hub-caption { margin: 2px 0 0; font-size: 13px; line-height: 20px; }
+.hub-settings-stack .hub-caption { font-size: 13px; line-height: 20px; }
+.hub-palette-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.hub-palette-opt { display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; border: 1px solid var(--hub-line); border-radius: 12px; background: var(--hub-card); cursor: pointer; min-width: 0; }
+.hub-palette-opt:hover { border-color: var(--hub-line-strong); }
+.hub-palette-opt.on { border-color: var(--hub-accent); background: var(--hub-accent-soft); box-shadow: inset 0 0 0 1px var(--hub-accent); }
+.hub-palette-opt .hub-radio { margin-top: 2px; }
+.hub-palette-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; align-self: stretch; }
+.hub-palette-text > .hub-swatch { margin-top: auto; }
+.hub-palette-text > .hub-caption { padding-bottom: 8px; }
+.hub-palette-text > .hub-caption { font-size: 12px; line-height: 16px; }
+/* The swatch: a tiny Roost home in the palette's own colours (data-palette and data-theme on the swatch itself). */
+.roost-scope.hub-swatch { display: flex; flex-direction: column; gap: 5px; height: 66px; margin-top: auto; padding: 6px; border-radius: 8px; border: 1px solid var(--hub-line); background: var(--hub-bg); overflow: hidden; font-size: 0; line-height: 0; }
+.hub-swatch > span, .hub-swatch span span { display: block; }
+.hub-swatch .sw-bar { display: flex; align-items: center; gap: 4px; height: 12px; padding: 0 4px; border-radius: 4px; background: var(--hub-card); border: 1px solid var(--hub-line); flex: none; }
+.hub-swatch .sw-mark { width: 6px; height: 6px; border-radius: 50%; background: var(--hub-accent); }
+.hub-swatch .sw-line { width: 30%; height: 3px; border-radius: 2px; background: var(--hub-line-strong); }
+.hub-swatch .sw-body { flex: 1; display: flex; gap: 4px; min-height: 0; }
+.hub-swatch .sw-main { flex: 2; display: flex; flex-direction: column; gap: 3px; }
+.hub-swatch .sw-side { flex: 1; display: flex; flex-direction: column; gap: 3px; padding: 3px; border-radius: 4px; background: var(--hub-card); border: 1px solid var(--hub-line); }
+.hub-swatch .sw-triage { height: 10px; border-radius: 4px; border: 1px solid var(--hub-accent-border); background: var(--hub-card); }
+.hub-swatch .sw-row { height: 4px; width: 80%; border-radius: 2px; background: var(--hub-line-strong); }
+.hub-swatch .sw-row.short { width: 50%; }
+.hub-swatch .sw-dots { display: flex; gap: 3px; flex: none; }
+.hub-swatch .sw-dots span { width: 6px; height: 6px; border-radius: 50%; }
+@media (max-width: 999px) { .hub-palette-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 759px) {
+  .roost-overlay.roost-settings-overlay { padding: 12px; }
+  .roost-settings { height: 100%; }
+  .roost-settings-head { padding: 20px 16px 12px; }
+  .hub-tabs { margin: 0 16px 12px; }
+  .roost-settings-body { padding: 0 16px 16px; }
+  .hub-palette-grid { grid-template-columns: minmax(0, 1fr); }
+}

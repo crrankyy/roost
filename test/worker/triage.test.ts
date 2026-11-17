@@ -1,23 +1,18 @@
 import { env } from 'cloudflare:test';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { browser, call, service, setupAccess } from './helpers';
+import { browser, call, publishPage, service, setupAccess } from './helpers';
 
 let svc = '', web = '';
 const R2 = (env as any).REPORTS as R2Bucket;
 const origin = { origin: 'https://roost.test' };
-const sha = async (s: string) => [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)))].map((b) => b.toString(16).padStart(2, '0')).join('');
 const j = (jwt: string, path: string, method = 'GET', body?: unknown, headers: Record<string, string> = {}) =>
   call(path, { jwt, method, body: body === undefined ? undefined : JSON.stringify(body), headers: { 'content-type': 'application/json', ...headers } });
 const act = (ref: string, body: unknown) => j(web, `/api/triage/${ref}`, 'POST', body, origin);
 const manifest = async (p: string) => (await (await R2.get(`p/${p}/manifest.json`))!.json()) as any;
 const index = async () => (await (await R2.get('index/recent.json'))!.json()) as any;
 
-async function publish(project: string, id: string, extra: Record<string, unknown> = {}) {
-  const html = `<html><head><title>${id}</title></head><body>${id} AKIAIOSFODNN7EXAMPLE</body></html>`;
-  const b = await (await j(svc, '/api/publish', 'POST', { project, id, kind: 'analysis', title: id, summary: 's', files: [{ path: 'index.html', size: html.length, sha256: await sha(html) }], ...extra })).json<any>();
-  await call(`${b.put_base}index.html`, { jwt: svc, method: 'PUT', body: html });
-  return (await j(svc, `${b.put_base}commit`, 'POST', {})).json<any>();
-}
+const publish = async (project: string, id: string, extra: Record<string, unknown> = {}) =>
+  (await publishPage(svc, project, id, { body: { kind: 'benchmark', title: id, ...extra }, content: `${id} AKIAIOSFODNN7EXAMPLE` })).body;
 
 beforeAll(async () => {
   await setupAccess();
@@ -43,9 +38,10 @@ describe('triage', () => {
     const findings = [{ file: 'index.html', line: 1, kind: 'aws-access-key', masked: '••••MPLE' }];
     await publish('tri', '2026-10-29-leak', { unattended: true, findings });
     expect((await act('tri/2026-10-29-leak', { action: 'confirm' })).status).toBe(422);
-    const page = await (await call('/triage?r=tri%2F2026-10-29-leak', { jwt: web })).text();
-    expect(page).toContain('••••MPLE');
-    expect(page).not.toContain('AKIAIOSFODNN7EXAMPLE');
+    const hub = await (await call('/api/hub', { jwt: web })).text();
+    expect(hub).toContain('••••MPLE');
+    expect(hub).not.toContain('AKIAIOSFODNN7EXAMPLE');
+    expect(JSON.parse(hub).reports.find((r: any) => r.id === 'tri/2026-10-29-leak')).toMatchObject({ state: 'quarantined', versions: [{ n: 1, file: '/triage/preview/tri/2026-10-29-leak/v1/' }] });
     const prev = await call('/triage/preview/tri/2026-10-29-leak/v1/', { jwt: web });
     expect(prev.headers.get('content-security-policy')).toBe('sandbox');
     expect((await call('/p/tri/r/2026-10-29-leak/v1/', { jwt: web })).status).toBe(404);
@@ -67,9 +63,13 @@ describe('triage', () => {
   it('reclassify in place, with a new stream', async () => {
     await publish('tri', '2026-10-29-re', { unattended: true, new_stream: { id: 'proposed', title: 'Proposed' } });
     expect((await manifest('tri')).streams.map((s: any) => s.id)).not.toContain('proposed');
-    const r = await (await act('tri/2026-10-29-re', { action: 'reclassify', kind: 'incident', new_stream: { id: 'proposed' } })).json<any>();
-    expect(r.entry).toMatchObject({ kind: 'incident', stream: 'proposed', classification: { triage: false, confirmed: true, by: 'user' } });
+    const r = await (await act('tri/2026-10-29-re', { action: 'reclassify', kind: 'postmortem', new_stream: { id: 'proposed' } })).json<any>();
+    expect(r.entry).toMatchObject({ kind: 'postmortem', stream: 'proposed', classification: { triage: false, confirmed: true, by: 'user' } });
     expect((await manifest('tri')).streams.map((s: any) => s.id)).toContain('proposed');
+  });
+
+  it('reclassify refuses the old kinds', async () => {
+    expect((await act('tri/2026-10-29-re', { action: 'reclassify', kind: 'incident' })).status).toBe(422);
   });
 
   it('reclassify to another project: files stay, old URL redirects, new URL serves', async () => {

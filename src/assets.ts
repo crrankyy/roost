@@ -1,10 +1,8 @@
 // Roost's own browser files (/_roost/), bundled into the Worker as text so they pass the same auth as everything else.
-import islands from '../public/_roost/islands.js';
 import chromeJs from '../public/_roost/chrome.js';
 import chromeCss from '../public/_roost/chrome.css';
 
 const FILES: Record<string, { body: string; type: string }> = {
-  'islands.js': { body: islands, type: 'text/javascript; charset=utf-8' },
   'chrome.js': { body: chromeJs, type: 'text/javascript; charset=utf-8' },
   'chrome.css': { body: chromeCss, type: 'text/css; charset=utf-8' },
 };

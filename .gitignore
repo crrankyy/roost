@@ -7,3 +7,11 @@ test/visual/out/
 
 # visual output
 test/visual/out/
+skill/roost-report/fonts-dist/
+skill/roost-report/samples/**/*.html
+!skill/roost-report/samples/**/*.src.html
+web/node_modules/
+web/dist/
+# Font source files: build-fonts.sh reads them locally; never committed.
+skill/roost-report/assets/fonts/*/*.[tT][tT][fF]
+skill/roost-report/assets/fonts/*/*.[oO][tT][fF]

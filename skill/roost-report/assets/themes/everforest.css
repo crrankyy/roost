@@ -1,0 +1,90 @@
+/* Theme: Everforest, medium contrast (github.com/sainnhe/everforest, palette.md). Light and dark variants;
+   code windows use the dark variant in both themes.
+   Every colour the report uses, as light-dark(light, dark). report.css switches color-scheme for the theme button.
+   Checked with the dataviz skill's validator and WCAG contrast:
+   - Everforest Light is low-contrast by design: only fg (#5C6A72, 5.18 on bg0) passes 4.5 for text. Every accent
+     is 2.1 to 3.1. So all light text is fg (hierarchy comes from size and weight), links are fg and underlined,
+     and the accent (green) is used only as a fill, with #1E2326 text on it. Cards use bg2 (fg 4.66; bg3 is 4.29).
+   - Dark: fg 7.38 on bg0, grey2 5.12; accents 4.55 to 6.84, so the green accent is also the link colour.
+   - Charts: the dark accents fail as series (muted, two read grey), so the light accents are used in both themes:
+     order blue, red, yellow, aqua, orange, purple, green passes on both surfaces (worst adjacent CVD dE 9.0,
+     normal 18.5; first three all-pairs 9.0). Everforest has 7 hues: slot 8 is "Other" grey, so at most 7 series.
+   - Status: green, yellow, orange, red; yellow/orange are close (normal dE 9.1): every status carries its word.
+   - Syntax follows Everforest's tree-sitter semantics; comments use grey2 (5.97) rather than grey1 (4.49). */
+:root {
+  /* page */
+  --canvas: light-dark(#fdf6e3, #2d353b);
+  --surface-soft: light-dark(#f4f0d9, #232a2e);
+  --surface-card: light-dark(#efebd4, #343f44);
+  --surface-cream-strong: light-dark(#e6e2cc, #3d484d);
+  --hairline: light-dark(#e0dcc7, #3d484d);
+  --hairline-soft: light-dark(#e6e2cc, #343f44);
+  --border: light-dark(#bdc3af, #4f585e);
+  /* heading levels: h1, h2, h3 (and "Key findings"), chart and table titles; each its own palette hue, darkened
+     or lightened only as far as its floor needs (3:1 for large headings, 4.5:1 for titles) */
+  --h1: light-dark(#839601, #a7c080); /* green; light 7% darker, 3.08, dark 6.23 */
+  --h2: light-dark(#3a94c5, #7fbbb3); /* blue; light 3.13, dark 5.74 */
+  --h3: light-dark(#d665b3, #d699b6); /* purple; light 4% darker, 3.06, dark 5.40 */
+  --title: light-dark(#ae591b, #e69875); /* orange; light 29% darker, 4.59, dark 5.41 */
+  /* text */
+  --ink: light-dark(#5c6a72, #d3c6aa);
+  --body-strong: light-dark(#5c6a72, #d3c6aa);
+  --body: light-dark(#5c6a72, #d3c6aa);
+  --muted: light-dark(#5c6a72, #9da9a0);
+  --muted-soft: light-dark(#939f91, #7a8478);
+  /* accent */
+  --primary: light-dark(#8da101, #a7c080);
+  --primary-active: light-dark(#8da101, #a7c080);
+  --on-primary: #1e2326;
+  --primary-disabled: light-dark(#bdc3af, #4f585e);
+  --link: light-dark(#5c6a72, #a7c080);
+  --link-decoration: underline;
+  --accent-teal: light-dark(#35a77c, #83c092);
+  --accent-amber: light-dark(#dfa000, #dbbc7f);
+  --error: light-dark(#f85552, #e67e80);
+  /* dark blocks: code windows, footer, tooltips */
+  --surface-dark: light-dark(#2d353b, #1e2326);
+  --surface-dark-elevated: light-dark(#3d484d, #343f44);
+  --surface-dark-soft: #232a2e;
+  --on-dark: #d3c6aa;
+  --on-dark-soft: #9da9a0;
+  /* text on a status fill (callouts) */
+  --on-status: #1e2326;
+  --on-critical: #1e2326;
+  /* syntax, on the dark code window */
+  --syn-comment: #9da9a0;
+  --syn-punctuation: #859289;
+  --syn-keyword: #e67e80;
+  --syn-string: #83c092;
+  --syn-regex: #a7c080;
+  --syn-number: #d699b6;
+  --syn-operator: #e69875;
+  --syn-function: #a7c080;
+  --syn-type: #dbbc7f;
+  --syn-builtin: #a7c080;
+  --syn-property: #7fbbb3;
+  --syn-variable: #d3c6aa;
+  --syn-macro: #83c092;
+  /* charts */
+  --chart-1: #3a94c5; /* blue */
+  --chart-2: #f85552; /* red */
+  --chart-3: #dfa000; /* yellow */
+  --chart-4: #35a77c; /* aqua */
+  --chart-5: #f57d26; /* orange */
+  --chart-6: #df69ba; /* purple */
+  --chart-7: #8da101; /* green */
+  --chart-8: var(--chart-other); /* Everforest has 7 hues */
+  --chart-other: light-dark(#939f91, #7a8478);
+  --chart-axis: light-dark(#bdc3af, #4f585e);
+  --chart-div-neg: light-dark(#3a94c5, #7fbbb3);
+  --chart-div-pos: light-dark(#f85552, #e67e80);
+  --chart-div-mid: light-dark(#e6e2cc, #3d484d);
+  /* table tints: light text is only 5.1:1 on the page, so light tints stay faint (12%) */
+  --heat-max: light-dark(#e6eadf, #315367);
+  --tint-up: light-dark(#fce4d3, #524449);
+  --tint-down: light-dark(#e6eadf, #3d5053);
+  --status-good: #8da101;
+  --status-warning: #dfa000;
+  --status-serious: #f57d26;
+  --status-critical: #f85552;
+}

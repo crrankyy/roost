@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BUG-0001 investigation</title>
+<meta name="report:kind" content="investigation">
+<meta name="report:project" content="zenith-md">
+<meta name="report:stream" content="perf">
+<meta name="report:date" content="2026-10-19">
+<link rel="stylesheet" href="/_fonts/v1/report-type.css">
+<link rel="stylesheet" href="/_fonts/v1/report-mono.css">
+<link rel="stylesheet" href="themes/catppuccin.css">
+<link rel="stylesheet" href="report.css">
+<link rel="stylesheet" href="charts.css">
+</head>
+<body>
+
+<div class="topbar" data-slot="host-bar"><div class="wrap">
+  <span class="wordmark">BUG-0001 investigation</span>
+  <span class="meta"><button class="theme-toggle" type="button">Theme: System</button></span>
+</div></div>
+
+<header class="hero"><div class="wrap">
+  <div class="hero-copy">
+    <span class="eyebrow">BUG-0001 · fixed by F-073</span>
+    <h1>A keystroke cost grew with the document, and three splices made it flat</h1>
+    <p class="lead">ZenithMD's first perf-budget run found that one keystroke on a 2 MB document held the UI thread for 78 ms. F-073 made every per-keystroke step touch only the edited lines, and the same bench then read about 0.27 ms, the same at 1 KB as at 2 MB.</p>
+    <p class="hero-meta">ZenithMD · 19 October 2026</p>
+  </div>
+  <dl class="stats">
+    <div><dt>Keystroke, 2 MB, before</dt><dd>78 ms</dd><dd class="delta">15× the 5 ms budget</dd></div>
+    <div><dt>Keystroke, 2 MB, after</dt><dd>~0.27 ms</dd><dd class="delta">268–291 µs median</dd></div>
+    <div><dt>Filed to resolved</dt><dd>1 h 19 min</dd><dd class="delta">00:55 to 02:14 UTC</dd></div>
+    <div><dt>Fix commits</dt><dd>3</dd><dd class="delta">one per task, T-073.1–3</dd></div>
+  </dl>
+</div></header>
+
+<div class="layout"><div class="wrap">
+  <nav class="toc" aria-label="Contents">
+    <span class="cap">Contents</span>
+    <ol>
+      <li><a href="#happened">What happened</a></li>
+      <li><a href="#found">How it was found</a></li>
+      <li><a href="#cause">Cause</a></li>
+      <li><a href="#fix">Fix</a></li>
+      <li><a href="#left">What's left</a></li>
+    </ol>
+  </nav>
+  <main>
+    <div class="findings">
+      <span class="cap">Key findings</span>
+      <ol>
+        <li><b>A benchmark found it, not a user.</b> F-023's first budget run measured <code>keystroke_to_frame</code> at 133 µs, 7.9 ms and 78 ms for 1 KB, 256 KB and 2 MB (<a href="#found">section 2</a>).</li>
+        <li><b>Every keystroke did whole-document work.</b> The wrap map rebuilt its tree and row vector on each edit, and the edited line was shaped twice (<a href="#cause">section 3</a>).</li>
+        <li><b>The fix was three splices, landed in 1 h 19 min.</b> Wrap-map tree splice, shape-once handoff to the layout cache, and one-walk anchor resolution; 2 MB went from 78 ms to about 0.27 ms (<a href="#fix">section 4</a>).</li>
+        <li><b>Profiling the fix found the next bug.</b> The Stage 1 parse worker sat at 100% in <code>ts_tree_edit</code> even at 1 KB (BUG-0002, fixed 29 minutes later); <code>set_width</code> is still O(lines) (<a href="#left">section 5</a>).</li>
+      </ol>
+    </div>
+
+    <section id="happened">
+      <header>
+        <span class="kicker">What happened</span>
+        <h2>The bug was filed, fixed and verified inside one morning</h2>
+        <p class="lead">Every step below is a timestamped entry in an Azimuth feature log or a commit. Commit times are converted from +05:30 to UTC.</p>
+      </header>
+      <div class="log">
+        <div class="log-entry">
+          <div class="log-when"><span class="big">00:55</span><span class="small">T-023.1 done · 7984637</span></div>
+          <div><p>The first budget run of F-023's criterion benches logs the miss. The same commit files BUG-0001 and DEBT-0013 and captures F-073 as an idea.</p></div>
+        </div>
+        <div class="log-entry">
+          <div class="log-when"><span class="big">00:58</span><span class="small">F-073 approved · 66fb4fc</span></div>
+          <div><p>F-073 is specified and goes from draft to approved in the same second.</p></div>
+        </div>
+        <div class="log-entry">
+          <div class="log-when"><span class="big">01:11</span><span class="small">F-073 in progress</span></div>
+          <div><p>T-073.1 (wrap map) and T-073.3 (anchors) start together (commit 04e358e); the plan says they are "independent (different crates)".</p></div>
+        </div>
+        <div class="log-entry">
+          <div class="log-when"><span class="big">01:24</span><span class="small">T-073.3 · 26ea9dd</span></div>
+          <div><p>Batched anchor resolution: 1,000 anchors 3.16 ms → 154 µs.</p></div>
+        </div>
+        <div class="log-entry">
+          <div class="log-when"><span class="big">01:29</span><span class="small">T-073.1 · feae721</span></div>
+          <div><p>Incremental wrap-map edit with a tree splice: one-line reshape 11.89 ms → 36.43 µs.</p></div>
+        </div>
+        <div class="log-entry">
+          <div class="log-when"><span class="big">02:14</span><span class="small">T-073.2 · aef46c8, 1f9c666</span></div>
+          <div><p>Shape each edited line once and borrow row text. <code>keystroke_to_frame/2mb</code> 78 ms → ~0.27 ms. BUG-0001 and DEBT-0011 are marked resolved; BUG-0002 is found during profiling.</p></div>
+        </div>
+        <div class="log-entry">
+          <div class="log-when"><span class="big">02:22</span><span class="small">F-073 done · 93f49ef</span></div>
+          <div><p>F-073 moves from verifying to done: "12/12 scenarios pass".</p></div>
+        </div>
+        <div class="log-entry">
+          <div class="log-when"><span class="big">02:43</span><span class="small">BUG-0002 · b2b2487</span></div>
+          <div><p>F-014's Stage 1 change makes the worker apply "each request's edits to its tree once instead of replaying the whole backlog per attempt (BUG-0002)".</p></div>
+        </div>
+      </div>
+      <p class="source">Source: <code>.azimuth/features/F-073-…/log.md</code>, <code>F-023-…/log.md</code> and <code>git log</code> of zenith-md, 19 October 2026.</p>
+    </section>
+
+    <section id="found">
+      <header>
+        <span class="kicker">How it was found</span>
+        <h2>The cost grew in step with document size</h2>
+        <p class="lead">The bug was a number in a bench log. The budget is 5 ms per keystroke for files up to 2 MB, from Architecture §7.</p>
+      </header>
+      <blockquote class="quote machine"><span class="cap">F-023 log · T-023.1 note · 2026-10-19 00:55:02 UTC</span>Short-run medians (release, reference Mac): buffer/apply/1kb 1.1 µs, /1mb 3.3 µs; undo_redo/100 328 µs; anchor_resolve/1000 3.0 ms (budget 1.0, misses); controller/keystroke_to_frame 1kb 133 µs, 256kb 7.9 ms, 2mb 78 ms (budget 5.0 ms, misses ~15x: UI-thread cost grows linearly with document size).</blockquote>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Bench</th><th class="num">1 KB</th><th class="num">256 KB</th><th class="num">2 MB</th><th>Against 5 ms</th></tr></thead>
+        <tbody>
+          <tr><td><code>controller/keystroke_to_frame</code></td><td class="num">133 µs</td><td class="num">7.9 ms</td><td class="num">78 ms</td><td><span class="status critical">Misses 15×</span></td></tr>
+        </tbody>
+      </table>
+  <p class="source">Source: the T-023.1 note quoted above.</p>
+</div>
+      <div class="prose">
+        <p>The issue file itself holds only the title and frontmatter. Its Repro, Expected and Actual headings are empty, so the evidence lives in the feature logs and commits:</p>
+      </div>
+      <details class="record" open>
+        <summary class="window-bar"><span class="file">.azimuth/issues/BUG-0001-….md, as resolved</span><span>11 of 19 lines</span></summary>
+        <pre><span class="ln">id: BUG-0001</span><span class="ln">title: Keystroke-to-frame on a 2 MB document takes 78 ms on the UI thread, 15x over the 5 ms §7 budget</span><span class="ln">status: resolved</span><span class="ln">severity: medium</span><span class="ln">found_by: SES-20261019-0040</span><span class="ln">created: 2026-10-19</span><span class="ln">resolved_at: 2026-10-19</span><span class="ln">---</span><span class="ln">## Repro</span><span class="ln">## Expected</span><span class="ln">## Actual</span></pre>
+      </details>
+      <p class="source">Source: the issue file; the <code>links</code>, <code>files</code>, <code>likelihood</code> and <code>impact</code> fields (all empty or null) are left out.</p>
+    </section>
+
+    <section id="cause">
+      <header>
+        <span class="kicker">Cause</span>
+        <h2>Three steps of every keystroke did whole-document work</h2>
+        <p class="lead">F-073's spec names the causes. Each one scaled with the document, not with the edit.</p>
+      </header>
+      <blockquote class="quote"><span class="cap">F-073 feature.md · Objective</span><code>WrapMap::edit</code> rebuilds its segment list, allocates a <code>String</code> per line to compare it, relocates every row and rebuilds the whole <code>SumTree</code> and flat row vector on every edit; the controller then shapes the edited line a second time through <code>LayoutCache</code> (DEBT-0011) and allocates each visible row's text while building the frame. Anchor resolution maps each anchor through every logged transaction (DEBT-0013).</blockquote>
+      <div class="prose">
+        <ul>
+          <li><b>The wrap map rebuilt itself.</b> Reshaping one line took 11.89 ms on a 10k-line document because the tree and row vector were rebuilt around it.</li>
+          <li><b>The edited line was shaped twice.</b> <code>WrapMap</code> shaped it, then <code>LayoutCache</code> shaped it again (DEBT-0011).</li>
+          <li><b>Anchors walked the whole log.</b> Each anchor was mapped through every logged transaction: 3.16 ms for 1,000 anchors (DEBT-0013).</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="fix">
+      <header>
+        <span class="kicker">Fix</span>
+        <h2>Each step now touches only the edited lines</h2>
+        <p class="lead">F-073 split the work into three tasks, one commit each, and logged bench medians after each.</p>
+      </header>
+      <div class="callout good">
+        <h3>78 ms became about 0.27 ms, flat across sizes</h3>
+        <p>After T-073.2 the keystroke bench read 216–270 µs at 1 KB, 267–405 µs at 256 KB and 268–291 µs at 2 MB: "Cost now flat in document size."</p>
+      </div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Task · commit</th><th>Change</th><th>Bench</th><th class="num">Before</th><th class="num">After</th></tr></thead>
+        <tbody>
+          <tr><td>T-073.1 · <code>feae721</code></td><td>Wrap-map tree splice</td><td><code>wrap/reshape_line</code></td><td class="num">11.89 ms</td><td class="num">36.43 µs</td></tr>
+          <tr><td>T-073.2 · <code>aef46c8</code></td><td>Shape once, borrow row text</td><td><code>keystroke_to_frame/2mb</code></td><td class="num">78 ms</td><td class="num">268–291 µs</td></tr>
+          <tr><td>T-073.3 · <code>26ea9dd</code></td><td>One-walk anchor resolution</td><td><code>anchor_resolve/1000</code></td><td class="num">3.16 ms</td><td class="num">154 µs</td></tr>
+        </tbody>
+      </table>
+  <p class="source">Source: F-073 log.md notes for each task (release builds; the T-073.2 run notes "load avg 13-26", hence ranges).</p>
+</div>
+
+      <h3>The wrap map splices instead of rebuilding</h3>
+      <p>T-073.1 turns edits into line deltas and shapes only the new lines. Excerpt of <code>WrapMap::edit</code>: the old body walked every segment and re-checked every line; the new one is three calls.</p>
+      <div class="window diff">
+        <div class="window-bar"><span class="file">crates/zmd-display-map/src/wrap.rs</span><span>feae721 · excerpt</span></div>
+        <pre><span class="ln">    pub fn edit(&amp;mut self, fold: &amp;dyn FoldLayer, edits: &amp;[ByteEdit], shaper: &amp;dyn LineShaper) {</span><span class="ln del">        let mut segments = self.segments();</span><span class="ln del">        for edit in edits {</span><span class="ln del">            apply_edit(&amp;mut segments, edit);</span><span class="ln del">        }</span><span class="ln del">        let old_lines = std::mem::take(&amp;mut self.lines);</span><span class="ln del">        let new_count = fold_line_count(fold);</span><span class="ln del">        …  (a loop over every segment, comparing each line's text)</span><span class="ln add">        let regions = merge_edits(edits);</span><span class="ln add">        let deltas = self.line_deltas(fold, &amp;regions);</span><span class="ln add">        self.edit_lines(fold, &amp;deltas, shaper);</span><span class="ln add">    }</span></pre>
+      </div>
+      <p class="source">Source: <code>git show feae721</code>. The "…" line stands for the rest of the deleted loop, left out here.</p>
+
+      <h3>The controller hands shaped lines to the cache</h3>
+      <p>T-073.2 stops the second shaping: lines the wrap map just shaped go straight into the layout cache.</p>
+      <div class="window diff">
+        <div class="window-bar"><span class="file">crates/zmd-app/src/editor/controller.rs</span><span>aef46c8</span></div>
+        <pre><span class="ln">        self.display.edit(&amp;snapshot, edits, self.shaper.as_ref());</span><span class="ln">        self.cache.apply_edits(snapshot.clone(), edits);</span><span class="ln add"><span class="c">        // The wrap layer just shaped the edited lines (post-edit numbering); handing them to</span></span><span class="ln add"><span class="c">        // the cache after `apply_edits` dropped the stale ones saves shaping them twice.</span></span><span class="ln add">        for (line, rows) in self.display.wrap().shaped_lines_since_edit() {</span><span class="ln add">            self.cache.insert_shaped(*line, rows.clone());</span><span class="ln add">        }</span><span class="ln">        self.last_stage1_request_version = snapshot.version;</span><span class="ln">        self.stage1.request(snapshot, edits);</span></pre>
+      </div>
+      <p class="source">Source: <code>git show aef46c8</code>, hunk in <code>publish_edits</code>.</p>
+
+      <div class="verdict good">
+        <div class="verdict-head"><span class="verdict-call">Resolved</span><span class="confidence">Confidence: high</span></div>
+        <p>The headless bench is under budget at every size, but the perf CI that would hold it there has never run.</p>
+      </div>
+    </section>
+
+    <section id="left">
+      <header>
+        <span class="kicker">What's left</span>
+        <h2>One cost is still O(lines), and nothing guards the budget yet</h2>
+        <p class="lead">Each item is named in F-073's or F-023's as-built follow-ups.</p>
+      </header>
+      <div class="aside serious">
+        <span class="aside-title"><span class="status serious">Open · DEBT-0009</span></span>
+        <p><b><code>set_width</code> still re-wraps every line.</b> It took 28.88 ms on 10k lines after the fix; F-073 left it out of scope on purpose ("every line re-wraps anyway").</p>
+      </div>
+      <div class="aside warning">
+        <span class="aside-title"><span class="status warning">Caveat</span></span>
+        <p><b>The perf gate has never run.</b> F-023's as-built says: "The workflow has never run on GitHub: no <code>perf</code> runner exists." A regression back above 5 ms would not be caught in CI.</p>
+      </div>
+      <div class="aside warning">
+        <span class="aside-title"><span class="status warning">Caveat</span></span>
+        <p><b>The remaining frame cost is logarithmic, not zero.</b> The T-073.2 profile puts 25–30% of <code>build_frame</code> in sum-tree cursor allocation in <code>row_layout</code>/<code>pixel_y</code>, plus rope <code>get_line</code>.</p>
+      </div>
+      <div class="aside good">
+        <span class="aside-title"><span class="status good">Resolved · BUG-0002</span></span>
+        <p><b>The parse worker no longer falls behind.</b> Found while profiling this fix, it was resolved the same morning in <code>b2b2487</code> as part of F-014.</p>
+      </div>
+      <p class="source">Source: F-073 log.md and as-built.md; F-023 as-built.md; DEBT-0009 and BUG-0002 issue files; <code>git show b2b2487</code>.</p>
+    </section>
+  </main>
+</div></div>
+
+<footer class="site"><div class="wrap">
+  <span class="wordmark">BUG-0001 investigation</span>
+  <p>Built on 17 November 2026 from zenith-md's <code>.azimuth/</code> records (BUG-0001, BUG-0002, DEBT-0009, DEBT-0011, F-023, F-073) and its git history, read only. Nothing was changed to make it.</p>
+  <p>All bench numbers are the record's own medians from headless criterion runs on the reference Mac; none were re-run. Nothing in this report is illustrated.</p>
+</div></footer>
+
+<script src="report.js"></script>
+<script src="charts.js"></script>
+<script src="prism.js"></script>
+</body>
+</html>

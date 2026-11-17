@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BUG-0005 postmortem</title>
+<meta name="report:kind" content="postmortem">
+<meta name="report:project" content="zenith-md">
+<meta name="report:stream" content="crashes">
+<meta name="report:date" content="2026-11-17">
+<link rel="stylesheet" href="/_fonts/v1/report-type.css">
+<link rel="stylesheet" href="/_fonts/v1/report-mono.css">
+<link rel="stylesheet" href="themes/catppuccin.css">
+<link rel="stylesheet" href="report.css">
+<link rel="stylesheet" href="charts.css">
+</head>
+<body>
+
+<div class="topbar" data-slot="host-bar"><div class="wrap">
+  <span class="wordmark">BUG-0005 postmortem</span>
+  <span class="meta"><button class="theme-toggle" type="button">Theme: System</button></span>
+</div></div>
+
+<header class="hero"><div class="wrap">
+  <div class="hero-copy">
+    <span class="eyebrow">Incident postmortem · BUG-0005 · critical</span>
+    <h1>The screen-reader adapter attached after AppKit had observed the window, and zmd crashed</h1>
+    <p class="lead">zmd's release and debug builds died with SIGSEGV minutes after launch on the lead's Touch Bar Mac. The bug was recorded on 19 October, fixed on 20 October in one 20-minute session, and two follow-ups are still open.</p>
+    <p class="hero-meta">zenith-md · 17 November 2026</p>
+  </div>
+  <dl class="stats">
+    <div><dt>Reported time to crash</dt><dd>139 s</dd><dd class="delta">release build, fish job report</dd></div>
+    <div><dt>Recorded to fixed</dt><dd>20 h 8 min</dd><dd class="delta">17:55Z → 14:03Z</dd></div>
+    <div><dt>Session start to fix</dt><dd>20 min</dd><dd class="delta">SES-20261020-1343</dd></div>
+    <div><dt>Focus cycles after fix</dt><dd>6 of 6</dd><dd class="delta">unfixed: crashed at cycle 2</dd></div>
+  </dl>
+</div></header>
+
+<div class="layout"><div class="wrap">
+  <nav class="toc" aria-label="Contents">
+    <span class="cap">Contents</span>
+    <ol>
+      <li><a href="#timeline">Timeline</a></li>
+      <li><a href="#cause">Cause</a></li>
+      <li><a href="#fix">Fix</a></li>
+      <li><a href="#impact">Impact</a></li>
+      <li><a href="#remediation">Remediation</a></li>
+    </ol>
+  </nav>
+  <main>
+    <div class="findings">
+      <span class="cap">Key findings</span>
+      <ol>
+        <li><b>The crash came from attach order, not a timer.</b> The accesskit adapter subclassed a view AppKit's Touch Bar finder had already KVO-swizzled; see <a href="#cause">Cause</a>.</li>
+        <li><b>The risk was written down two days earlier.</b> Q-0002 named it and the fix; a passing VoiceOver check led F-003 to record that attaching late was fine; see <a href="#cause">Cause</a>.</li>
+        <li><b>The fix is small and was checked by A/B.</b> The window now opens hidden and is shown after the adapter attaches; see <a href="#fix">Fix</a>.</li>
+        <li><b>The record holds no user impact.</b> Only the lead's machine is named, and no build was public until 24 October; see <a href="#impact">Impact</a>.</li>
+        <li><b>Two follow-ups are open.</b> The lead's release-build check has no record, and the architecture doc still says to attach after the window is visible; see <a href="#remediation">Remediation</a>.</li>
+      </ol>
+    </div>
+
+    <section id="timeline">
+      <header>
+        <span class="kicker">Timeline</span>
+        <h2>The crash sat as a note for 20 hours; the fix took 20 minutes</h2>
+        <p class="lead">Times are UTC, converted from the commits' +05:30 offsets. The lead asked for the crash to be noted only, so nobody worked on it until the next session.</p>
+      </header>
+      <div class="log">
+        <div class="log-entry">
+          <div class="log-when"><span class="big">18 Oct 21:52</span><span class="small">Q-0002 raised</span></div>
+          <div><p>The VoiceOver question for the F-003 spike names the risk: the adapter "should be created before the view is first shown". Its proposed fix is "open hidden, install, show".</p></div>
+        </div>
+        <div class="log-entry">
+          <div class="log-when"><span class="big">18 Oct 21:55</span><span class="small">Q-0002 answered</span></div>
+          <div><p>The lead answers <code>pass</code>: VoiceOver reached the text node with the adapter attached after the window was shown.</p></div>
+        </div>
+        <div class="log-entry">
+          <div class="log-when"><span class="big">18 Oct 22:04</span><span class="small">F-003 closed out</span></div>
+          <div><p>Commit <code>51c7c35</code> records for Phase 2 that the adapter "can be installed after iced shows the window".</p></div>
+        </div>
+        <div class="log-entry">
+          <div class="log-when"><span class="big">19 Oct 13:50</span><span class="small">F-032 closed out</span></div>
+          <div><p>Commit <code>453181d</code> closes the accessibility-tree feature, which attaches the subclassing adapter in the shipping app.</p></div>
+        </div>
+        <div class="log-entry">
+          <div class="log-when"><span class="big">19 Oct 17:44</span><span class="small">M-03 handoff</span></div>
+          <div><p>Commit <code>e061f4f</code> pauses work after M-03. The lead runs the release build of this commit on <code>CLAUDE.md</code>; it crashes after 139 s. The lead had seen the same with the debug build earlier; the record gives no time for that.</p></div>
+        </div>
+        <div class="log-entry">
+          <div class="log-when"><span class="big">19 Oct 17:55</span><span class="small">BUG-0005 recorded</span></div>
+          <div><p>Commit <code>733924a</code> files the bug as critical, "noted only", with a list of first things to check.</p></div>
+        </div>
+        <div class="log-entry">
+          <div class="log-when"><span class="big">20 Oct 13:43</span><span class="small">Session starts</span></div>
+          <div><p>SES-20261020-1343 opens with BUG-0005 as its first goal.</p></div>
+        </div>
+        <div class="log-entry">
+          <div class="log-when"><span class="big">20 Oct 14:03</span><span class="small">Fixed</span></div>
+          <div><p>Commit <code>f4a3ae0</code> lands the fix; the status note moves the bug from in-progress to resolved at 14:03:48. Commit <code>4bf4106</code> records the resolution 18 s later.</p></div>
+        </div>
+        <div class="log-entry">
+          <div class="log-when"><span class="big">24 Oct 16:01</span><span class="small">v0.4.0 pushed</span></div>
+          <div><p>The first push to GitHub carries the fix; no earlier build left the machine.</p></div>
+        </div>
+        <div class="log-entry">
+          <div class="log-when"><span class="big">1 Nov</span><span class="small">BUG-0012 measured</span></div>
+          <div><p>Cold start is about 700 ms against its target, and the report notes it "includes the window staying hidden until the accessibility adapter attaches (BUG-0005)".</p></div>
+        </div>
+      </div>
+      <p class="source">Source: BUG-0005, Q-0002, F-003 as-built, BUG-0012, SES-20261020-1343 and SES-20261024-1601 in <code>.azimuth/</code>; commit times from <code>git log</code>.</p>
+
+      <figure class="chart"><script type="application/json">
+{"type": "gantt", "title": "Almost all of the 20 hours was waiting, by the lead's choice",
+ "subtitle": "UTC, 19 to 20 October 2026",
+ "source": "Commits e061f4f, 733924a, f4a3ae0; SES-20261020-1343 started_at",
+ "tasks": [{"name": "M-03 release build to bug recorded", "start": "2026-10-19T17:44:05Z", "end": "2026-10-19T17:55:33Z"},
+           {"name": "Open, noted only", "start": "2026-10-19T17:55:33Z", "end": "2026-10-20T13:43:28Z"},
+           {"name": "Investigation and fix", "start": "2026-10-20T13:43:28Z", "end": "2026-10-20T14:03:48Z"}]}
+</script></figure>
+    </section>
+
+    <section id="cause">
+      <header>
+        <span class="kicker">Cause</span>
+        <h2>AppKit observed the view before the adapter subclassed it</h2>
+        <p class="lead">The resolving status note and the fix commit give the mechanism. The record keeps no backtrace, core dump or log of the investigation itself; these two texts are all there is.</p>
+      </header>
+      <blockquote class="quote machine"><span class="cap">BUG-0005 status note · agent · 2026-10-20T14:03:48Z</span>Root cause: the accesskit SubclassingAdapter attached after AppKit's Touch Bar finder had KVO-swizzled WinitView (the adapter requires attaching before the view is shown or focused); KVO then jumped through a null cached observationInfo pointer when the finder invalidated its observations on an app switch.</blockquote>
+      <ol class="steps">
+        <li><span class="step-title">iced shows the window</span><p>zmd launched with <code>.window_size(WINDOW_SIZE)</code>, so the window was visible from its first frame.</p></li>
+        <li><span class="step-title">AppKit observes the view</span><p>"When the window became key before the editor existed AppKit had already KVO-swizzled WinitView."</p></li>
+        <li><span class="step-title">The adapter subclasses the wrong class</span><p>Attached once the editor existed, the adapter "subclassed NSKVONotifying_WinitView" instead of the plain view.</p></li>
+        <li><span class="step-title">An app switch tears down the observers</span><p>"KVO then jumped through a null cached observationInfo pointer the next time the finder invalidated its observations, typically when the user switched apps."</p></li>
+      </ol>
+      <p class="source">Source: commit <code>f4a3ae0</code> message, quoted; step 1 from its diff.</p>
+
+      <div class="sub">
+        <h3>The risk was known and judged safe on a passing check</h3>
+        <p>Nobody skipped a step. The spike asked the right question, the lead ran the check, and VoiceOver worked, so the early warning read as answered. The check could not show a crash that needs a Touch Bar observer and an app switch.</p>
+        <div class="grid two">
+          <blockquote class="quote"><span class="cap">Q-0002 context · 18 Oct 21:52Z</span>One known risk: accesskit_macos documents that SubclassingAdapter should be created before the view is first shown, and iced only hands out the window after it is visible; if VoiceOver ignores the window, that is the likely cause and the fix (open hidden, install, show) is small.</blockquote>
+          <blockquote class="quote"><span class="cap">F-003 as-built · facts for Phase 2 · commit 51c7c35</span>the adapter can be installed after iced shows the window (accesskit's docs prefer before; VoiceOver still picked it up)</blockquote>
+        </div>
+      </div>
+
+      <div class="aside warning">
+        <span class="aside-title"><span class="status warning">Gap</span></span>
+        <p>The record never explains the 139 s in the bug's title. The fix commit says the crash came "a few minutes after launch" and "typically when the user switched apps", which suggests 139 s was when the lead switched apps, not a timer. That is a reading of the record, not a finding in it.</p>
+      </div>
+    </section>
+
+    <section id="fix">
+      <header>
+        <span class="kicker">Fix</span>
+        <h2>The window now opens hidden and is shown after the adapter attaches</h2>
+        <p class="lead">One file, 23 lines added and 7 removed, in <code>crates/zmd-app/src/app.rs</code>. This is the order Q-0002 had proposed.</p>
+      </header>
+      <div class="window diff">
+        <div class="window-bar"><span class="file">crates/zmd-app/src/app.rs · launch</span><span>f4a3ae0</span></div>
+        <pre><span class="ln">    iced::application(boot, update, view)</span><span class="ln">        .title(|app: &amp;App| app.title.clone())</span><span class="ln del">        .window_size(WINDOW_SIZE)</span><span class="ln add">        .window(window::Settings {</span><span class="ln add">            size: WINDOW_SIZE,</span><span class="ln add">            // Hidden until the screen-reader adapter is attached (see the module docs); the</span><span class="ln add">            // bench window attaches none and must be drawn from its first frame.</span><span class="ln add">            visible: mode != Mode::Interactive,</span><span class="ln add">            ..window::Settings::default()</span><span class="ln add">        })</span><span class="ln">        .subscription(subscription)</span></pre>
+      </div>
+      <div class="window diff">
+        <div class="window-bar"><span class="file">crates/zmd-app/src/app.rs · attach_a11y</span><span>f4a3ae0</span></div>
+        <pre><span class="ln">    window::latest()</span><span class="ln">        .and_then(move |id| {</span><span class="ln">            let initial = initial.clone();</span><span class="ln">            window::run(id, move |window| attach_on_main_thread(window, initial))</span><span class="ln">                .map(Message::A11yAttached)</span><span class="ln">        })</span><span class="ln add">        .chain(show_window())</span><span class="ln">}</span><span class="ln add"> </span><span class="ln add">/// Shows the window `launch` opened hidden. Runs after the adapter attached (or failed to,</span><span class="ln add">/// or found no window): the document must appear either way.</span><span class="ln add">fn show_window() -&gt; Task&lt;Message&gt; {</span><span class="ln add">    window::latest().and_then(|id| window::set_mode(id, window::Mode::Windowed))</span><span class="ln add">}</span></pre>
+      </div>
+      <p class="source">Source: <code>git show f4a3ae0</code>, excerpts; the second hunk is shown after the change, with the chained call marked.</p>
+      <blockquote class="quote machine"><span class="cap">BUG-0005 status note · verification</span>Verified: focus-cycle A/B on the debug build (unfixed: SIGSEGV at cycle 2; adapter disabled or fixed: 6 cycles clean).</blockquote>
+    </section>
+
+    <section id="impact">
+      <header>
+        <span class="kicker">Impact</span>
+        <h2>The crash hit one developer machine before any public build</h2>
+        <p class="lead">The record says where the crash happened, not who it hurt. What it does say is below; the rest is left blank rather than guessed.</p>
+      </header>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Question</th><th>What the record says</th></tr></thead>
+        <tbody>
+          <tr><td>Which builds</td><td>Release (<code>target/release/zmd</code>, 73 MB, commit <code>e061f4f</code>) and debug</td></tr>
+          <tr><td>Which machines</td><td>"Touch Bar Macs (MacBookPro16,1, macOS 26.4.1)", the lead's reference Mac</td></tr>
+          <tr><td>Who saw it</td><td>The lead, twice; no other reporter</td></tr>
+          <tr><td>Public exposure</td><td>None: the first push to GitHub was v0.4.0 on 24 October, after the fix</td></tr>
+          <tr><td>Data lost</td><td><span class="status">Not recorded</span></td></tr>
+          <tr><td>Macs without a Touch Bar</td><td><span class="status">Not recorded</span></td></tr>
+        </tbody>
+      </table>
+  <p class="source">Source: BUG-0005 report, commit <code>f4a3ae0</code> message, SES-20261024-1601 notes.</p>
+</div>
+      <div class="aside warning">
+        <span class="aside-title"><span class="status warning">Cost of the fix</span></span>
+        <p>Keeping the window hidden until the adapter attaches adds to cold start. BUG-0012 measures first paint at 661 to 729 ms and names this as one of the causes, without splitting out its share.</p>
+      </div>
+    </section>
+
+    <section id="remediation">
+      <header>
+        <span class="kicker">Remediation</span>
+        <h2>The fix is in; its release check and two stale docs are not</h2>
+        <p class="lead">Done items come from the commits. Open items are what this review found still standing at HEAD <code>c94ad39</code>.</p>
+      </header>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Step</th><th>Where</th><th>State</th></tr></thead>
+        <tbody>
+          <tr><td>Open the window hidden, show it after the adapter attaches</td><td><code>f4a3ae0</code></td><td><span class="status good">Done</span></td></tr>
+          <tr><td>Explain the order in the module docs</td><td><code>app.rs</code> lines 17–19 at HEAD</td><td><span class="status good">Done</span></td></tr>
+          <tr><td>A/B the fix with focus cycles on the debug build</td><td>BUG-0005 status note</td><td><span class="status good">Done</span></td></tr>
+          <tr><td>Lead's check on the release build</td><td>BUG-0005 status note</td><td><span class="status warning">No record</span></td></tr>
+          <tr><td>Correct the attach order in the architecture doc</td><td><code>project/architecture.md</code> line 127</td><td><span class="status warning">Open</span></td></tr>
+          <tr><td>Correct the F-003 "facts for Phase 2"</td><td>F-003 <code>as-built.md</code></td><td><span class="status warning">Open</span></td></tr>
+          <tr><td>Automated test for the attach order</td><td>none in <code>f4a3ae0</code></td><td><span class="status">None</span></td></tr>
+          <tr><td>Win back the cold-start time</td><td>BUG-0012</td><td><span class="status">Tracked</span></td></tr>
+        </tbody>
+      </table>
+  <p class="source">Source: <code>git show --stat f4a3ae0</code>; <code>.azimuth/</code> at <code>c94ad39</code>, searched for BUG-0005 in every session after 20 October.</p>
+</div>
+
+      <article class="finding">
+        <div class="finding-head"><span class="status warning">Open</span><span class="finding-title">The release-build check was asked for and never logged</span></div>
+        <span class="where">BUG-0005 status note · lead</span>
+        <p>The fix was tested only on the debug build. The note asks the lead to repeat it on the release build, and no later session or issue mentions BUG-0005 again.</p>
+        <span class="label">Evidence</span>
+        <blockquote class="quote machine"><span class="cap">BUG-0005 status note · 2026-10-20T14:03:48Z</span>Lead check on the release build: launch zmd on a file, switch to another app and back a few times, wait 5 minutes.</blockquote>
+        <span class="label">Next step</span>
+        <ol class="steps">
+          <li><span class="step-title">Build</span><p>Build the release binary at current HEAD.</p></li>
+          <li><span class="step-title">Exercise</span><p>Open a file, switch to another app and back a few times, then wait 5 minutes.</p></li>
+          <li><span class="step-title">Record</span><p>Add the result to BUG-0005's status notes.</p></li>
+        </ol>
+      </article>
+
+      <article class="finding">
+        <div class="finding-head"><span class="status warning">Open</span><span class="finding-title">The architecture doc still prescribes the order that crashed</span></div>
+        <span class="where">.azimuth/project/architecture.md · line 127</span>
+        <p>A new feature that attaches an adapter, such as a second window, would copy this order from the doc.</p>
+        <span class="label">Evidence</span>
+        <blockquote class="quote"><span class="cap">architecture.md · at c94ad39</span>Accessibility on macOS works with an app-owned <code>accesskit_macos::SubclassingAdapter</code> created from the NSView iced exposes via <code>window::run</code>, installed after the window is visible</blockquote>
+        <span class="label">Fix</span>
+        <p>Replace "installed after the window is visible" with the hidden-then-shown order and cite BUG-0005; make the same change to F-003's "facts for Phase 2".</p>
+      </article>
+    </section>
+  </main>
+</div></div>
+
+<footer class="site"><div class="wrap">
+  <span class="wordmark">BUG-0005 postmortem</span>
+  <p>Built on 17 November 2026 from zenith-md's <code>.azimuth/</code> records (BUG-0005, BUG-0012, Q-0002, F-003, SES-20261020-1343, SES-20261024-1601) and <code>git log</code> / <code>git show</code> at commit <code>c94ad39</code>. Nothing in the project was changed to make it.</p>
+  <p>The issue's Repro, Expected and Actual sections are empty, and no investigation log beyond the resolving status note exists; the cause rests on that note and the fix commit.</p>
+</div></footer>
+
+<script src="report.js"></script>
+<script src="charts.js"></script>
+<script src="prism.js"></script>
+</body>
+</html>

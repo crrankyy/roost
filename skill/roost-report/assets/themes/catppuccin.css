@@ -1,0 +1,83 @@
+/* Theme: Catppuccin. Light is Latte, dark is Mocha; code windows are Mocha in both.
+   Every colour the report uses, as light-dark(light, dark). report.css switches color-scheme for the theme button.
+   Checked with the dataviz skill's validator and WCAG contrast:
+   - Text: ink/body 7.06 on Latte base; muted is subtext1 (5.53; subtext0 is 4.37). Mocha text 11.34, subtext0 7.37.
+   - Accent: mauve, 4.79 on Latte base, 8.07 on Mocha. Peach would be closer to a warm accent but is 2.64.
+   - Charts: Latte accents in both themes (Mocha's pastels fail as series). Order blue, sapphire, peach, mauve,
+     green, pink, yellow, red: worst adjacent CVD dE 16.7, normal 19.7; first three pass all-pairs (18.1).
+     Status-like hues come late so kind tag 1 isn't a severity colour. Teal reads grey: not used.
+   - Status: green, yellow, peach, red. No Catppuccin set passes normal-vision 15 (best: 9.7 Latte, 11 Mocha);
+     every status carries its word. */
+:root {
+  /* page */
+  --canvas: light-dark(#eff1f5, #1e1e2e);
+  --surface-soft: light-dark(#e6e9ef, #181825);
+  --surface-card: light-dark(#dce0e8, #313244);
+  --surface-cream-strong: light-dark(#ccd0da, #45475a);
+  --hairline: light-dark(#ccd0da, #313244);
+  --hairline-soft: light-dark(#dce0e8, #313244);
+  --border: light-dark(#bcc0cc, #45475a);
+  /* heading levels: h1, h2, h3 (and "Key findings"), chart and table titles; each its own palette hue, darkened
+     or lightened only as far as its floor needs (3:1 for large headings, 4.5:1 for titles) */
+  --h1: light-dark(#8839ef, #cba6f7); /* mauve; light 4.79, dark 8.07 */
+  --h2: light-dark(#1e66f5, #89b4fa); /* blue; light 4.34, dark 7.79 */
+  --h3: light-dark(#179299, #94e2d5); /* teal; light 3.31, dark 11.01 */
+  --title: light-dark(#b94908, #fab387); /* peach; light 27% darker, 4.62, dark 9.27 */
+  /* text */
+  --ink: light-dark(#4c4f69, #cdd6f4);
+  --body-strong: light-dark(#4c4f69, #cdd6f4);
+  --body: light-dark(#4c4f69, #bac2de);
+  --muted: light-dark(#5c5f77, #a6adc8);
+  --muted-soft: light-dark(#8c8fa1, #7f849c);
+  /* accent */
+  --primary: light-dark(#8839ef, #cba6f7);
+  --primary-active: light-dark(#8839ef, #cba6f7);
+  --on-primary: light-dark(#eff1f5, #11111b);
+  --primary-disabled: light-dark(#bcc0cc, #45475a);
+  --link: var(--primary-active);
+  --link-decoration: none;
+  --accent-teal: light-dark(#179299, #94e2d5);
+  --accent-amber: light-dark(#df8e1d, #f9e2af);
+  --error: light-dark(#d20f39, #f38ba8);
+  /* dark blocks: code windows, footer, tooltips (Mocha in both themes) */
+  --surface-dark: light-dark(#1e1e2e, #11111b);
+  --surface-dark-elevated: #313244;
+  --surface-dark-soft: #181825;
+  --on-dark: #cdd6f4;
+  --on-dark-soft: #a6adc8;
+  /* text on a status fill (callouts): dark on all, except light text on Latte red */
+  --on-status: #11111b;
+  --on-critical: light-dark(#eff1f5, #11111b);
+  /* syntax, on the dark code window */
+  --syn-comment: #9399b2;
+  --syn-punctuation: #9399b2;
+  --syn-keyword: #cba6f7;
+  --syn-string: #a6e3a1;
+  --syn-regex: #f5c2e7;
+  --syn-number: #fab387;
+  --syn-operator: #89dceb;
+  --syn-function: #89b4fa;
+  --syn-type: #f9e2af;
+  --syn-builtin: #f38ba8;
+  --syn-property: #b4befe;
+  --syn-variable: #eba0ac;
+  --syn-macro: #94e2d5;
+  /* charts */
+  --chart-1: #1e66f5; /* blue */
+  --chart-2: #209fb5; /* sapphire */
+  --chart-3: #fe640b; /* peach */
+  --chart-4: #8839ef; /* mauve */
+  --chart-5: #40a02b; /* green */
+  --chart-6: #ea76cb; /* pink */
+  --chart-7: #df8e1d; /* yellow */
+  --chart-8: #d20f39; /* red */
+  --chart-other: light-dark(#8c8fa1, #6c7086);
+  --chart-axis: light-dark(#acb0be, #585b70);
+  --chart-div-neg: light-dark(#1e66f5, #89b4fa);
+  --chart-div-pos: light-dark(#d20f39, #f38ba8);
+  --chart-div-mid: light-dark(#ccd0da, #45475a);
+  --status-good: light-dark(#40a02b, #a6e3a1);
+  --status-warning: light-dark(#df8e1d, #f9e2af);
+  --status-serious: light-dark(#fe640b, #fab387);
+  --status-critical: light-dark(#d20f39, #f38ba8);
+}
