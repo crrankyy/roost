@@ -6,7 +6,7 @@ dest="$HOME/.claude/skills/roost-report"
 node "$here/scripts/build-skill.mjs" >/dev/null 2>&1 || true   # refresh from the repo when run inside it
 mkdir -p "$HOME/.claude/skills" "$HOME/.local/bin" "$HOME/.roost/drafts"
 # The previous install is moved aside, not deleted, so files the skill no longer ships don't linger in it.
-if [ -d "$dest" ]; then mv "$dest" "$HOME/.claude/skills/.roost-report.bak-$(date +%Y%m%d-%H%M%S)"; fi
+if [ -d "$dest" ]; then mkdir -p "$HOME/.roost/skill-backups" && mv "$dest" "$HOME/.roost/skill-backups/roost-report-$(date +%Y%m%d-%H%M%S)"; fi
 mkdir -p "$dest"
 # fonts-dist/ and built samples stay in the repo: they are build output (MonoLisa is licensed).
 (cd "$here/skill/roost-report" && find . -type f ! -path './fonts-dist/*' ! -name '.DS_Store' | while read -r f; do
